@@ -86,12 +86,13 @@ PRIVATE int cmd_list(struct comal_line *line)
 		while (curline
 		       &&
 		       !((curline->cmd == procSYM
-			  || curline->cmd == funcSYM)
+			  || curline->cmd == funcSYM
+			  || curline->cmd == moduleSYM)
 			 && curline->lc.pfrec.id == line->lc.listrec.id))
 			curline = curline->ld->next;
 
 		if (!curline)
-			run_error(CMD_ERR, "PROC/FUNC %s not found",
+			run_error(CMD_ERR, "PROC/FUNC/MODULE %s not found",
 				  line->lc.listrec.id->name);
 
 		from = curline->ld->lineno;

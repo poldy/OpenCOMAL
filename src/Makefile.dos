@@ -7,7 +7,7 @@ OBJ=	pdcpars.obj	pdcmain.obj	pdcmisc.obj	pdccmd.obj 	\
 	pdcfree.obj	pdccloop.obj	pdcexp.obj	pdcmem.obj	\
 	pdcsqash.obj	pdcstr.obj	pdcprog.obj	pdcext.obj	\
 	pdcseg.obj	pdclex.obj	pdcval.obj	pdcmsdos.obj	\
-	pdcrun.obj
+	pdcrun.obj	pdcmod.obj
 
 COPTS=-c -DOS_MSDOS -ml -w-pro
 CC=bcc

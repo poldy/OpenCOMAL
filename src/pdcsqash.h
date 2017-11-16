@@ -11,7 +11,7 @@
 /* OpenComal line squashing functions for save/load purposes header file */
 
 #define SQ_COPYRIGHT_MSG	"OpenComal/Sqash (c) 1992-2002 Muppet Lab"
-#define SQ_VERSION		0x1251
+#define SQ_VERSION		0x1253
 #define SQ_MARKER		"SqAsH"
 
 /* The sqash items */
@@ -38,6 +38,8 @@
 #define SQ_NOEXTERNAL		19
 #define SQ_ONETWOEXP		20
 #define SQ_TWOEXP		21
+#define SQ_IDLIST		22
+#define SQ_ENDIDLIST		23
 
 extern void sqash_2file(char *fname);
 extern struct comal_line *expand_fromfile(char *fname);

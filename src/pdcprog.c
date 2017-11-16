@@ -19,6 +19,7 @@
 #include "pdcmisc.h"
 #include "pdcenv.h"
 #include "pdcexec.h"
+#include "pdcmod.h"
 
 
 PUBLIC void prog_addline(struct comal_line *line)
@@ -160,6 +161,8 @@ PUBLIC void prog_run()
 
 	prog_total_scan();
 
-	if (curenv->scan_ok)
+	if (curenv->scan_ok) {
+		mod_initall();
 		exec_seq(curenv->progroot);
+	}
 }

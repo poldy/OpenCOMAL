@@ -141,6 +141,17 @@ PRIVATE void sqash_explist(struct exp_list *exproot)
 	sqash_putc(SQ_ENDEXPLIST);
 }
 
+PRIVATE void sqash_idlist(struct id_list *root)
+{
+	sqash_putc(SQ_IDLIST);
+
+	while (root) {
+		sqash_putid(root->id);
+		root = root->next;
+	}
+
+	sqash_putc(SQ_ENDIDLIST);
+}
 
 PRIVATE void sqash_twoexp(struct two_exp *twoexp)
 {
@@ -399,6 +410,7 @@ PRIVATE void sqash_horse(struct comal_line *line)
 	case elseSYM:
 	case endSYM:
 	case endcaseSYM:
+	case endmoduleSYM:
 	case endfuncSYM:
 	case endifSYM:
 	case endloopSYM:
@@ -421,6 +433,11 @@ PRIVATE void sqash_horse(struct comal_line *line)
 	case idSYM:
 	case restoreSYM:
 		sqash_putid(line->lc.id);
+		break;
+
+	case useSYM:
+	case exportSYM:
+		sqash_idlist(line->lc.idroot);
 		break;
 
 	case execSYM:
@@ -455,6 +472,7 @@ PRIVATE void sqash_horse(struct comal_line *line)
 		break;
 
 	case localSYM:
+	case staticSYM:
 	case dimSYM:
 		sqash_dim(line);
 		break;
@@ -465,6 +483,7 @@ PRIVATE void sqash_horse(struct comal_line *line)
 
 	case funcSYM:
 	case procSYM:
+	case moduleSYM:
 		sqash_putid(line->lc.pfrec.id);
 		sqash_putint(0, line->lc.pfrec.closed);
 		sqash_parmlist(line->lc.pfrec.parmroot);
@@ -722,6 +741,27 @@ PRIVATE struct exp_list *expand_explist()
 		    mem_alloc_private(curenv->program_pool,
 				      sizeof(struct exp_list));
 		work->exp = expand_exp();
+		work->next = root;
+		root = work;
+	}
+
+	expand_getc();
+
+	return my_reverse(root);
+}
+
+PRIVATE struct id_list *expand_idlist()
+{
+	struct id_list *root = NULL;
+	struct id_list *work;
+
+	expand_check(SQ_IDLIST);
+
+	while (expand_peekc() != SQ_ENDIDLIST) {
+		work =
+		    mem_alloc_private(curenv->program_pool,
+				      sizeof(struct id_list));
+		work->id = expand_getid();
 		work->next = root;
 		root = work;
 	}
@@ -1130,6 +1170,7 @@ PRIVATE struct comal_line *expand_horse()
 	case handlerSYM:
 	case loopSYM:
 	case endtrapSYM:
+	case endmoduleSYM:
 		break;
 
 	case trapSYM:
@@ -1139,6 +1180,11 @@ PRIVATE struct comal_line *expand_horse()
 	case idSYM:
 	case restoreSYM:
 		line->lc.id = expand_getid();
+		break;
+
+	case useSYM:
+	case exportSYM:
+		line->lc.idroot=expand_idlist();
 		break;
 
 	case execSYM:
@@ -1173,6 +1219,7 @@ PRIVATE struct comal_line *expand_horse()
 		break;
 
 	case localSYM:
+	case staticSYM:
 	case dimSYM:
 		expand_dim(line);
 		break;
@@ -1183,6 +1230,7 @@ PRIVATE struct comal_line *expand_horse()
 
 	case funcSYM:
 	case procSYM:
+	case moduleSYM:
 		line->lc.pfrec.id = expand_getid();
 		line->lc.pfrec.closed = expand_getint();
 		line->lc.pfrec.parmroot = expand_parmlist();

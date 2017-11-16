@@ -45,6 +45,10 @@ struct id_rec {
 	char name[1];
 };
 
+struct id_list {
+	struct id_list *next;
+	struct id_rec *id;
+};
 
 struct name_rec {
 	struct sym_env *env;
@@ -94,10 +98,10 @@ struct sym_item {
 
 struct sym_env {
 	struct sym_env *prev;
+	struct sym_env *aliasenv;
 	int closed;
 	struct sym_item *itemroot;
 	char *name;
-	struct sym_env *parentenv;
 	struct comal_line *curproc;
 	int level;
 };
@@ -232,6 +236,7 @@ struct proc_func_rec {
 	int closed;
 	struct ext_rec *external;
 	struct parm_list *parmroot;
+	struct sym_env *staticenv;
 	int level;
 	struct comal_line *proclink;
 	struct comal_line *localproc;
@@ -326,6 +331,7 @@ struct comal_line {
 	union line_contents {
 		struct string *str;
 		int inum;
+		struct id_list *idroot;
 		struct id_rec *id;
 		struct two_num twonum;
 		struct two_exp twoexp;
@@ -367,6 +373,28 @@ struct seg_des {
 	struct comal_line *save_localproc;
 };
 
+/*
+ * Element of the exported function table
+ */
+struct mod_func_entry {
+	struct mod_func_entry	*next;
+	struct id_rec		*id;
+	struct comal_line	*line;
+	struct mod_entry	*module;
+};
+
+/*
+ * Element of the module table
+ */
+struct mod_entry {
+	struct mod_entry	*next;
+        struct id_rec           *id;
+        struct comal_line       *line;
+	int			being_registered;
+	int			has_been_scanned;
+	struct seg_des 		*seg;
+};
+
 
 #define RUNNING		1
 #define HALTED		2
@@ -406,4 +434,5 @@ struct comal_env {
 	long lasterrline;
 };
 
+#define	FOR_EACH_LINE(seg,var) for (var=seg_root(seg); var; var=var->ld->next)
 #endif

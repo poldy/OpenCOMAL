@@ -15,6 +15,8 @@
 #include "pdcstr.h"
 #include "pdcseg.h"
 #include "pdcid.h"
+#include "pdcmod.h"
+#include "pdcsym.h"
 
 PUBLIC struct comal_env *env_new(char *name)
 {
@@ -76,9 +78,21 @@ PUBLIC struct comal_env *env_find(char *name)
 PUBLIC void clean_runenv(struct comal_env *env)
 {
 	struct file_rec *fwalk = curenv->fileroot;
+	struct comal_line *walk;
 
 	if (comal_debug)
 		my_printf(MSG_DEBUG, 1, "Cleaning runenv");
+
+	/*
+	 * Free all the existing static environments of procedures, functions
+	 * and modules.
+	 */
+	FOR_EACH_LINE(NULL,walk)
+		if (walk->cmd==procSYM || walk->cmd==funcSYM || walk->cmd==moduleSYM)
+			if (walk->lc.pfrec.staticenv) {
+				sym_freeenv(walk->lc.pfrec.staticenv,0);
+				walk->lc.pfrec.staticenv=NULL;
+			}
 
 	env->lasterr = 0;
 	mem_free(env->lasterrmsg);
@@ -87,10 +101,14 @@ PUBLIC void clean_runenv(struct comal_env *env)
 	env->escallowed = 1;
 	env->nrtraps = 0;
 	env->running = 0;
+	env->curenv = NULL;
 
 	env->datalptr = NULL;
 	env->dataeptr = NULL;
 
+	/*
+	 * Close all open files
+	 */
 	while (fwalk) {
 		if (comal_debug)
 			my_printf(MSG_DEBUG, 1, "Closing comal file %ld",
@@ -102,6 +120,7 @@ PUBLIC void clean_runenv(struct comal_env *env)
 
 	curenv->fileroot = NULL;
 
+	mod_freeall();
 	seg_allfree();
 	mem_freepool(RUN_POOL);
 	trace_reset();
@@ -114,7 +133,6 @@ PUBLIC void clear_env(struct comal_env *env)
 
 	env->progroot = NULL;
 	env->rootenv = NULL;
-	env->curenv = NULL;
 	env->changed = 0;
 	env->scan_ok = 0;
 

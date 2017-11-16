@@ -27,6 +27,17 @@ PUBLIC void yyerror(char *s)
 	/* No action here */
 }
 
+PUBLIC struct id_list *pars_idlist_item(struct id_rec *id,
+					  struct id_list *next)
+{
+	struct id_list *work =
+	    mem_alloc(PARSE_POOL, sizeof(struct id_list));
+
+	work->id = id;
+	work->next = next;
+
+	return work;
+}
 
 PUBLIC struct exp_list *pars_explist_item(struct expression *exp,
 					  struct exp_list *next)

@@ -15,6 +15,8 @@
 #include "pdcmisc.h"
 #include "pdcid.h"
 #include "pdcsym.h"
+#include "pdcmod.h"
+#include "pdcseg.h"
 
 #include <string.h>
 
@@ -28,43 +30,48 @@ PRIVATE int scan_sp;
 
 struct scan_entry {
 	int sym;
+	int atindent0;
 	int leavessym;
 	int expectsym1;
 	int expectsym2;
 	enum { NOT_SPECIAL, SHORT_FORM, EXIT, PROCFUNC, EPROCFUNC,
-		DATA_STAT, CASE, RETRY
+		DATA_STAT, CASE, RETRY, EXPORT, USE
 	} special;
 };
 
 
 PRIVATE struct scan_entry scan_tab[] = {
-	{caseSYM, whenSYM, 0, 0, CASE},
-	{dataSYM, 0, 0, 0, DATA_STAT},
-	{elifSYM, elifSYM, elifSYM, 0, NOT_SPECIAL},
-	{elseSYM, endifSYM, elifSYM, 0, NOT_SPECIAL},
-	{endcaseSYM, 0, whenSYM, endcaseSYM, NOT_SPECIAL},
-	{endforSYM, 0, endforSYM, 0, NOT_SPECIAL},
-	{endfuncSYM, 0, endfuncSYM, 0, EPROCFUNC},
-	{endifSYM, 0, endifSYM, elifSYM, NOT_SPECIAL},
-	{endloopSYM, 0, endloopSYM, 0, NOT_SPECIAL},
-	{endprocSYM, 0, endprocSYM, 0, EPROCFUNC},
-	{endtrapSYM, 0, endtrapSYM, handlerSYM, NOT_SPECIAL},
-	{endwhileSYM, 0, endwhileSYM, 0, NOT_SPECIAL},
-	{exitSYM, 0, 0, 0, EXIT},
-	{forSYM, endforSYM, 0, 0, SHORT_FORM},
-	{funcSYM, endfuncSYM, 0, 0, PROCFUNC},
-	{handlerSYM, endtrapSYM, handlerSYM, 0, NOT_SPECIAL},
-	{ifSYM, elifSYM, 0, 0, SHORT_FORM},
-	{loopSYM, endloopSYM, 0, 0, NOT_SPECIAL},
-	{otherwiseSYM, endcaseSYM, whenSYM, 0, NOT_SPECIAL},
-	{procSYM, endprocSYM, 0, 0, PROCFUNC},
-	{retrySYM, 0, 0, 0, RETRY},
-	{repeatSYM, untilSYM, 0, 0, SHORT_FORM},
-	{trapSYM, handlerSYM, 0, 0, NOT_SPECIAL},
-	{untilSYM, 0, untilSYM, 0, NOT_SPECIAL},
-	{whenSYM, whenSYM, whenSYM, 0, NOT_SPECIAL},
-	{whileSYM, endwhileSYM, 0, 0, SHORT_FORM},
-	{0, 0, 0, 0, NOT_SPECIAL}
+	{caseSYM, 0, whenSYM, 0, 0, CASE},
+	{dataSYM, 0, 0, 0, 0, DATA_STAT},
+	{elifSYM, 0, elifSYM, elifSYM, 0, NOT_SPECIAL},
+	{elseSYM, 0, endifSYM, elifSYM, 0, NOT_SPECIAL},
+	{endcaseSYM, 0, 0, whenSYM, endcaseSYM, NOT_SPECIAL},
+	{endforSYM, 0, 0, endforSYM, 0, NOT_SPECIAL},
+	{endfuncSYM, 0, 0, endfuncSYM, 0, EPROCFUNC},
+	{endifSYM, 0, 0, endifSYM, elifSYM, NOT_SPECIAL},
+	{endloopSYM, 0, 0, endloopSYM, 0, NOT_SPECIAL},
+	{endprocSYM, 0, 0, endprocSYM, 0, EPROCFUNC},
+	{endmoduleSYM, 0, 0, endmoduleSYM, 0, EPROCFUNC},
+	{endtrapSYM, 0, 0, endtrapSYM, handlerSYM, NOT_SPECIAL},
+	{endwhileSYM, 0, 0, endwhileSYM, 0, NOT_SPECIAL},
+	{exitSYM, 0, 0, 0, 0, EXIT},
+	{exportSYM, 0, 0, 0, 0, EXPORT},
+	{forSYM, 0, endforSYM, 0, 0, SHORT_FORM},
+	{funcSYM, 0, endfuncSYM, 0, 0, PROCFUNC},
+	{handlerSYM, 0, endtrapSYM, handlerSYM, 0, NOT_SPECIAL},
+	{ifSYM, 0, elifSYM, 0, 0, SHORT_FORM},
+	{loopSYM, 0, endloopSYM, 0, 0, NOT_SPECIAL},
+	{otherwiseSYM, 0, endcaseSYM, whenSYM, 0, NOT_SPECIAL},
+	{procSYM, 0, endprocSYM, 0, 0, PROCFUNC},
+	{moduleSYM, 1, endmoduleSYM, 0, 0, PROCFUNC},
+	{retrySYM, 0, 0, 0, 0, RETRY},
+	{repeatSYM, 0, untilSYM, 0, 0, SHORT_FORM},
+	{trapSYM, 0, handlerSYM, 0, 0, NOT_SPECIAL},
+	{untilSYM, 0, 0, untilSYM, 0, NOT_SPECIAL},
+	{useSYM, 0, 0, 0, 0, USE},
+	{whenSYM, 0, whenSYM, whenSYM, 0, NOT_SPECIAL},
+	{whileSYM, 0, endwhileSYM, 0, 0, SHORT_FORM},
+	{0, 0, 0, 0, 0, NOT_SPECIAL}
 };
 
 
@@ -100,20 +107,24 @@ PRIVATE void scan_stack_pop(int *sym, struct comal_line **line)
 }
 
 
-PRIVATE void scan_stack_search(int sym1, int sym2, int *result,
+PRIVATE void scan_stack_search(int sym1, int sym2, int sym3, int *result,
 			       struct comal_line **stkline)
 {
 	int i;
+	int sym;
 
-	for (i = scan_sp - 1; i >= 0; i--)
-		if (scan_stack[i].sym == sym1 || scan_stack[i].sym == sym2) {
-			*result = scan_stack[i].sym;
+	for (i = scan_sp - 1; i >= 0; i--) {
+		sym=scan_stack[i].sym;
+
+		if (sym == sym1 || sym == sym2 || sym==sym3) {
+			*result = sym;
 
 			if (stkline)
 				*stkline = scan_stack[i].line;
 
 			return;
 		}
+	}
 
 	*result = 0;
 	*stkline = NULL;
@@ -140,7 +151,7 @@ PRIVATE struct comal_line *routine_search_horse(struct id_rec *id,
 PRIVATE struct comal_line *routine_search(struct id_rec *id, int type,
 					  struct comal_line *curproc)
 {
-	struct comal_line *procline;
+	struct comal_line *procline=NULL;
 	struct comal_line *father = curproc;
 
 	while (father) {
@@ -154,11 +165,44 @@ PRIVATE struct comal_line *routine_search(struct id_rec *id, int type,
 		father = father->lc.pfrec.fatherproc;
 	}
 
-	return routine_search_horse(id, type, curenv->globalproc);
+	procline=routine_search_horse(id, type, curenv->globalproc);
+
+	if (!procline)
+		procline=mod_search_routine(id,type);
+
+	return procline;
 }
 
 
+/*
+ * SCAN pass 2
+ *
+ * Traverse the entire segment and find all USEs
+ */
 PRIVATE int scan_pass2(struct seg_des *seg, char *errtxt,
+		       struct comal_line **errline)
+{
+	struct comal_line *curline;
+	struct id_list *walk;
+
+	*errline=NULL;
+
+	FOR_EACH_LINE(seg,curline) 
+		if (curline->cmd == useSYM)
+			/*
+			 * Process each identifier of the USE statement
+			 */
+			for (walk=curline->lc.idroot; walk; walk=walk->next)
+				if (!mod_use(seg,walk->id,errtxt,errline)) {
+					if (!*errline) *errline=curline;
+					return 0;
+				}
+
+	return 1;
+}
+
+
+PRIVATE int scan_pass4(struct seg_des *seg, char *errtxt,
 		       struct comal_line **errline)
 {
 	struct comal_line *curline;
@@ -186,11 +230,11 @@ PRIVATE int scan_pass2(struct seg_des *seg, char *errtxt,
 		if (!theline)
 			theline = curline;
 
-		if (theline->cmd == procSYM || theline->cmd == funcSYM) {
+		if (theline->cmd == procSYM || theline->cmd == funcSYM || theline->cmd == moduleSYM) {
 			scan_stack_push(0, procline);
 			procline = theline;
 		} else if (theline->cmd == endprocSYM
-			   || theline->cmd == endfuncSYM)
+			   || theline->cmd == endfuncSYM || theline->cmd==endmoduleSYM)
 			scan_stack_pop(&dummy, &procline);
 		else if (seg && !procline && theline->cmd != 0) {
 			strcpy(errtxt,
@@ -198,17 +242,21 @@ PRIVATE int scan_pass2(struct seg_des *seg, char *errtxt,
 			*errline = curline;
 			return 0;
 		} else if (theline->cmd == importSYM) {
-			if (!procline || !procline->lc.pfrec.closed)
+			if (!procline) // || !procline->lc.pfrec.closed)
 				err =
-				    "IMPORT only allowed within CLOSED PROCs/FUNCs";
+				    "IMPORT only allowed within PROCs/FUNCs or MODULEs";
 		} else if (theline->cmd == localSYM) {
 			if (!procline || procline->lc.pfrec.closed)
 				err =
 				    "LOCAL only allowed within open PROCs/FUNCs";
+		} else if (theline->cmd == staticSYM) {
+			if (!procline || procline->cmd == moduleSYM)
+				err =
+				    "STATIC only inside a PROC or FUNC please";
 		} else if (theline->cmd == returnSYM) {
 			if (!procline)
 				err =
-				    "Can only RETURN from inside a PROC or FUNC";
+				    "Can only RETURN from inside a PROC, FUNC or MODULE";
 			else if (procline->cmd == funcSYM) {
 				if (!theline->lc.exp)
 					err =
@@ -220,7 +268,7 @@ PRIVATE int scan_pass2(struct seg_des *seg, char *errtxt,
 					    "This statement RETURNs the wrong type of expression";
 			} else if (theline->lc.exp)
 				err =
-				    "This statement (inside a PROC) must not RETURN an expression";
+				    "This statement (inside a PROC or MODULE) must not RETURN an expression";
 		} else if (theline->cmd == execSYM) {
 			proccall = &theline->lc.exp->e.expid;
 
@@ -347,6 +395,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 {
 	int sym;
 	struct comal_line *lineptr;
+	int i;
 
 	switch (p->special) {
 	case CASE:
@@ -368,7 +417,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 		break;
 
 	case EXIT:
-		scan_stack_search(endloopSYM, -1, &sym, &lineptr);
+		scan_stack_search(endloopSYM, -1, -1, &sym, &lineptr);
 
 		if (sym == 0) {
 			strcpy(errtxt, "Can only EXIT from within a loop");
@@ -378,8 +427,37 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 
 		break;
 
+	/*
+	 * An EXPORT may only be done on the most outer level of a MODULE.
+	 */
+	case EXPORT:
+		if (scan_sp !=1 || scan_stack[scan_sp-1].sym != endmoduleSYM) {
+			strcpy(errtxt, "Can not have EXPORT here");
+			*errline = curline;
+			return 0;
+		}
+
+		break;
+
+	/*
+	 * A USE may be done on the most outer level of the main program or a
+	 * PROC, FUNC or MODULE
+	 */
+	case USE:
+		if (scan_sp>0) {
+			sym=scan_stack[scan_sp-1].sym;
+
+			if (sym!=endprocSYM && sym!=endfuncSYM && sym!=endmoduleSYM) {
+				strcpy(errtxt, "Can not have USE here");
+				*errline = curline;
+				return 0;
+			}
+		}
+
+		break;
+
 	case RETRY:
-		scan_stack_search(endtrapSYM, -1, &sym, &lineptr);
+		scan_stack_search(endtrapSYM, -1, -1, &sym, &lineptr);
 
 		if (sym == 0) {
 			strcpy(errtxt, "Can only RETRY from within the HANDLER part of a TRAP/ENDTRAP");
@@ -400,9 +478,29 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 			return 0;
 		}
 
+		/*
+		 * Search the scanning stack to see whether this PROC/FUNC definition
+		 * is nested inside another control structure (not being another PROC,
+		 * FUNC or MODULE.
+		 */
+		for (i=scan_sp-1; i>=0; i--) {
+			sym=scan_stack[i].sym;
+
+			/*
+			 * The check for sym!=0 is because scan_pass4 pushes a 0 on the scan
+			 * stack when it encounters a proc/func. I can't remember why I did
+			 * that, but it's probably for a good cause, so better check it here
+			 */
+			if (sym!=0 && sym!=endprocSYM && sym!=endfuncSYM && sym!=endmoduleSYM) {
+				strcpy(errtxt, "PROC/FUNC may not be defined here");
+				*errline = curline;
+				return 0;
+			}
+		}
+
 		theline->lc.pfrec.proclink = *procroot;
 		theline->lc.pfrec.level = *level;
-		scan_stack_search(endprocSYM, endfuncSYM, &sym, &lineptr);
+		scan_stack_search(endprocSYM, endfuncSYM, endmoduleSYM, &sym, &lineptr);
 
 		if (seg && !lineptr)
 			theline->lc.pfrec.fatherproc =
@@ -421,7 +519,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 	case EPROCFUNC:
 		scan_stack_peek(&sym, &lineptr);
 
-		if (sym == endprocSYM || sym == endfuncSYM) {
+		if (sym == endprocSYM || sym == endfuncSYM || sym==endmoduleSYM) {
 			lineptr->lc.pfrec.localproc = *procroot;
 			*procroot = lineptr;
 			(*level)--;
@@ -460,6 +558,8 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 	}
 
 	scan_sp = 0;
+	*errline=NULL;
+	*errtxt=0;
 
 	while (curline) {
 		theline = line_2line(curline);
@@ -490,6 +590,15 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 			    || (theline->cmd == trapSYM
 				&& theline->lc.traprec.esc))
 				skip_processing = 1;	/* Prevent indention */
+
+			/*
+			 * Check whether this symbol should only occur at indent 0
+			 */
+			if (p->atindent0 && scan_sp!=0) {
+				sprintf(errtxt,"Can not have %s here",lex_sym(p->sym));
+				*errline=curline;
+				return 0;
+			}
 
 			if (!do_special1
 			    (p, theline, curline, errline, errtxt, &level,
@@ -545,7 +654,7 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 
 		if (procroot->lc.pfrec.proclink) {
 			strcpy(errtxt,
-			       "More than 1 PROC or FUNC in external segment");
+			       "More than 1 PROC/FUNC/MODULE in external segment");
 			return 0;
 		}
 	} else
@@ -554,10 +663,16 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 	if (!scan_pass2(seg, errtxt, errline))
 		return 0;
 
+	if (!scan_pass4(seg, errtxt, errline))
+		return 0;
+
 	return 1;
 }
 
 
+/*
+ * The prog_structure_scan is "only" used to get the indentation right...
+ */
 #define INDENT(x) ((x)>=INDENTION*MAX_INDENT ? INDENTION*MAX_INDENT : (x))
 
 PUBLIC void prog_structure_scan()
@@ -622,7 +737,8 @@ PUBLIC int scan_nescessary(struct comal_line *line)
 				if (line_2cmd(line) != 0
 				    ||
 				    ((line->cmd == procSYM
-				      || line->cmd == funcSYM)
+				      || line->cmd == funcSYM
+				      || line->cmd == moduleSYM)
 				     && line->lc.pfrec.external)
 				    || (line->cmd == trapSYM
 					&& line->lc.traprec.esc))

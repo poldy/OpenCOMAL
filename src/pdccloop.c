@@ -18,6 +18,7 @@
 #include "pdccmd.h"
 #include "pdcexec.h"
 #include "pdclexs.h"
+#include "pdcenv.h"
 
 
 PUBLIC char *sys_interpreter()
@@ -95,12 +96,16 @@ PUBLIC void comal_loop(int newstate)
 	struct comal_line *aline;
 	int ret = 0;
 	jmp_buf save_err;
+	char *prompt="$ ";
 
 	curenv->running = newstate;
 	save_err[0] = ERRBUF[0];
 
 	do {
-		if (!sys_get(MSG_DIALOG, line, MAX_LINELEN, "$ ")) {
+		if (curenv->running==HALTED) 
+			prompt="(halted)$ ";
+
+		if (!sys_get(MSG_DIALOG, line, MAX_LINELEN, prompt)) {
 			aline = crunch_line(line);
 			ret = process_comal_line(aline);
 
@@ -127,6 +132,9 @@ PUBLIC void pdc_go(int argc, char *argv[])
 	if (comal_debug)
 		my_printf(MSG_DEBUG, 1, "Interpreter restart code: %d",
 			  restart_err);
+
+	if (restart_err == PROG_END)
+		clean_runenv(curenv);
 
 	if (restart_err == RUN)
 		prog_run();

@@ -1,2 +1,2 @@
-#define OPENCOMAL_VERSION "0.2.6"
-#define OPENCOMAL_BUILD "553"
+#define OPENCOMAL_VERSION "0.2.7-pre1-work"
+#define OPENCOMAL_BUILD "727"

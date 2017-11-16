@@ -1,0 +1,114 @@
+       10 // External FUNC verbaal$
+       20 // SAVE this as verbaal.cml and run verbaal_test
+       30 
+       40 FUNC verbaal$(getal#) CLOSED
+       50   //
+       60   //   ************************************
+       70   //   **    FUNC Verbaal$ ( Integer )   **
+       80   //   ************************************
+       90   //
+      100   // Geschreven door Jos Visser, 25-06-1987
+      110   // Aangepast voor PDCOMAL,     10-9-92
+      120   //
+      130   //
+      140   // Functie :
+      150   //            Deze functie neemt als parameter een integer getal,
+      160   //            positief danwel negatief, en geeft een string terug
+      170   //            die weergeeft hoe dat getal op zijn Nederlands
+      180   //            geschreven kan worden.
+      190   //
+      200   // Parameters in :
+      210   //            Integer getal
+      220   //
+      230   // Parameters uit :
+      240   //            String, maximaal 132 karakters lang
+      250   //
+      260   // Packages ed.   :
+      270   //            Geen
+      280   //
+      290   PROC skipspaces(REF a$) CLOSED
+      300     IF a$<>"" THEN
+      310       WHILE a$(LEN(a$):LEN(a$))=" " DO a$:=a$(1:LEN(a$)-1)
+      320     ENDIF
+      330   ENDPROC
+      340   //
+      350   FUNC cijfer$(nr#) CLOSED
+      360     DIM a$ OF 5
+      370     a$:="nul  een  twee drie vier vijf zes  zevenacht negentien   "(1+nr#*5:5+nr#*5)
+      380     skipspaces(a$)
+      390     RETURN a$
+      400   ENDFUNC
+      410   //
+      420   FUNC t'11'19$(nr#) CLOSED
+      430     DIM a$ OF 10
+      440     a$:="tien     elf      twaalf   dertien  veertien vijftien zestien  zeventienachtien  negentien"(1+(nr#-10)*9:9+(nr#-10)*9)
+      450     skipspaces(a$)
+      460     RETURN a$
+      470   ENDFUNC
+      480   //
+      490   FUNC tiental$(nr#) CLOSED
+      500     DIM a$ OF 10
+      510     nr#:=nr# DIV 10
+      520     a$:="twintig dertig  veertig vijftig zestig  zeventigtachtig negentig"(1+(nr#-2)*8:8+(nr#-2)*8)
+      530     skipspaces(a$)
+      540     RETURN a$
+      550   ENDFUNC
+      560   //
+      570   FUNC duizend$(nr#) CLOSED
+      580     honderd#:=nr# DIV 100
+      590     rest#:=nr# MOD 100
+      600     IF honderd#>1 THEN
+      610       result$:=cijfer$(honderd#)+"honderd"
+      620     ELIF honderd#=1
+      630       result$:="honderd"
+      640     ELSE
+      650       result$:=""
+      660     ENDIF
+      670     IF rest#<=10 THEN
+      680       IF rest#<>0 OR honderd#=0 THEN result$:+cijfer$(rest#)
+      690     ELIF rest#<20
+      700       result$:+t'11'19$(rest#)
+      710     ELSE
+      720       IF rest# MOD 10<>0 THEN result$:=result$+cijfer$(rest# MOD 10)+"en"
+      730       IF rest# DIV 10>0 THEN result$:+tiental$(rest#)
+      740     ENDIF
+      750     RETURN result$
+      760   ENDFUNC
+      770   //
+      780   DIM result$ OF 132, subresult$ OF 40
+      790   result$:=""
+      800   IF getal#<0 THEN
+      810     negatief#:=TRUE
+      820     getal#:=-getal#
+      830   ELSE
+      840     result$:=""
+      850     negatief#:=FALSE
+      860   ENDIF
+      870   FOR macht#:=9 DOWNTO 0 STEP 3 DO
+      880     subgetal#:=getal# DIV 10^macht#
+      890     getal#:=getal# MOD 10^macht#
+      900     IF subgetal#>0 OR (macht#=0 AND result$="") THEN
+      910       subresult$:=duizend$(subgetal#)
+      920       IF macht#<>3 OR subgetal#<>1 THEN
+      930         result$:=result$+", "+subresult$
+      940       ELSE
+      950         IF result$="" THEN result$:="  "
+      960       ENDIF
+      970       CASE macht# OF
+      980       WHEN 9
+      990         result$:+" miljard "
+     1000       WHEN 6
+     1010         result$:+" miljoen "
+     1020       WHEN 3
+     1030         result$:+"duizend "
+     1040       OTHERWISE
+     1050         NULL
+     1060       ENDCASE
+     1070     ENDIF
+     1080     skipspaces(result$)
+     1090   ENDFOR
+     1100   result$:=result$(3:)
+     1110   IF negatief# THEN result$:="min "+result$
+     1120   RETURN result$
+     1130 ENDFUNC
+     1140 //

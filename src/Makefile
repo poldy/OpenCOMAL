@@ -11,19 +11,19 @@
 SOURCES=lex.yy.c pdccloop.c pdccmd.c pdcenv.c pdcexec.c pdcexp.c pdcext.c \
 	pdcfree.c pdcid.c pdclexs.c pdclinux.c pdclist.c pdcmain.c pdcmem.c \
 	pdcmisc.c pdcpars.tab.c pdcparss.c pdcprog.c pdcrun.c pdcscan.c \
-	pdcseg.c pdcsqash.c pdcstr.c pdcsym.c pdcval.c
+	pdcseg.c pdcsqash.c pdcstr.c pdcsym.c pdcval.c pdcmod.c
 
 TARG1=../bin/opencomal
 OBJ1=pdcpars.tab.o lex.yy.o pdcmain.o pdcmisc.o pdccmd.o  pdclexs.o  \
 	pdcid.o  pdcscan.o pdcparss.o pdcenv.o pdcsym.o pdcexec.o pdclist.o \
 	pdcfree.o pdcexp.o pdcmem.o pdcsqash.o pdcstr.o pdcprog.o pdcext.o \
-	pdcseg.o pdcval.o pdccloop.o
+	pdcseg.o pdcval.o pdccloop.o pdcmod.o
 
 TARG2=../bin/opencomalrun
 OBJ2=pdcmain.o pdcmisc.o \
 	pdcid.o  pdcscan.o pdcenv.o pdcsym.o pdcexec.o pdcfree.o \
 	pdcexp.o pdcmem.o pdcsqash.o pdcstr.o pdcprog.o pdcext.o pdcseg.o \
-	pdcval.o pdcrun.o
+	pdcval.o pdcrun.o pdcmod.o
 OS=pdclinux.o 
 OSLIB=-lncurses -lreadline
 STATIC=

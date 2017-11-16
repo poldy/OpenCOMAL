@@ -54,6 +54,7 @@
 #define JUST_RESTART	1	/* Nothing special, restart interpreter */
 #define QUIT		2	/* Restart code = QUIT */
 #define RUN		3	/* Restart code = RUN */
+#define PROG_END	4	/* Restart code = end program */
 #define ERR_FATAL	666	/* fatal error occurred */
 
 EXTERN jmp_buf RESTART;		/* restart entry in the interpreter after error */

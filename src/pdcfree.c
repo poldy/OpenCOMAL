@@ -15,6 +15,7 @@
 #include "pdcparss.h"
 #include "pdcmisc.h"
 #include "pdcseg.h"
+#include "pdcsym.h"
 
 
 PRIVATE void free_exp();
@@ -263,6 +264,7 @@ PRIVATE void free_horse(struct comal_line *line)
 	case endforSYM:
 	case endprocSYM:
 	case endfuncSYM:
+	case endmoduleSYM:
 		break;
 
 	case execSYM:
@@ -296,6 +298,12 @@ PRIVATE void free_horse(struct comal_line *line)
 		free_twoexp(&line->lc.twoexp);
 		break;
 
+	case useSYM:
+	case exportSYM:
+		free_list((struct my_list *)line->lc.idroot);
+		break;
+
+	case staticSYM:
 	case localSYM:
 	case dimSYM:
 		free_dim(line);
@@ -307,6 +315,7 @@ PRIVATE void free_horse(struct comal_line *line)
 
 	case funcSYM:
 	case procSYM:
+	case moduleSYM:
 		if (line->lineptr)
 			line->lineptr->lineptr = NULL;
 
@@ -318,6 +327,9 @@ PRIVATE void free_horse(struct comal_line *line)
 			free_exp(line->lc.pfrec.external->filename);
 			mem_free(line->lc.pfrec.external);
 		}
+
+		if (line->lc.pfrec.staticenv)
+			sym_freeenv(line->lc.pfrec.staticenv,0);
 
 		free_list((struct my_list *) line->lc.pfrec.parmroot);
 		break;

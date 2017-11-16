@@ -124,3 +124,14 @@
 	  And, guess what, the SAVE format changed because of adding a
 	  new keyword...  :-(
 	- Added FRAC and ROUND.
+
+0.2.7:
+	- Started implementing the MODULE concept. See "whitepaper1.txt"
+	  in the doc/ directory for more information.
+	- Changed the meaning of "END" to remove the complete variable
+	  environment. Also made "END" executable as a command (so as to
+	  end an interrupted program".
+	- Changed the OpenComal prompt to "(halted)$ " if the
+	  interpreter is in HALTED state (program was stopped but could
+	  be continued).
+	- Added the STATIC command (also see "whitepaper1.txt".)

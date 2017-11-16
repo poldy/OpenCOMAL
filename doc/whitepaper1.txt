@@ -1,0 +1,838 @@
+On open, CLOSED and MODULEs
+---------------------------
+
+Author:		Jos Visser <josv@osp.nl>
+Version:	0.1 (Thu Dec 19 14:07:26 CET 2002)
+OpenComal:	0.2.7-pre1
+
+License
+-------
+
+This document is copyright (c) 2002 Jos Visser <josv@osp.nl>. You
+are allowed to distribute, link and print this document as you see fit,
+provided that you do so in its entirety. Modifications are not allowed.
+
+0. OpenComal
+------------
+
+All examples in this document work with OpenComal version 0.2.7-pre1 or
+later. For more information on OpenComal see the OpenComal web site at
+http://www.josvisser.nl/opencomal.
+
+
+1. Introduction
+---------------
+
+Ever since its inception Comal contained the concepts of closed 
+procedures and functions. The purpose of closed procedures and functions
+is to separate the global and local variable spaces so as not to pollute
+the set of global variables with variables and values that are only
+meaningful within a routine's (PROCedure or FUNCtion) context. Closed
+routines are Comal's way to escape from Wizard's second rule (the rule 
+of unintended results); Comal's conceptual parent (Basic) did not have
+an similar concept and many programming errors were caused by
+uncoordinated modification of variables.
+
+
+2. The global variable space
+----------------------------
+
+When a Comal program is run it has a global variable space and (unless
+changed by the features described in the following sections) all
+variable references are resolved to the global variable space:
+
+$ list
+       10 a:=1
+       20 aap
+       30 PRINT a
+       40 
+       50 PROC aap
+       60   PRINT a
+       70   a:=2
+       80 ENDPROC
+$ run
+1
+2
+
+The results speak for themselves
+
+
+3. CLOSED
+---------
+
+By declaring a routine CLOSED two things happen:
+
+- Variables in the global variable space become invisible
+- New variables are created in a local variable space. They are removed
+  when the routine ends and their existence does not influence any
+  variables in the global (or other local) variable space:
+
+$ list
+       10 a:=1
+       20 aap
+       30 PRINT a
+       40 
+       50 PROC aap CLOSED
+       60   PRINT a
+       70   a:=2
+       80 ENDPROC
+$ run
+       60   PRINT a
+Error 19: "Unknown identifier a" at line 60
+$ del 60
+Adding/Modifying/Deleting the current execution line has inhibited CONtinuation
+$ run
+1
+
+As you can see the reference to "a" in line 60 results in a run time
+error. The "a" introduced in line 70 is local and does not modify the
+"a" in the global variable space.
+
+
+4. IMPORT
+---------
+
+The complete separation of local and global variable spaces is in some
+occasions counterproductice. For instance, because Comal does not know
+constants programmers regularly abuse variables to hold constant values
+that are global by nature. In other cases certain data just has to be
+kept globally because it plays an important role throughout the program.
+
+For these cases Comal provides the IMPORT statement. IMPORT introduces
+variables from another (most often the global) variable space into the
+local space:
+
+$ list
+       10 a:=1
+       20 aap
+       30 PRINT a
+       40 
+       50 PROC aap CLOSED
+       60   IMPORT a
+       70   PRINT a
+       80   a:=2
+       90 ENDPROC aap
+$ run
+1
+2
+
+In some Comal implementations the CLOSED concept encompasses procedures
+and functions too. In these Comals you should IMPORT any procedures and
+functions that you want to call from your closed routine. In OpenComal
+procedures and functions are global entities that need not be imported
+(a warning is given if you do).
+
+
+5. LOCAL
+--------
+
+OpenComal extends the Comal language with the LOCAL keyword. LOCAL
+creates a local variable. It may only be used in open routines (since it
+is unneccesary in closed routines):
+
+$ list
+       10 a:=1
+       20 aap
+       30 PRINT a
+       40 
+       50 PROC aap
+       60   LOCAL a
+       70   PRINT a
+       80   a:=2
+       90 ENDPROC aap
+$ run
+0
+1
+
+LOCAL can also be used to introduce local string variables and arrays.
+Its syntax is just like DIM:
+
+$ list
+       10 DIM a$(20) OF 2
+       20 a$():="x"
+       30 aap
+       40 PRINT a$()
+       50 
+       60 PROC aap
+       70   LOCAL a$(10) OF 2
+       80   a$():="y"
+       90   PRINT a$()
+      100 ENDPROC aap
+$ run
+y y y y y y y y y y 
+x x x x x x x x x x x x x x x x x x x x 
+
+
+6. Calling open routines from closed ones
+-----------------------------------------
+
+OpenComal relaxes restrictions found in other Comals related to calling
+open routines from closed ones. In OpenComal, one *can* call an open
+routine from a closed one:
+
+$ list
+       10 a:=1
+       20 aap
+       30 PRINT a
+       40 
+       50 PROC aap CLOSED
+       60   a:=2
+       70   tijger
+       80   PRINT a
+       90 ENDPROC aap
+      100 
+      110 PROC tijger
+      120   PRINT a
+      130   a:=3
+      140 ENDPROC tijger
+$ run
+1
+2
+3
+
+As this example show, the "a" referred to in procedure "tijger" is the
+global one. The "a" in the closed procedure "aap" is not changed by the
+assignment in line 130 whereas the global "a" initialised in line 10
+is!
+
+Allowing closed routines to call open ones removes an important
+restriction from Comal. In my (and thus OpenComal's :-) view routines
+are global entities that package a certain functionality. Calling
+routines should be mostly context free, that the routine's developer
+decided to make a routine closed should not make any difference to the
+caller.
+
+
+7. Variable space stack
+-----------------------
+
+When routines start calling each other a stack of variable spaces comes
+into existence. For instance take the following case:
+
+$ list
+       10 a:=1
+       20 aap
+       30 
+       40 PROC aap CLOSED
+       50   a:=2
+       60   tijger
+       70 ENDPROC aap
+       80 
+       90 PROC tijger
+      100   LOCAL b
+      110   b:=2
+      120   SYS listvars
+      130 ENDPROC tijger
+
+When control reaches line 120 there are three variable spaces into
+existence:
+
+1) The global variable space
+2) The closed environment of "aap"
+3) The local (but essentially open) environment of "tijger"
+
+The internal OpenComal command "SYS listvars" dumps the variable
+environments that exist at that point:
+
+$ run
+Symbol environment:        90 PROC tijger
+  Item: b (is Variable) Value: 2
+Symbol environment:        40 PROC aap CLOSED
+  Item: a (is Variable) Value: 2
+Symbol environment: Global
+  Item: a (is Variable) Value: 1
+
+
+8. Named IMPORT
+---------------
+
+Since OpenComal is at all times aware of the actual variable space stack
+it can (and does) allow an IMPORT to specify from which environment a
+variable should be imported.
+
+Look at the following example:
+
+$ list
+       10 a:=1
+       20 aap
+       30 PRINT a
+       40 
+       50 PROC aap CLOSED
+       60   a:=2
+       70   tijger
+       80   PRINT a
+       90 ENDPROC aap
+      100 
+      110 PROC tijger
+      120   IMPORT aap: a
+      130   PRINT a
+      140   a:=3
+      150 ENDPROC tijger
+$ run
+2
+3
+1
+
+The execution of this program proceeds through lines 10, 20, 60, 70 and
+120. At that time, two variables "a" exist: one in the global variable
+space and one in the closed environment of "aap". Without qualification
+an "IMPORT a" would import "a" from the global environment. However,
+because the programmer specified "IMPORT aap:a" the "a" IMPORTed is the
+one from the (calling) closed environment of "aap". The assignment in
+line 140 modifies that instance of "a" as we can see from the result of
+the PRINT statement in line 80.
+
+Named IMPORT provides a powerful mechanism to break the CLOSEDness of a
+routine. It also introduces a powerful dependency on the calling
+sequence of routines. In the example outlined above "tijger" *must* be
+called by someone who called (or is) "aap". If you break this implicit
+dependency a runtime error occurs:
+
+$ tijger
+      120   IMPORT aap: a
+Error 30: "Environment not found" at line 120
+
+All these are strong reasons for disallowing named IMPORT. However, as
+we will see later, named IMPORT can be necessary for if and when we
+start nesting routines.
+
+
+9. STATIC
+---------
+
+A feature that exists in other languages and that I have included in
+OpenComal too is that of local variables that retain their value from
+call to call. These variables are called static variables and are
+introduced in a procedure through the STATIC keyword (which has the same
+syntax as LOCAL):
+
+$ list
+       10 TRACE on
+       20 a:=100
+       30 aap
+       40 aap
+       50 PRINT a
+       60 
+       70 PROC aap
+       80   STATIC a
+       90   PRINT a
+      100   a:+1
+      110   tijger
+      120 ENDPROC aap
+      130 
+      140 PROC tijger
+      150   STATIC a
+      160   PRINT a
+      170   a:+10
+      180 ENDPROC tijger
+
+To get a decent idea of what is going on I activated execution line
+tracing:
+
+$ run 
+       10 TRACE on
+       20 a:=100
+       30 aap
+       80   STATIC a
+       90   PRINT a
+0
+      100   a:+1
+      110   tijger
+      150   STATIC a
+      160   PRINT a
+0
+      170   a:+10
+      180 ENDPROC tijger
+      120 ENDPROC aap
+       40 aap
+       80   STATIC a
+       90   PRINT a
+1
+      100   a:+1
+      110   tijger
+      150   STATIC a
+      160   PRINT a
+10
+      170   a:+10
+      180 ENDPROC tijger
+      120 ENDPROC aap
+       50 PRINT a
+100
+       60 
+       70 PROC aap
+      130 
+      140 PROC tijger
+
+STATIC variables are automatically LOCAL to the routine that defines
+them. For instance if we change line 150 to "IMPORT a" and run again the
+following output is produced:
+
+$ run
+0
+100
+1
+110
+120
+
+For those that really want to make a mess of things, we can use a named
+IMPORT to import a STATIC variable into a local environment:
+
+$ list
+       10 a:=100
+       20 aap
+       30 aap
+       40 PRINT a
+       50 
+       60 PROC aap CLOSED
+       70   STATIC a
+       80   PRINT a
+       90   a:+1
+      100   tijger
+      110 ENDPROC aap
+      120 
+      130 PROC tijger
+      140   IMPORT aap: a
+      150   PRINT a
+      160   a:+10
+      170 ENDPROC tijger
+$ run
+0
+1
+11
+12
+100
+
+The message here is that features that are introduced for a good cause
+can be misused to create chaotic programs (Wizard's Second Rule: the
+rule of unintended results). But, as Larry Wall aptly stated: "Good
+programmers can write assembler in any language" :-).
+
+
+10. Nested routines
+-------------------
+
+OpenComal allows procedures and functions to be nested. This feature was
+introduced in order to allow large and complex procedures to be
+modularised internally and then be loaded on demand through an EXTERNAL
+procedure or function. For a good example of this look at the "verbaal"
+sample programs that use both nested and external routines.
+
+Nesting routines adds extra complexity to the issues of variable spaces
+and open/CLOSED/IMPORT. For instance look at this sample program:
+
+$ list
+       10 a:=1
+       20 aap
+       30 PRINT a
+       40 
+       50 PROC aap CLOSED
+       60   
+       70   tijger
+       80   PRINT a
+       90   
+      100   PROC tijger
+      110     PRINT a
+      120     a:=100
+      130   ENDPROC tijger
+      140   
+      150 ENDPROC aap
+
+First of all it should be noticed that nesting changes the rules of 
+calling routines. The procedure "tijger" is nested in "aap"; one of the
+consequences of this is that "tijger" can only be called from within
+"aap"! If you would try and call "tijger" from the main program the
+OpenComal program structure scanning engine (invoked before RUN or
+through the SCAN command) would complain:
+
+$ 15 tijger
+$ scan
+       15 tijger
+PROCedure tijger not found
+$ del 15
+$ scan
+
+There are no conceptual limits to nesting of routines. OpenComal does
+restrict nesting of routines for reasons of readability (to prevent the
+automatic indentation of program listings to go through the roof).
+
+When we run this program, the execution progresses through lines 10, 20,
+70 on to 110. The interesting question then becomes whether the "a"
+mentioned there is visible or not? On the one hand, "tijger" is an open
+procedure (whatever that may mean in a nested routine) but it is part of
+the CLOSED procedure "aap"...
+
+Let's run the program and see what happens...
+
+$ trace on
+$ run
+       10 a:=1
+       20 aap
+       60   
+       70   tijger
+      110     PRINT a
+      110     PRINT a
+Error 19: "Unknown identifier a" at line 110
+
+The OpenComal interpreter declares that it does not know about "a"!
+
+We are know (hopefully) ready to get a better understanding of what open
+and CLOSED routines actually entail...
+
+An open variable environment is one that allows unrestricted access to 
+variables from its parent environment. In this example the procedure
+"tijger" provides a new open environment upon call, which allows access
+to variables from its parent environment, which is the procedure "aap".
+
+In contrast, a CLOSED environment is one that does not allow access to 
+variables from its parent environment.
+
+So when the OpenComal interpreter finds the reference to "a" in line 110
+it first examines the local environment of "tijger". It does not find an
+"a" there, thus it progresses to the parent environment ("aap"). It does
+not find an "a" there either. Since "aap" is CLOSED the search process
+stops there. If "aap" would have been open, the search for "a" would
+have progressed into the global (program) variable space. Try it!
+
+One of the nice things of an interpreter is that we can modify the
+environment and continue the program. 
+
+$ a=99
+$ con
+      110     PRINT a
+99
+      120     a:=100
+      130   ENDPROC tijger
+       80   PRINT a
+100
+       90   
+      100   PROC tijger
+      140   
+      150 ENDPROC aap
+       30 PRINT a
+1
+       40 
+       50 PROC aap CLOSED
+
+In this example I assign the value 99 to "a" and CONtinue the execution
+of the program. The PRINT statement in line 110 now prints the assigned
+value and the program continues. Next comes the PRINT statement in line
+80. Will it succeed? It apparently does, which raises the next question:
+In which variable environment was the "a" assigned to from the command
+line (conceptually in the procedure "tijger", since that was where the
+interpreter halted) entered?
+
+The (Open)Comal rules for the environment in which new variables are
+entered are as follows:
+
+- PROCedure and FUNCtion parameters exist in the local environment of
+  the routine.
+- LOCAL variables are entered in the routine's local environment (that's
+  not much of a surprise I hope :-)
+- STATIC variables are entered in a special per-routine static
+  environment that survives from one call to another.
+- IMPORTed variables are created in the local variable environment with
+  a reference to their true home environment.
+- Normal variables are entered in the first CLOSED environment found
+  when moving outward from the point of assignment.
+  The global variable environment is CLOSED by default, so that is
+  ultimately where new variables are created.
+
+In this example: Since "tijger" is open, the new "a" is introduced in
+the local environment of "aap" (as it lives in the execution stack).
+That's why "a" still exists when we return from "tijger"! When we
+subsequently return from "aap" the "a" in the global variable space has
+not been touched.
+
+
+11. IMPORT and nested routines
+------------------------------
+
+Let's modify the example program somewhat. Suppose we add an "IMPORT a"
+to line 65 and run again:
+
+$ 65 import a
+$ list
+       10 a:=1
+       20 aap
+       30 PRINT a
+       40 
+       50 PROC aap CLOSED
+       60   
+       65   IMPORT a
+       70   tijger
+       80   PRINT a
+       90   
+      100   PROC tijger
+      110     PRINT a
+      120     a:=100
+      130   ENDPROC tijger
+      140   
+      150 ENDPROC aap
+$ run
+1
+100
+100
+
+The IMPORT statement introduces the global "a" in the local variable
+space of "aap". This makes that "a" reachable for "aap" and all its
+nested routines. The PRINT statements in line 110 and 80 refer to the
+one global "a" and the assignment statement in line 120 modifies it (as
+is shown by the PRINT statement in line 30).
+
+However, what would happen if we would insert an IMPORT statement in
+"tijger"?
+
+$ list
+       10 a:=1
+       20 aap
+       30 PRINT a
+       40 
+       50 PROC aap CLOSED
+       60   
+       70   tijger
+       80   PRINT a
+       90   
+      100   PROC tijger
+      110     IMPORT a
+      120     PRINT a
+      130     a:=100
+      140   ENDPROC tijger
+      150   
+      160 ENDPROC aap
+$ run
+      110     IMPORT a
+Error 30: "IMPORTable item "a" not found" at line 110
+
+OpenComal tries to IMPORT a variable "a" from the parent environment
+(i.e. from "aap"). There is no "a" in "aap", and "aap" itself is closed,
+so OpenComal can not find the "a" to be imported.
+
+If we really want to mess things up we can use a named IMPORT to
+specifically declare which "a" we are talking about. In that case we
+need to specify the special identifier "_program" to instruct OpenComal
+to IMPORT from the global variable space:
+
+$ edit 110
+      110     IMPORT _program:a
+$ run
+1
+       80   PRINT a
+Error 19: "Unknown identifier a" at line 80
+$ a=99
+$ con
+99
+100
+
+What happens here?
+
+Line 10 sets the global "a" to 1. Execution then proceeds through lines
+20 and 70 to line 110. There the global "a" is IMPORTed in the local
+variable space of "tijger". Line 120 prints that global "a" and line 130
+sets it to the value 100. We then leave procedure "tijger" and return to
+line 80. There we try to print "a", but there is no "a" in the local
+variable environment of "aap"! Program execution therefore stops with an
+error message. 
+
+If we then manually assign "a=99", an "a" is created in the local 
+variable environment of "aap". We then CONtinue the program. The local
+"aap" copy of "a" is printed and execution returns to line 30. There we
+print the global copy of "a" which has been modified in the nested
+routine "tijger" (line 130).
+
+Here, named import provides us with a sort of escape mechanism to break
+the strict scoping rules of Comal. Use it with care!
+
+
+12. MODULEs
+-----------
+
+To aid in developing modular programs, UniComal introduced the concepts
+of modules into the Comal language. OpenComal supports these modules
+too. 
+
+In OpenComal, a module is a package of procedures and functions from
+which only selected (exported) procedures and functions can be called
+from outside it. Put differently, a routine inside a module can only be
+called by someone outside the module if that routine has been explicitly
+exported (through the EXPORT keyword).
+
+Modules are introduced with the MODULE keyword. A program can declare
+its intention to use the exported routines in a module with the USE
+keyword:
+
+$ list
+       10 USE aap
+       20 f
+       30 g
+       40 
+       50 MODULE aap
+       60   
+       70   EXPORT f, g
+       80   
+       90   PROC f
+      100     PRINT "Hello from f"
+      110   ENDPROC f
+      120   
+      130   PROC g
+      140     PRINT "hello from g"
+      150   ENDPROC g
+      160   
+      170   PROC h
+      180     PRINT "hello from h"
+      190   ENDPROC h
+      200 ENDMODULE aap
+$ run
+Hello from f
+hello from g
+
+Procedure "h" is not exported and can thus not be called. If we try, an
+error is thrown:
+
+$ 35 h
+$ run
+       35 h
+PROCedure h not found
+
+
+13. MODULE variable access
+--------------------------
+
+Modules have their own static variable environment that is available to
+all routines in the module. All variables that are in this module
+environment are available to all routines in the module:
+
+$ list
+       10 USE a
+       20 f
+       30 f
+       40 
+       50 MODULE a
+       60   n:=1
+       70   EXPORT f
+       80   PROC f
+       90     PRINT "In f, n=",n
+      100     n:+1
+      110   ENDPROC
+      120 ENDMODULE
+$ run
+In f, n=1
+In f, n=2
+
+Sort of hidden in this last example is that the initialization code in
+line 60 is executed *before* the program executes. In fact, to help in 
+initializing a module, all executable statements in the module are 
+executed just before the program is run. Look at the following example:
+
+$ list
+       10 USE a, b
+       20 FOR i:=1 TO 4 DO
+       30   f
+       40   g
+       50 ENDFOR i
+       60 
+       70 MODULE a
+       80   PRINT "Init a"
+       90   n:=1
+      100   EXPORT f
+      110   PROC f
+      120     n:+1
+      130     PRINT n
+      140   ENDPROC f
+      150 ENDMODULE a
+      160 
+      170 MODULE b
+      180   PRINT "Init b"
+      190   n:=100
+      200   EXPORT g
+      210   PROC g
+      220     n:+1
+      230     PRINT n
+      240   ENDPROC g
+      250 ENDMODULE b
+$ run
+Init b
+Init a
+2
+101
+3
+102
+4
+103
+5
+104
+
+As you can see, the initialization statements in "a" and "b" are
+executed before the main program starts. You will also see that the
+order in which they are executed is not easily predicted. It is best not
+to depend on the exact order of initialization.
+
+The "n" variables of modules "a" and "b" are completely separate and not
+available outside the module. Look at the following example:
+
+$ list
+       10 USE a
+       20 f
+       30 
+       40 MODULE a
+       50   n:=3
+       60   EXPORT f
+       70   PROC f
+       80     n:+1
+       90     g
+      100   ENDPROC f
+      110 ENDMODULE a
+      120 
+      130 PROC g
+      140   PRINT n
+      150 ENDPROC g
+$ run
+      140   PRINT n
+Error 19: "Unknown identifier n" at line 140
+
+This example shows another thing: In OpenComal routines in modules can
+call routines from outside the module without any obstructions. You can
+have a debate about whether this is advisable (and hence, should be
+allowed) or not. My point of view is that it is certainly useful to be 
+able to do so (e.g. to have callback routines from a module).
+Furthermore (but, I admit, completely beside the point), OpenComal's
+internal architecture makes this "feature" more or less automatically
+available.
+
+By the way, if we really want to mess things up, we can use a named
+IMPORT statement in procedure "g" to get at the internal "n" of module
+"a":
+
+$ 135 import a:n
+$ run
+4
+
+This is not advised, but possible! Preventing people from writing stupid
+and hard-to-understand code is unfortunately impossible in a programming
+language that is sufficiently powerful.
+
+
+14. Additional comments on MODULEs
+----------------------------------
+
+(This section delves somewhat deeper than usual; you may skip it if you
+are not interested).
+
+OpenComal implements MODULEs as a special sort of closed procedures.
+When a program is SCANned, all USE statements are collected and a search
+is initiated for the MODULEs mentioned. Then all EXPORTs inside the
+module are located and all exported functions are added to a global
+table.
+
+Then, just before "run", all executable statements in all loaded modules
+are executed. The variable environment created by the initialization is
+set aside (remembered).
+
+When a procedure/function call is executed, the OpenComal interpreter
+starts the search of the routine using the normal visibility rules:
+
+- PROC/FUNC parameter visible in the current variable environment
+- Inward->out search for the routine
+
+If the routine is not found then the global table of exported routines
+is consulted. If the routine is found there then the static module
+environment is pushed onto the call stack and the call is executed.

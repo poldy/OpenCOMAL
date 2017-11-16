@@ -15,6 +15,8 @@ extern int yyparse();
 
 extern struct exp_list *pars_explist_item(struct expression *exp,
 					  struct exp_list *next);
+extern struct id_list *pars_idlist_item(struct id_rec *id,
+					  struct id_list *next);
 extern struct print_list *pars_printlist_item(int pr_sep,
 					      struct expression *exp,
 					      struct print_list *next);

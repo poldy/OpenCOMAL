@@ -16,3 +16,4 @@ extern struct seg_des *seg_dynamic_load(struct comal_line *line);
 extern struct seg_des *seg_static_free(struct seg_des *seg);
 extern struct seg_des *seg_dynamic_free(struct seg_des *seg);
 extern void seg_allfree(void);
+extern struct comal_line *seg_root(struct seg_des *seg);

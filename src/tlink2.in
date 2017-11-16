@@ -16,6 +16,7 @@ pdcstr.obj +
 pdcexp.obj +
 pdcext.obj +
 pdcrun.obj +
+pdcmod.obj +
 pdcwin32.obj
 ..\bin\opencomalrun.exe
 

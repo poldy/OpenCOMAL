@@ -40,6 +40,7 @@ extern int yylex();
 		int inum;
 		struct string *str;
 		struct id_rec *id;
+		struct id_list *id_root;
 		struct dubbel dubbel;
 		struct expression *exp;
 		struct { struct id_rec *id; int array; } oneparm;
@@ -95,6 +96,7 @@ extern int yylex();
 %token	endloopSYM
 %token	endprocSYM 
 %token	endSYM 
+%token  endmoduleSYM
 %token	endtrapSYM 
 %token	endwhileSYM 
 %token	envSYM 
@@ -105,6 +107,7 @@ extern int yylex();
 %token	escSYM
 %token	execSYM 
 %token	exitSYM
+%token	exportSYM
 %token	externalSYM
 %token	fileSYM
 %token	forSYM 
@@ -126,6 +129,7 @@ extern int yylex();
 %token	minusSYM 
 %token	mkdirSYM
 %token	modSYM 
+%token	moduleSYM 
 %token	nameSYM
 %token	neqSYM 
 %token	newSYM
@@ -172,6 +176,7 @@ extern int yylex();
 %token	trapSYM 
 %token  unitSYM
 %token	untilSYM 
+%token	useSYM 
 %token	usingSYM 
 %token	whenSYM 
 %token	whileSYM 
@@ -213,6 +218,7 @@ extern int yylex();
 %type	<whenptr>	when_list when_numitem when_stritem when_numlist 
 %type	<whenptr>	when_strlist
 %type	<assignptr>	assign_list assign_item
+%type	<id_root>	idlist idSYMlist
 
 %type	<cl>		comal_line command list_cmd
 %type	<cl>		program_line complex_stat simple_stat complex_1word
@@ -224,7 +230,8 @@ extern int yylex();
 %type	<cl>		select_out_stat stop_stat sys_stat write_stat assign_stat
 %type	<cl>		select_in_stat exit_stat trace_stat cursor_stat chdir_stat
 %type	<cl>		rmdir_stat mkdir_stat repeat_stat
-%type	<cl>		local_stat trap_stat dir_stat unit_stat
+%type	<cl>		local_stat trap_stat dir_stat unit_stat static_stat
+%type	<cl>		module_stat export_stat use_stat
 
 %type	<pcl>		optsimple_stat 
 
@@ -454,6 +461,7 @@ complex_stat	:	case_stat
 		|	func_stat
 		|	if_stat
 		|	proc_stat
+		|	module_stat
 		|	until_stat
 		|	when_stat
 		|	while_stat
@@ -469,7 +477,9 @@ simple_stat	:	close_stat
 		|	dim_stat
 		|	dir_stat
 		|	local_stat
+		|	static_stat
 		|	exec_stat
+		|	export_stat
 		|	import_stat
 		|	input_stat
 		|	mkdir_stat
@@ -488,6 +498,7 @@ simple_stat	:	close_stat
 		|	trace_stat
 		|	trap_stat
 		|	unit_stat
+		|	use_stat
 		|	write_stat
 		|	xid
 			{
@@ -557,6 +568,10 @@ complex_1word	:	elseSYM
 			{
 				$$.cmd=endtrapSYM;
 			}
+		|	endmoduleSYM optid2
+			{
+				$$.cmd=endmoduleSYM;
+			}
 		;
 
 simple_1word	:	nullSYM
@@ -582,6 +597,30 @@ simple_1word	:	nullSYM
 			}
 		;
 		
+module_stat	:	moduleSYM idSYM opt_external
+			{
+				$$.cmd=moduleSYM;
+				$$.lc.pfrec.id=$2;
+				$$.lc.pfrec.closed=1;
+				$$.lc.pfrec.external=$3;
+				$$.lc.pfrec.staticenv=NULL;
+			}
+		;
+
+use_stat	:	useSYM idSYMlist
+			{
+				$$.cmd=useSYM;
+				$$.lc.idroot=$2;
+			}
+		;
+
+export_stat	:	exportSYM idlist
+			{
+				$$.cmd=exportSYM;
+				$$.lc.idroot=$2;
+			}
+		;
+
 case_stat	:	caseSYM exp optof
 			{
 				$$.cmd=caseSYM;
@@ -658,6 +697,13 @@ unit_stat	:	unitSYM stringexp
 			}
 		;
 
+static_stat	:	staticSYM local_list
+			{
+				$$.cmd=staticSYM;
+				$$.lc.dimroot=my_reverse($2);
+			}
+		;
+
 
 local_stat	:	localSYM local_list
 			{
@@ -665,6 +711,7 @@ local_stat	:	localSYM local_list
 				$$.lc.dimroot=my_reverse($2);
 			}
 		;
+
 local_list	:	local_list commaSYM local_item
 			{
 				$$=$3;
@@ -850,6 +897,7 @@ func_stat	:	funcSYM id procfunc_head optclosed opt_external
 				$$.lc.pfrec.parmroot=my_reverse($3);
 				$$.lc.pfrec.closed=$4;
 				$$.lc.pfrec.external=$5;
+				$$.lc.pfrec.staticenv=NULL;
 			}
 		;
 
@@ -1032,9 +1080,10 @@ proc_stat	:	procSYM idSYM procfunc_head optclosed opt_external
 			{
 				$$.cmd=procSYM;
 				$$.lc.pfrec.id=$2;
-				$$.lc.pfrec.parmroot=my_reverse($3);
 				$$.lc.pfrec.closed=$4;
 				$$.lc.pfrec.external=$5;
+				$$.lc.pfrec.parmroot=my_reverse($3);
+				$$.lc.pfrec.staticenv=NULL;
 			}
 		;
 
@@ -1801,6 +1850,26 @@ numid		:	idSYM
 		|	intidSYM
 		;
 
+idlist		:	id commaSYM idlist
+			{
+				$$=pars_idlist_item($1,$3);
+			}
+		|	id
+			{
+				$$=pars_idlist_item($1,NULL);
+			}
+		;
+
+idSYMlist	:	idSYM commaSYM idSYMlist
+			{
+				$$=pars_idlist_item($1,$3);
+			}
+		|	idSYM
+			{
+				$$=pars_idlist_item($1,NULL);
+			}
+		;
+
 opt_commalist	:	opt_commalist commaSYM
 		|	/* epsilon */
 		;
@@ -1808,7 +1877,7 @@ opt_commalist	:	opt_commalist commaSYM
 exp_list	:	exp_list commaSYM exp
 			{
 				$$=pars_explist_item($3,$1);
-				}
+			}
 		|	exp
 			{
 				$$=pars_explist_item($1,NULL);

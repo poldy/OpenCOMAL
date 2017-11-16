@@ -16,6 +16,7 @@
 #include "pdcexec.h"
 #include "pdcexp.h"
 #include "pdcval.h"
+#include "pdcsym.h"
 #include "version.h"
 
 struct inpfile_stkent {
@@ -41,7 +42,6 @@ PUBLIC void ext_tini()
 PUBLIC int ext_call_scan(struct id_rec *id, struct exp_list *exproot,
 			 char *errtext)
 {
-	my_printf(MSG_DEBUG,1,"Ext_call_scan for %s",id->name);
 	return -1;
 }
 
@@ -297,6 +297,13 @@ PUBLIC int ext_sys_stat(struct exp_list *exproot)
 
 		mem_debug((*(long *) result));
 		val_free(result, type);
+
+		return 0;
+	} else if (strcmp(cmd,"listvars") == 0) {
+		if (exproot->next)
+			run_error(SYS_ERR,"No parameters allowed for SYS listvars");
+
+		sym_list(curenv->curenv,1);
 
 		return 0;
 	}

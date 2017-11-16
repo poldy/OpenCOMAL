@@ -366,6 +366,10 @@ PRIVATE struct {
 	, {
 	unitSYM, sizeof(c_line.lc.exp)}
 	, {
+	useSYM, sizeof(c_line.lc.idroot)}
+	, {
+	exportSYM, sizeof(c_line.lc.idroot)}
+	, {
 	execSYM, sizeof(c_line.lc.exp)}
 	, {
 	elseSYM, 0}
@@ -419,6 +423,8 @@ PRIVATE struct {
 	delSYM, sizeof(c_line.lc.exp)}
 	, {
 	dimSYM, sizeof(c_line.lc.dimroot)}
+	, {
+	staticSYM, sizeof(c_line.lc.dimroot)}
 	, {
 	localSYM, sizeof(c_line.lc.dimroot)}
 	, {
@@ -477,6 +483,10 @@ PRIVATE struct {
 	writeSYM, sizeof(c_line.lc.writerec)}
 	, {
 	becomesSYM, sizeof(c_line.lc.assignroot)}
+	, {
+	endmoduleSYM, 0}
+	, {
+	moduleSYM, sizeof(c_line.lc.pfrec)}
 	, {
 	idSYM, sizeof(c_line.lc.id)}
 	, {
@@ -603,7 +613,12 @@ PUBLIC int proclevel(struct comal_line *proc)
 	return i;
 }
 
-
+/*
+ * This method returns the *actual* Comal statement in a line.
+ * I.e. in most cases the line, but in case of a short form FOR, 
+ * IF, WHILE or REPEAT it returns the "body" of the short form
+ * structure statement.
+ */
 PUBLIC struct comal_line *line_2line(struct comal_line *line)
 {
 	switch (line->cmd) {

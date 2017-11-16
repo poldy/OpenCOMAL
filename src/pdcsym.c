@@ -14,10 +14,13 @@
 #include "pdcid.h"
 #include "pdcstr.h"
 #include "pdcmisc.h"
+#include "pdclist.h"
+#include "pdcval.h"
 
 #include <string.h>
 
 PUBLIC struct sym_env *sym_newenv(int closed, struct sym_env *prev,
+				  struct sym_env *alias, 
 				  struct comal_line *curproc, char *name)
 {
 	struct sym_env *work = GETCORE(RUN_POOL, struct sym_env);
@@ -30,6 +33,7 @@ PUBLIC struct sym_env *sym_newenv(int closed, struct sym_env *prev,
 	}
 
 	work->prev = prev;
+	work->aliasenv = alias;
 	work->closed = closed;
 	work->itemroot = NULL;
 	work->name = my_strdup(RUN_POOL, name);
@@ -114,7 +118,14 @@ PRIVATE struct sym_item *search_horse(struct sym_env *env,
 				      struct id_rec *id,
 				      enum SYM_TYPE type)
 {
-	struct sym_item *work = env->itemroot;
+	struct sym_item *work;
+	
+	if (!env) return NULL;
+
+	if (env->aliasenv)
+		return search_horse(env->aliasenv,id,type);
+
+	work = env->itemroot;
 
 	if (comal_debug)
 		my_printf(MSG_DEBUG, 1,
@@ -127,6 +138,13 @@ PRIVATE struct sym_item *search_horse(struct sym_env *env,
 				  work->id->name);
 
 		work = work->next;
+	}
+
+	if (!work && env->curproc && env!=env->curproc->lc.pfrec.staticenv) {
+		if (comal_debug) 
+			my_printf(MSG_DEBUG,1,"  Not found, starting to look in static env");
+		
+		work=search_horse(env->curproc->lc.pfrec.staticenv,id,type);
 	}
 
 	if (comal_debug) {
@@ -156,7 +174,7 @@ PUBLIC struct sym_item *sym_search(struct sym_env *env, struct id_rec *id,
 
 		level--;
 
-		while (proclevel(env->curproc) != level)
+		while (proclevel(env->curproc) > level)
 			env = env->prev;
 	}
 
@@ -251,6 +269,11 @@ PUBLIC struct sym_env *sym_freeenv(struct sym_env *env, int recur)
 	return env;
 }
 
+
+PUBLIC void sym_reparent_env(struct sym_env *env, struct sym_env *newparent)
+{
+	env->prev=newparent;
+}
 
 PRIVATE struct arr_des *make_arrdes(struct arr_dim *arrdim)
 {
@@ -355,4 +378,84 @@ PUBLIC void *var_data(struct var_item *var)
 		return &var->data;
 
 	return var->data.vref;
+}
+
+PRIVATE void sym_list_error(struct sym_item *sym)
+{
+}
+
+PRIVATE void sym_list_var(struct sym_item *sym)
+{
+	struct var_item *var=sym->data.var;
+	
+	val_print(MSG_DIALOG,&var->data,var->type);
+}
+
+PRIVATE void sym_list_name(struct sym_item *sym)
+{
+}
+
+PRIVATE void sym_list_proc(struct sym_item *sym)
+{
+}
+
+/*
+ * Print a symbol environment 
+ */
+PRIVATE void sym_list_horse(struct sym_env *env)
+{
+	char line[256];
+	char *buf=line;
+	struct sym_item *walk;
+	char *s;
+	void (*fun)();
+	
+	my_printf(MSG_DIALOG,0,"Symbol environment: ");
+	
+	if (env->curproc) {
+		line_list(&buf, env->curproc);
+		my_printf(MSG_DIALOG,1,line);
+	} else
+		my_printf(MSG_DIALOG,1,"Global");
+
+	if (env->aliasenv) env=env->aliasenv;
+	
+	for (walk=env->itemroot; walk; walk=walk->next) {
+
+		switch (walk->symtype) {
+			case S_ERROR:	s="Error";
+					fun=sym_list_error;
+					break;
+			case S_VAR:	s="Variable";
+					fun=sym_list_var;
+					break;
+			case S_NAME:	s="NAME";
+					fun=sym_list_name;
+					break;
+			case S_PROCVAR:	s="PROC";
+					fun=sym_list_proc;
+					break;
+			case S_FUNCVAR:	s="FUNC";
+					fun=sym_list_proc;
+					break;
+			default:	fatal("sym_list_horse: Err#1");
+		}
+
+		my_printf(MSG_DIALOG,0,"  Item: %s (is %s) Value: ",walk->id->name,s);
+		(*fun)(walk);
+		my_nl(MSG_DIALOG);
+	}
+}
+
+/*
+ * Print a symbol environment 
+ */
+PUBLIC void sym_list(struct sym_env *env, int recurse)
+{
+	if (!env) return;
+
+	do {
+		sym_list_horse(env);
+		env=env->prev;
+	} while (env && recurse);
 }

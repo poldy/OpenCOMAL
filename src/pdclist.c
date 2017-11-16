@@ -104,6 +104,19 @@ PRIVATE void list_string(char **buf, char str[])
 	list_char(buf, '"');
 }
 
+PRIVATE void list_idlist(char **buf, struct id_list *root)
+{
+	int first = 1;
+
+	if (!root)
+		return;
+
+	while (root) {
+		list_comma(buf, &first, ',');
+		list_text(buf, root->id->name);
+		root = root->next;
+	}
+}
 
 PRIVATE void list_twoexp(char **buf, struct two_exp *twoexp, char
 			 *inter, int compuls)
@@ -538,7 +551,7 @@ PRIVATE void list_pf(char **buf, struct comal_line *line)
 	list_text(buf, pf->id->name);
 	list_parms(buf, pf->parmroot);
 
-	if (pf->closed) {
+	if (pf->closed && line->cmd!=moduleSYM) {
 		list_char(buf, ' ');
 		list_sym(buf, closedSYM);
 	}
@@ -618,6 +631,12 @@ PRIVATE void list_horse(char **buf, struct comal_line *line)
 		list_sym(buf, line->cmd);
 		break;
 
+	case useSYM:
+	case exportSYM:
+		list_symsp(buf, line->cmd);
+		list_idlist(buf, line->lc.idroot);
+		break;
+
 	case repeatSYM:
 		list_repeat(buf, line);
 		break;
@@ -669,6 +688,7 @@ PRIVATE void list_horse(char **buf, struct comal_line *line)
 		list_explist(buf, line->lc.exproot, 0);
 		break;
 
+	case staticSYM:
 	case localSYM:
 	case dimSYM:
 		list_dim(buf, line);
@@ -680,6 +700,7 @@ PRIVATE void list_horse(char **buf, struct comal_line *line)
 
 	case funcSYM:
 	case procSYM:
+	case moduleSYM:
 		list_pf(buf, line);
 		break;
 
@@ -727,6 +748,17 @@ PRIVATE void list_horse(char **buf, struct comal_line *line)
 
 		list_explist(buf, line->lc.readrec.lvalroot, 0);
 		break;
+
+	case endmoduleSYM:
+		list_sym(buf, line->cmd);
+
+		if (line->lineptr) {
+			list_char(buf, ' ');
+			list_text(buf, line->lineptr->lc.id->name);
+		}
+
+		break;
+
 
 	case endfuncSYM:
 	case endprocSYM:
@@ -793,6 +825,12 @@ PRIVATE void list_horse(char **buf, struct comal_line *line)
 PUBLIC void line_list(char **buf, struct comal_line *line)
 {
 	int i;
+
+	if (!line) {
+		sprintf(*buf,"<no line>");
+		(*buf) += 10;
+		return;
+	}
 
 	if (line->ld) {
 		sprintf(*buf, "%9ld  ", line->ld->lineno);

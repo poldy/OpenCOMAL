@@ -101,12 +101,14 @@ PRIVATE struct {
 	rnSYM, _EOD, "EOD"}, {
 	tnrnSYM, _EOF, "EOF"}, {
 	eorSYM, 0, "EOR"}, {
+	endmoduleSYM, 0, "ENDMODULE"}, {
 	rnSYM, _ERR, "ERR"}, {
 	rnSYM, _ERRLINE, "ERRLINE"}, {
 	rsSYM, _ERRTEXT, "ERRTEXT$"}, {
 	escSYM, 0, "ESC"}, {
 	execSYM, 0, "EXEC"}, {
 	exitSYM, 0, "EXIT"}, {
+	exportSYM, 0, "EXPORT"}, {
 	externalSYM, 0, "EXTERNAL"}, {
 	tnrnSYM, _EXP, "EXP"}, {
 	rnSYM, _FALSE, "FALSE"}, {
@@ -133,6 +135,7 @@ PRIVATE struct {
 	loopSYM, 0, "LOOP"}, {
 	mkdirSYM, 0, "MKDIR"}, {
 	modSYM, 0, "MOD"}, {
+	moduleSYM, 0, "MODULE"}, {
 	nameSYM, 0, "NAME"}, {
 	newSYM, 0, "NEW"}, {
 	tnrnSYM, _NOT, "NOT"}, {
@@ -190,6 +193,7 @@ PRIVATE struct {
 	rsSYM, _UNIT, "UNIT$"}, {
 	untilSYM, 0, "UNTIL"}, {
 	tsrsSYM, _UPPER, "UPPER$"}, {
+	useSYM, 0, "USE"}, {
 	usingSYM, 0, "USING"}, {
 	tsrnSYM, _VAL, "VAL"}, {
 	whenSYM, 0, "WHEN"}, {

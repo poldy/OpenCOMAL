@@ -18,7 +18,7 @@
 #include "pdcexp.h"
 #include "pdcval.h"
 
-PRIVATE void val_print_array(int stream, struct var_item *var) 
+PUBLIC void val_print_array(int stream, struct var_item *var) 
 {
 	long n=var->array->nritems;
 	char *data=var_data(var);

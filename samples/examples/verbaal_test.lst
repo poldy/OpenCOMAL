@@ -1,0 +1,10 @@
+       10 // General sample program
+       20 //
+       30 WHILE NOT(EOD) DO
+       40   READ a
+       50   PRINT a;"  ";verbaal$(a)
+       60 ENDWHILE
+       70 //
+       80 DATA 1, 12, 34, 112, 1009, 1234567890
+       90 //
+      100 FUNC verbaal$(getal#) EXTERNAL "verbaal.cml"

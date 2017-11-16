@@ -119,7 +119,6 @@ PUBLIC struct seg_des *seg_dynamic_load(struct comal_line *line)
 	return seg;
 }
 
-
 PUBLIC struct seg_des *seg_static_free(struct seg_des *seg)
 {
 	prog_del(&seg->lineroot, 0, MAXINT, 0);
@@ -149,7 +148,7 @@ PUBLIC void seg_allfree()
 	curenv->segroot = NULL;
 
 	while (curline) {
-		if ((curline->cmd == procSYM || curline->cmd == funcSYM)
+		if ((curline->cmd == procSYM || curline->cmd == funcSYM || curline->cmd==moduleSYM)
 		    && curline->lc.pfrec.external
 		    && curline->lc.pfrec.external->seg) {
 			seg_static_free(curline->lc.pfrec.external->seg);
@@ -158,4 +157,12 @@ PUBLIC void seg_allfree()
 
 		curline = curline->ld->next;
 	}
+}
+
+PUBLIC struct comal_line *seg_root(struct seg_des *seg) 
+{
+	if (seg)
+		return seg->lineroot;
+
+	return curenv->progroot;
 }

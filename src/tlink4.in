@@ -16,6 +16,7 @@ pdcmem.obj +
 pdcstr.obj +
 pdcexp.obj +
 pdcext.obj +
+pdcmod.obj +
 pdcmsdos.obj
 ..\bin\ocomrun.exe
 

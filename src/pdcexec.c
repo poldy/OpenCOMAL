@@ -24,6 +24,7 @@
 #include "pdcprog.h"
 #include "pdcexec.h"
 #include "pdcdsys.h"
+#include "pdcmod.h"
 
 #include <fcntl.h>
 #include <string.h>
@@ -355,18 +356,28 @@ PRIVATE void decode_parmlist(struct sym_env *env, struct parm_list *plist,
 		run_error(PARM_ERR, "Too much parameters provided");
 }
 
-
+/*
+ * This function is way too complicated...
+ */
 PUBLIC void exec_call(struct expression *exp, int calltype, void **result,
 		      enum VAL_TYPE *type)
 {
 	struct comal_line *pfline;
 	struct comal_line *curline;
 	int wasrunning;
-	struct sym_env *env;
+	struct sym_env *env=NULL;
+	struct sym_env *save_env = curenv->curenv;
 	struct seg_des *seg = NULL;
 	struct ext_rec *ext = NULL;
 	int dynseg_loaded = 0;
+	struct comal_line *modline=NULL;
+	struct sym_env *modenv = NULL;
+	struct sym_env *aliasenv = NULL;
 
+	/*
+	 * If we are running in the command loop, first scan the program
+	 * before we execute something...
+	 */
 	if (curenv->running == CMDLOOP) {
 		if (!curenv->scan_ok)
 			prog_total_scan();
@@ -376,18 +387,47 @@ PUBLIC void exec_call(struct expression *exp, int calltype, void **result,
 				  "Execution of direct command aborted due to program structure errors");
 	}
 
+	/*
+	 * Search the Comal line with the proc/func definition
+	 */
 	pfline = routine_search(exp->e.expid.id, calltype);
 
+	/*
+	 * If we did not find it, it might be an exported proc/func
+	 * form a module...
+	 */
 	if (!pfline) {
-		if (sys_call
-		    (exp->e.expid.id, exp->e.expid.exproot, calltype,
-		     result, type))
-			return;
+		pfline=mod_search_routine(exp->e.expid.id,calltype);
 
-		run_error(UNFUNC_ERR, "Unknown identifier %s",
-			  exp->e.expid.id->name);
+		/*
+		 * Or it might be an extension (pdcext.c)
+		 */
+		if (!pfline) {
+			if (sys_call
+		    	(exp->e.expid.id, exp->e.expid.exproot, calltype,
+		     	result, type))
+				return;
+
+			run_error(UNFUNC_ERR, "Unknown identifier %s",
+			  	exp->e.expid.id->name);
+		}
+
+		/*
+		 * The routine was found in an OpenComal module. Next to
+		 * the line of the proc/func, also record the line where
+		 * the module definition lives...
+		 */
+		modline=pfline->lc.pfrec.fatherproc;
+
+		/*
+		 * Also record the module's static environment
+		 */	
+		modenv=modline->lc.pfrec.staticenv;
 	}
 
+	/*
+	 * Is this an externally defined procedure or function?
+	 */
 	ext = pfline->lc.pfrec.external;
 
 	if (ext) {
@@ -405,9 +445,21 @@ PUBLIC void exec_call(struct expression *exp, int calltype, void **result,
 		pfline = seg->procdef;
 	}
 
-	env =
-	    sym_newenv(pfline->lc.pfrec.closed, curenv->curenv, pfline,
-		       exp->e.expid.id->name);
+	/*
+	 * This is a call to an EXPORTed routine in a MODULE. We have 
+	 * to insert the MODULEs static environment in front of the new
+	 * PROC/FUNC environment. This is done by inserting an alias
+	 * symbol environment in the chain that refers to the static
+	 * environment that was created when the module was initialised.
+	 */
+	if (modenv) {
+		aliasenv = sym_newenv(1,save_env,modenv,modline,
+			modline->lc.pfrec.id->name);
+		env = sym_newenv(pfline->lc.pfrec.closed, aliasenv, 
+			NULL, pfline, exp->e.expid.id->name);
+	} else
+		env = sym_newenv(pfline->lc.pfrec.closed, save_env, 
+			NULL, pfline, exp->e.expid.id->name);
 
 	decode_parmlist(env, pfline->lc.pfrec.parmroot,
 			exp->e.expid.exproot);
@@ -422,7 +474,16 @@ PUBLIC void exec_call(struct expression *exp, int calltype, void **result,
 		fatal("Internal CALL/RETURN error #1");
 
 	curenv->curline = curline;
-	curenv->curenv = sym_freeenv(env, 0);
+	env = sym_freeenv(env, 0);
+
+	if (aliasenv) {
+		if (aliasenv!=env) 
+			fatal("exec_call internal error #1");
+
+		sym_freeenv(aliasenv,0);
+	}
+
+	curenv->curenv = save_env;
 	curenv->running = wasrunning;
 
 	if (dynseg_loaded)
@@ -520,7 +581,7 @@ PRIVATE struct arr_dim *make_arrdim(struct dim_ension *d)
 }
 
 
-PRIVATE void do_1dim(struct dim_list *dim, int type)
+PRIVATE void do_1dim(struct dim_list *dim, struct comal_line *line)
 {
 	struct arr_dim *arrdim = make_arrdim(dim->dimensionroot);
 	struct sym_env *env;
@@ -531,9 +592,20 @@ PRIVATE void do_1dim(struct dim_list *dim, int type)
 	else
 		strlen = DEFAULT_STRLEN;
 
-	if (type == localSYM)
+	if (line->cmd == localSYM)
 		env = curenv->curenv;
-	else
+	else if (line->cmd == staticSYM) {
+		env=curenv->curenv->curproc->lc.pfrec.staticenv;
+
+		if (!env) {
+	    		env=sym_newenv(1, NULL, NULL, NULL, 
+				line->lc.pfrec.id->name);
+
+			curenv->curenv->curproc->lc.pfrec.staticenv=env;
+		} else
+			if (sym_search(env,dim->id,S_VAR))
+				return;
+	} else
 		env = sym_newvarenv(curenv->curenv);
 
 	if (!sym_enter
@@ -548,7 +620,7 @@ PRIVATE void exec_dim(struct comal_line *line)
 	struct dim_list *work = line->lc.dimroot;
 
 	while (work) {
-		do_1dim(work, line->cmd);
+		do_1dim(work, line);
 		work = work->next;
 	}
 }
@@ -824,11 +896,11 @@ PRIVATE void exec_assign(struct comal_line *line)
 
 PRIVATE void exec_end()
 {
-	if (curenv->running != RUNNING)
-		run_error(DIRECT_ERR,
-			  "Can't END in direct mode (use QUIT to leave OpenComal)");
+	if (curenv->running != RUNNING) 
+		if (!sys_yn(MSG_DIALOG,"Are you sure? "))
+			return;
 
-	longjmp(RESTART, JUST_RESTART);
+	longjmp(RESTART, PROG_END);
 }
 
 
@@ -2051,6 +2123,8 @@ PUBLIC int exec_line(struct comal_line *line)
 	case endcaseSYM:
 	case endifSYM:
 	case nullSYM:
+	case useSYM:
+	case exportSYM:
 		break;
 
 	case repeatSYM:
@@ -2123,6 +2197,7 @@ PUBLIC int exec_line(struct comal_line *line)
 
 		break;
 
+	case staticSYM:
 	case localSYM:
 	case dimSYM:
 		exec_dim(line);
@@ -2241,12 +2316,14 @@ PUBLIC int exec_line(struct comal_line *line)
 	case handlerSYM:
 		return line->cmd;
 
+	case endmoduleSYM:
 	case endprocSYM:
 		return returnSYM;
 
 	case endfuncSYM:
 		run_error(NORETURN_ERR, "Should have RETURNed by now");
 
+	case moduleSYM:
 	case funcSYM:
 	case procSYM:
 		if (!line->lc.pfrec.external)
@@ -2326,7 +2403,22 @@ PUBLIC void exec_seq(struct comal_line *line)
 	curenv->curline = line;
 	curenv->running = RUNNING;
 
-	exec_seq2();		/* No return from this */
+	exec_seq2();
+}
 
-	fatal("Internal exec_seq() error #1");
+PUBLIC void exec_mod_init(struct comal_line *line)
+{
+	struct sym_env *env;
+	struct sym_env *oldenv=curenv->curenv;
+
+	if (comal_debug)
+		my_printf(MSG_DEBUG,1,"Initialising module %s",
+			line->lc.pfrec.id->name);
+	env =
+	    sym_newenv(line->lc.pfrec.closed, NULL, NULL, line, line->lc.pfrec.id->name);
+
+	curenv->curenv = env;
+	exec_seq(line->ld->next);
+	line->lc.pfrec.staticenv=env;
+	curenv->curenv = oldenv;
 }

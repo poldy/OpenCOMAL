@@ -24,3 +24,4 @@ extern void print_file(struct two_exp *twoexp,
 extern void input_file(struct two_exp *twoexp, struct exp_list *lvalroot);
 extern int exec_line(struct comal_line *line);
 extern void exec_seq(struct comal_line *line);
+extern void exec_mod_init(struct comal_line *line);

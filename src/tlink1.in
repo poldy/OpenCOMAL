@@ -22,6 +22,7 @@ pdcparss.obj +
 pdcstr.obj +
 pdcexp.obj +
 pdcext.obj +
+pdcmod.obj +
 pdcwin32.obj
 ..\bin\opencomal.exe
 

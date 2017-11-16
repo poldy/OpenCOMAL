@@ -10,6 +10,7 @@
 
 /* OpenComal internal data value manipulation header file */
 
+extern void val_print_array(int stream, struct var_item *var);
 extern void val_print(int stream, void *result, enum VAL_TYPE type);
 extern void val_copy(void *to, void *from, enum VAL_TYPE ttype, enum VAL_TYPE ftype);
 extern void val_free(void *result, enum VAL_TYPE type);

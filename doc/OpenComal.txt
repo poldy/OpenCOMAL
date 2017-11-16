@@ -2,9 +2,14 @@
 OpenComal Documentation
 -----------------------			    
 
-Version:	0.2.6-pre3
+Version:	0.2.7-pre1
 I am:		Jos Visser <josv@osp.nl>
-Date: 		Sun Dec  1 12:10:59 CET 2002
+Date: 		Sat Jan  4 11:50:09 CET 2003
+
+ALSO SEE
+--------
+- whitepaper1.txt for information on STATIC and MODULES
+
 
 TODO
 ----
@@ -589,6 +594,8 @@ The END statements halts all program execution and returns
 control to the interpreter's command loop. The program can not
 be CONtinued after an END.
 
+When executing in command mode, the END command clears the program run
+environment.
 
 6.22 ENDCASE
 
