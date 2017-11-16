@@ -10,62 +10,19 @@
 
 /* OpenComal own string routines */
 
+#include <string.h>
 #include "pdcglob.h"
 
 
-PRIVATE long my_strlen(char HUGE_POINTER * s)
+PUBLIC char *my_strdup(int pool, const char *s)
 {
-	long l = 0;
+	long l = strlen(s);
+	char *t = (char *)mem_alloc(pool, l + 1);
+	char *result;
 
-	while (*s) {
-		s++;
-		l++;
-	}
-
-	return l;
-}
-
-
-PUBLIC char *my_strcpy(char *s1, char *s2)
-{
-	char HUGE_POINTER *w1 = s1;
-	char HUGE_POINTER *w2 = s2;
-
-	while (*w2) {
-		*w1 = *w2;
-		w1++; 
-		w2++;
-	}
-
-	*w1 = '\0';
-
-	return s1;
-}
-
-PRIVATE char *my_strncpy(char *s1, char *s2, long n)
-{
-	char HUGE_POINTER *w1 = s1;
-	char HUGE_POINTER *w2 = s2;
-
-	while (*w2 && n) {
-		*w1 = *w2;
-		w1++; 
-		w2++;
-		n--;
-	}
-
-	*w1 = '\0';
-
-	return s1;
-}
-
-
-
-PUBLIC char *my_strdup(int pool, char *s)
-{
-	char *t = mem_alloc(pool, my_strlen(s) + 1);
-
-	return my_strcpy(t, s);
+	result = strncpy(t, s, l);
+	t[l] = '\0';
+	return result;
 }
 
 
@@ -74,20 +31,18 @@ PUBLIC int str_cmp(struct string *s1, struct string *s2)
 	char HUGE_POINTER *w1 = s1->s;
 	char HUGE_POINTER *w2 = s2->s;
 
-	while (*w1 && *w2 && *w1 == *w2)
-		w1++, w2++;
-
-	return *w1 - *w2;
+	return strcmp(w1, w2);
 }
 
 
-PUBLIC struct string *str_make(int pool, char *s)
+PUBLIC struct string *str_make(int pool, const char *s)
 {
-	long l = my_strlen(s);
+	long l = strlen(s);
 	struct string *work = STR_ALLOC(pool, l);
 
 	work->len = l;
-	my_strcpy(work->s, s);
+	strncpy(work->s, s, l);
+	work->s[l] = '\0';
 
 	return work;
 }
@@ -95,14 +50,10 @@ PUBLIC struct string *str_make(int pool, char *s)
 PUBLIC struct string *str_make2(int pool, long len)
 {
 	struct string *work = STR_ALLOC(pool, len);
-	char HUGE_POINTER *s;
 
 	work->len = len;
 	
-	for (s=work->s; len; --len) {
-		*s=' ';
-		s++;
-	}
+        memset(work->s, ' ', len);
 
 	return work;
 }
@@ -111,9 +62,8 @@ PUBLIC struct string *str_cat(struct string *s1, struct string *s2)
 {
 	char HUGE_POINTER *w1 = s1->s;
 
-	w1 = w1 + s1->len;
 	s1->len += s2->len;
-	my_strcpy(w1, s2->s);
+	strncat(w1, s2->s, s2->len);
 
 	return s1;
 }
@@ -123,32 +73,19 @@ PUBLIC long str_search(struct string *needle, struct string *haystack)
 {
 	char HUGE_POINTER *h = haystack->s;
 	char HUGE_POINTER *n = needle->s;
-	char HUGE_POINTER *wn;
-	char HUGE_POINTER *wh;
 
-	while (*h) {
-		if (*h == *n) {
-			wn = n;
-			wh = h;
-
-			while (*wn == *wh && *wn)
-				wn++, wh++;
-
-			if (!*wn)
-				return h - haystack->s + 1;
-		}
-
-		h++;
-	}
-
-	return 0L;
+        if ((h = strstr(h, n)) != NULL) {
+                return h - haystack->s + 1;
+        }
+        return 0L;
 }
 
 
 PUBLIC struct string *str_cpy(struct string *s1, struct string *s2)
 {
 	s1->len = s2->len;
-	my_strcpy(s1->s, s2->s);
+	strncpy(s1->s, s2->s, s2->len);
+	s1->s[s2->len] = '\0';
 
 	return s1;
 }
@@ -156,7 +93,8 @@ PUBLIC struct string *str_cpy(struct string *s1, struct string *s2)
 PUBLIC struct string *str_ncpy(struct string *s1, struct string *s2, long n)
 {
 	s1->len = n;
-	my_strncpy(s1->s, s2->s,n);
+	strncpy(s1->s, s2->s,n);
+	s1->s[n] = '\0';
 
 	return s1;
 }
@@ -173,10 +111,9 @@ PUBLIC struct string *str_partcpy(struct string *s1, struct string *s2,
 	s1->len = to - from + 1;
 	w2 = w2 + from - 1;
 
-	while (from <= to && *w2)
-		*w1 = *w2, w1++, w2++, from++;
+        strncpy(w1, w2, to - from + 1);
 
-	*w1 = '\0';
+        w1[to - from + 1] = '\0';
 
 	return s1;
 }
@@ -190,8 +127,7 @@ PUBLIC struct string *str_partcpy2(struct string *s1, struct string *s2,
 	char HUGE_POINTER *w1 = s1->s+from-1; /* Comal strings start at offset 1 */
 	char HUGE_POINTER *w2 = s2->s;
 
-	while (from <= to && *w2)
-		*w1 = *w2, w1++, w2++, from++;
+        strncpy(w1, w2, to - from + 1);
 
 	return s1;
 }
@@ -221,7 +157,6 @@ PUBLIC void str_extend(int pool, struct string **s, long newlen)
 {
 	struct string *work;
 	char HUGE_POINTER *t;
-	long i;
 
 	if ((*s) && (*s)->len>=newlen) return;
 
@@ -229,12 +164,8 @@ PUBLIC void str_extend(int pool, struct string **s, long newlen)
 	str_cpy(work,*s);
 	t=&work->s[(*s)->len];
 	
-	for (i=newlen-(*s)->len; i; --i) {
-		*t=' ';
-		t++;
-	}
-	
-	*t=0;
+        memset(t, ' ', newlen - (*s)->len);
+        t[newlen - (*s)->len] = '\0';
 	work->len=newlen;
 	mem_free(*s);
 	*s=work;

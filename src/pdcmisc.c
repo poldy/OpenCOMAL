@@ -20,6 +20,9 @@
 
 #include <math.h>
 #include <fcntl.h>
+#include <string.h>
+#include <stdarg.h>
+#include <assert.h>
 
 
 struct int_trace {
@@ -37,29 +40,32 @@ PUBLIC void my_nl(int stream)
 		if (fputc('\n', sel_outfile) == EOF)
 			run_error(SELECT_ERR,
 				  "Error when writing to SELECT OUTPUT file %s",
-				  sys_errlist[errno]);
+				  strerror(errno));
 	} else
 		sys_nl(stream);
 }
 
 
-PUBLIC void my_put(int stream, char *buf, long len)
+PUBLIC void my_put(int stream, const char *buf, long len)
 {
 	if (sel_outfile && stream == MSG_PROGRAM) {
 		if (fputs(buf, sel_outfile) == EOF)
 			run_error(SELECT_ERR,
 				  "Error when writing to SELECT OUTPUT file %s",
-				  sys_errlist[errno]);
+				  strerror(errno));
 	} else
 		sys_put(stream, buf, len);
 }
 
 
-PUBLIC void my_printf(int stream, int newline, char *s, ...)
+PUBLIC void my_printf(int stream, int newline, const char *s, ...)
 {
 	char buf[MAX_LINELEN];
+	va_list ap;
 
-	vsprintf(buf, s, (char *) &s + sizeof(s));
+	va_start(ap, s);
+	vsprintf(buf, s, ap);
+	va_end(ap);
 	my_put(stream, buf, -1L);
 
 	if (newline)
@@ -67,11 +73,14 @@ PUBLIC void my_printf(int stream, int newline, char *s, ...)
 }
 
 
-PUBLIC void fatal(char *s, ...)
+PUBLIC void fatal(const char *s, ...)
 {
 	char buf[140];
+	va_list ap;
 
-	vsprintf(buf, s, (char *) &s + sizeof(s));
+	va_start(ap, s);
+	vsprintf(buf, s, ap);
+	va_end(ap);
 	my_printf(MSG_ERROR, 1, "FATAL error: %s", buf);
 
 	longjmp(RESTART, ERR_FATAL);
@@ -101,7 +110,7 @@ PUBLIC void free_list(struct my_list *root)
 		return;
 
 	while (root)
-		root = mem_free(root);
+		root = (struct my_list *)mem_free(root);
 }
 
 
@@ -179,12 +188,8 @@ PUBLIC int nr_items(struct my_list *list)
 
 PUBLIC long d2int(double x, int whole)
 {
-	double max = MAXINT;
-#ifdef __bsdi__
+	double max = INT_MAX;
 	double min = INT_MIN;
-#else
-	double min = MININT;
-#endif
 
 	if (x > max || x < min)
 		run_error(F2INT1_ERR,
@@ -208,7 +213,7 @@ PUBLIC int type_match1(struct id_rec *id, struct expression *exp)
 
 PUBLIC struct id_rec *exp_of_id(struct expression *exp)
 {
-	struct id_rec *id;
+	struct id_rec *id = NULL;
 
 	if (exp->optype != T_EXP_IS_NUM && exp->optype != T_EXP_IS_STRING)
 		fatal("Exp_id() internal error #1");
@@ -233,19 +238,6 @@ PUBLIC struct id_rec *exp_of_id(struct expression *exp)
 	return id;
 }
 
-/*
- * Check whether this expression consists of a single array. If this
- * is the case, return the identifier (name of the array), else return
- * NULL
- */
-PUBLIC struct id_rec *exp_of_array(struct expression *exp)
-{
-	if (exp->optype==T_ARRAY || exp->optype==T_SARRAY)
-		return exp->e.expid.id;
-
-	return NULL;
-}
-
 PUBLIC int exp_of_string(struct expression *exp)
 {
 	if (exp->optype != T_EXP_IS_STRING)
@@ -260,44 +252,6 @@ PUBLIC int exp_of_string(struct expression *exp)
 PUBLIC char *exp_cmd(struct expression *exp)
 {
 	return (exp_of_id(exp))->name;
-}
-
-
-PUBLIC long my_write(int h, char *data, long size)
-{
-	long worksize = size;
-
-	while (worksize > MAXUNSIGNED) {
-		if (write(h, data, MAXUNSIGNED) < 0)
-			return -1;
-
-		data += MAXUNSIGNED;
-		worksize -= MAXUNSIGNED;
-	}
-
-	if (write(h, data, worksize) < 0)
-		return -1;
-
-	return size;
-}
-
-
-PUBLIC long my_read(int h, char *data, long size)
-{
-	long worksize = size;
-
-	while (worksize > MAXUNSIGNED) {
-		if (read(h, data, MAXUNSIGNED) < 0)
-			return -1;
-
-		data += MAXUNSIGNED;
-		worksize -= MAXUNSIGNED;
-	}
-
-	if (read(h, data, worksize) < 0)
-		return -1;
-
-	return size;
 }
 
 
@@ -490,7 +444,7 @@ PRIVATE struct {
 	, {
 	idSYM, sizeof(c_line.lc.id)}
 	, {
-	-1 - 1}
+	-1, -1}
 };
 
 
@@ -544,18 +498,6 @@ PUBLIC int type_size(enum VAL_TYPE t)
 }
 
 
-PUBLIC void data_dump(char *data, int nr, char *title)
-{
-	my_nl(MSG_DEBUG);
-	my_printf(MSG_DEBUG, 1, title);
-
-	for (; nr; nr--, data++)
-		my_printf(MSG_DEBUG, 0, "%02X ", *data);
-
-	my_nl(MSG_DEBUG);
-}
-
-
 PUBLIC void check_lval(struct expression *exp)
 {
 	struct sym_item *sym;
@@ -575,21 +517,6 @@ PUBLIC void check_lval(struct expression *exp)
 	if (exp->optype == T_SID && exp->e.expsid.twoexp)
 		run_error(LVAL_ERR,
 			  "This string lvalue cannot have a substring specifier");
-}
-
-
-PUBLIC int clean_string_lval(struct expression *exp)
-{
-	if (exp->optype == T_EXP_IS_STRING)
-		exp = exp->e.exp;
-
-	if (exp->optype != T_SID)
-		return 0;
-
-	if (exp->e.expsid.twoexp)
-		return 0;
-
-	return 1;
 }
 
 
@@ -653,32 +580,13 @@ PUBLIC struct comal_line *stat_dup(struct comal_line *stat)
 	char *to;
 	char *from;
 
-	work = mem_alloc(PARSE_POOL, memsize);
+	work = (struct comal_line *)mem_alloc(PARSE_POOL, memsize);
 
 	for (to = (char *) work, from = (char *) stat; memsize > 0;
 	     memsize--, to++, from++)
 		*to = *from;
 
 	return work;
-}
-
-
-PUBLIC void trace_add(int *val, char *name)
-{
-	struct int_trace *work =
-	    mem_alloc(MISC_POOL, sizeof(struct int_trace));
-
-	work->next = tr_root;
-	work->value = val;
-	work->name = name;
-	tr_root = work;
-}
-
-
-PUBLIC void trace_remove()
-{
-	if (tr_root)
-		tr_root = mem_free(tr_root);
 }
 
 
@@ -699,7 +607,7 @@ PUBLIC void trace_reset()
 	struct int_trace *work = tr_root;
 
 	while (work)
-		work = mem_free(work);
+		work = (struct int_trace *)mem_free(work);
 }
 
 #ifndef EVIL32
@@ -728,8 +636,9 @@ PUBLIC void strlwr(char *s)
 
 #ifdef UNIX
 
-PUBLIC char *ltoa(long num, char *buf, int len)
+PUBLIC char *ltoa(long num, char *buf, int radix)
 {
+        assert(radix == 10);
 	sprintf(buf, "%ld", num);
 
 	return buf;
@@ -748,7 +657,7 @@ PUBLIC int eof(int f)
 }
 #endif
 
-PUBLIC void remove_trailing(char *s, char *trailer, char *subst) 
+PUBLIC void remove_trailing(char *s, const char *trailer, const char *subst) 
 {
 	int l=strlen(s);
 	int m=strlen(trailer);
@@ -769,12 +678,14 @@ PUBLIC double my_frac(double x)
 	return -(ceil(x)-x);
 }
 
+#ifndef HAS_ROUND
 PUBLIC double my_round(double x)
 {
-	double d=my_frac(x);
+       double d=my_frac(x);
 
-	if (abs(d)>=0.5)
-		return ceil(x);
+       if (fabs(d)>=0.5)
+               return ceil(x);
 
-	return floor(x);
+       return floor(x);
 }
+#endif

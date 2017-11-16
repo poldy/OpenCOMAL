@@ -111,8 +111,8 @@ exp			[Ee][\-\+]?{number}+
 \;						RETURN(semicolonSYM);
 \,						RETURN(commaSYM);
 \#						RETURN(fileSYM);
-\/\/[^\r?\n]*					RETURN(lex_rem());
-\"(\"\"|\\\"|[^\"\n])*\"?			RETURN(lex_string_flatten());
+\/\/[^\r\n]*					RETURN(lex_rem());
+\"([^\\]\"\"|\\\"|[^\"\n])*\"?			RETURN(lex_string_flatten());
 {letter}{netter}*				RETURN(lex_id(idSYM));
 {letter}{netter}*\#				RETURN(lex_id(intidSYM));
 {letter}{netter}*\$				RETURN(lex_id(stringidSYM));
@@ -127,8 +127,7 @@ PUBLIC int yywrap()
 		return 1;
 	}
 
-PRIVATE void pdc_unput(c)
-	char c;
+PRIVATE void pdc_unput(char c)
 	{
 
 		#ifdef PDCLEX_DEBUG
@@ -169,8 +168,7 @@ PUBLIC int lex_pos()
 	}
 
 
-PUBLIC void lex_setinput(line)
-	char *line;
+PUBLIC void lex_setinput(char *line)
 	{
 		#ifdef FLEX
 			yyrestart(NULL);

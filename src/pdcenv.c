@@ -17,8 +17,9 @@
 #include "pdcid.h"
 #include "pdcmod.h"
 #include "pdcsym.h"
+#include <string.h>
 
-PUBLIC struct comal_env *env_new(char *name)
+PUBLIC struct comal_env *env_new(const char *name)
 {
 	struct comal_env *work = GETCORE(MISC_POOL, struct comal_env);
 	struct env_list *work2 = GETCORE(MISC_POOL, struct env_list);

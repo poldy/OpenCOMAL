@@ -18,10 +18,11 @@
 #include "pdcval.h"
 
 #include <string.h>
+#include <stdbool.h>
 
 PUBLIC struct sym_env *sym_newenv(int closed, struct sym_env *prev,
 				  struct sym_env *alias, 
-				  struct comal_line *curproc, char *name)
+				  struct comal_line *curproc, const char *name)
 {
 	struct sym_env *work = GETCORE(RUN_POOL, struct sym_env);
 
@@ -166,7 +167,7 @@ PUBLIC struct sym_item *sym_search(struct sym_env *env, struct id_rec *id,
 	int level = proclevel(env->curproc);
 	struct sym_item *ret;
 
-	while (1 == 1) {
+	while (true) {
 		ret = search_horse(env, id, type);
 
 		if (ret || env->closed)
@@ -187,9 +188,9 @@ PUBLIC struct sym_item *sym_search(struct sym_env *env, struct id_rec *id,
 
 PRIVATE void free_var(struct var_item *var)
 {
-	long nritems;
-
 	if (!var->ref) {
+		long nritems;
+
 		if (var->array) {
 			nritems = var->array->nritems;
 			free_list((struct my_list *) var->array);
@@ -250,9 +251,9 @@ PRIVATE struct sym_item *free_symitem(struct sym_item *item)
 
 PUBLIC struct sym_env *sym_freeenv(struct sym_env *env, int recur)
 {
-	struct sym_item *work;
-
 	do {
+		struct sym_item *work;
+
 		if (comal_debug)
 			my_printf(MSG_DEBUG, 1, "Free env %p", env);
 
@@ -262,18 +263,13 @@ PUBLIC struct sym_env *sym_freeenv(struct sym_env *env, int recur)
 			work = free_symitem(work);
 
 		mem_free(env->name);
-		env = mem_free(env);
+		env = (struct sym_env *)mem_free(env);
 	}
 	while (env && recur);
 
 	return env;
 }
 
-
-PUBLIC void sym_reparent_env(struct sym_env *env, struct sym_env *newparent)
-{
-	env->prev=newparent;
-}
 
 PRIVATE struct arr_des *make_arrdes(struct arr_dim *arrdim)
 {
@@ -313,7 +309,7 @@ PUBLIC struct var_item *var_newvar(enum VAL_TYPE type,
 	}
 
 	work =
-	    mem_alloc(RUN_POOL,
+	    (struct var_item *)mem_alloc(RUN_POOL,
 		      sizeof(struct var_item) - sizeof(union var_data) +
 		      type_size(type) * nritems);
 
@@ -337,7 +333,7 @@ PUBLIC struct var_item *var_refvar(struct var_item *lvar, enum VAL_TYPE type, lo
 		my_printf(MSG_DEBUG, 1, "NEW RefVar pointing at %p", vref);
 
 	work =
-	    mem_alloc(RUN_POOL,
+	    (struct var_item *)mem_alloc(RUN_POOL,
 		      sizeof(struct var_item) - sizeof(union var_data) +
 		      sizeof(void *));
 
@@ -359,7 +355,7 @@ PUBLIC struct name_rec *name_new(struct sym_env *env,
 				 struct expression *exp)
 {
 	struct name_rec *work =
-	    mem_alloc(RUN_POOL, sizeof(struct name_rec));
+	    (struct name_rec *)mem_alloc(RUN_POOL, sizeof(struct name_rec));
 
 	work->env = env;
 	work->exp = exp;
@@ -407,8 +403,8 @@ PRIVATE void sym_list_horse(struct sym_env *env)
 	char line[256];
 	char *buf=line;
 	struct sym_item *walk;
-	char *s;
-	void (*fun)();
+	const char *s;
+	void (*fun)(struct sym_item *);
 	
 	my_printf(MSG_DIALOG,0,"Symbol environment: ");
 	

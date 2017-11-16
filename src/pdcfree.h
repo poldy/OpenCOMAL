@@ -8,4 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
+#ifndef PDCFREE_H
+#define PDCFREE_H
+
 extern void line_free(struct comal_line *line, int mainprog);
+
+#endif

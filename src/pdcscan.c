@@ -28,15 +28,17 @@ PRIVATE struct {
 } scan_stack[SCAN_STACK_SIZE];
 PRIVATE int scan_sp;
 
+enum scan_entry_special { NOT_SPECIAL, SHORT_FORM, EXIT, PROCFUNC, EPROCFUNC,
+	DATA_STAT, CASE, RETRY, EXPORT, USE
+};
+
 struct scan_entry {
 	int sym;
 	int atindent0;
 	int leavessym;
 	int expectsym1;
 	int expectsym2;
-	enum { NOT_SPECIAL, SHORT_FORM, EXIT, PROCFUNC, EPROCFUNC,
-		DATA_STAT, CASE, RETRY, EXPORT, USE
-	} special;
+	enum scan_entry_special special;
 };
 
 
@@ -111,9 +113,10 @@ PRIVATE void scan_stack_search(int sym1, int sym2, int sym3, int *result,
 			       struct comal_line **stkline)
 {
 	int i;
-	int sym;
 
 	for (i = scan_sp - 1; i >= 0; i--) {
+		int sym;
+
 		sym=scan_stack[i].sym;
 
 		if (sym == sym1 || sym == sym2 || sym==sym3) {
@@ -151,7 +154,7 @@ PRIVATE struct comal_line *routine_search_horse(struct id_rec *id,
 PRIVATE struct comal_line *routine_search(struct id_rec *id, int type,
 					  struct comal_line *curproc)
 {
-	struct comal_line *procline=NULL;
+	struct comal_line *procline;
 	struct comal_line *father = curproc;
 
 	while (father) {
@@ -212,7 +215,7 @@ PRIVATE int scan_pass4(struct seg_des *seg, char *errtxt,
 	struct comal_line *walk;
 	struct parm_list *pwalk;
 	struct exp_id *proccall;
-	char *err = NULL;
+	const char *err = NULL;
 	int dummy;
 	int procfound;
 	int sp;
@@ -544,7 +547,6 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 	struct comal_line *lineptr;
 	struct scan_entry *p;
 	int sym;
-	int skip_processing;
 	int cmd2;
 	struct comal_line *procroot = NULL;
 	int level;
@@ -562,6 +564,8 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 	*errtxt=0;
 
 	while (curline) {
+		int skip_processing;
+
 		theline = line_2line(curline);
 
 		if (theline)
@@ -673,20 +677,25 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 /*
  * The prog_structure_scan is "only" used to get the indentation right...
  */
-#define INDENT(x) ((x)>=INDENTION*MAX_INDENT ? INDENTION*MAX_INDENT : (x))
+static inline int
+INDENT(int x)
+{
+	return (x >= INDENTION * MAX_INDENT ? INDENTION * MAX_INDENT : x);
+}
 
 PUBLIC void prog_structure_scan()
 {
 	int indent = 0;
 	struct comal_line *curline = curenv->progroot;
 	struct scan_entry *p;
-	int skip_processing;
-	int cmd2;
 
 	if (comal_debug)
 		my_printf(MSG_DEBUG, 1, "Structure scanning...");
 
 	while (curline) {
+		int skip_processing;
+		int cmd2;
+
 		cmd2 = line_2cmd(curline);
 		skip_processing = 0;
 
@@ -758,7 +767,7 @@ PUBLIC int scan_nescessary(struct comal_line *line)
 
 PUBLIC int assess_scan(struct comal_line *line)
 {
-	char *msg = NULL;
+	const char *msg = NULL;
 
 	if (entering)
 		return 0;

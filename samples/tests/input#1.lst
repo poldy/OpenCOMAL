@@ -7,7 +7,7 @@
        70 FOR f:=1 TO 10 DO a$(f):="Number "+STR$(f)
        80 //
        90 OPEN FILE 1, "ofile12", WRITE 
-      100 WRITE FILE 1: a$
+      100 WRITE FILE 1: a$()
       110 CLOSE FILE 1
       120 //
       130 OPEN FILE 1, "ofile12", READ 
@@ -20,7 +20,7 @@
       200 a$:=""  // Assignment of array
       210 //
       220 OPEN FILE 1, "ofile12", READ 
-      230 INPUT FILE 1: a$  // INPUT FILE of array()
+      230 INPUT FILE 1: a$()  // INPUT FILE of array()
       240 CLOSE
       250 //
       260 FOR f:=1 TO 10 DO

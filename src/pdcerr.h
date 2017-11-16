@@ -10,6 +10,9 @@
 
 /* OpenComal Comal error codes */
 
+#ifndef PDCERR_H
+#define PDCERR_H
+
 /* Run error codes */
 
 #define NO_RUN_ERR	0
@@ -63,3 +66,5 @@
 #define SPC_ERR		49	/* Error in parameter to SPC$ */
 #define DIR_ERR		50	/* Error in MKDIR, CHDIR of RMDIR */
 #define RND_ERR		51	/* Error in the arguments for RND */
+
+#endif

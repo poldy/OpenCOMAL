@@ -21,7 +21,7 @@
 PUBLIC void val_print_array(int stream, struct var_item *var) 
 {
 	long n=var->array->nritems;
-	char *data=var_data(var);
+	char *data=(char *)var_data(var);
 	enum VAL_TYPE type=var->type;
 	int size=type_size(type);
 	
@@ -84,7 +84,7 @@ PUBLIC void val_copy(void *to, void *from, enum VAL_TYPE ttype, enum
 
 		if (*(struct string **)to) mem_free(*(struct string **)to);
 
-		*(struct string **) to = str_dup(RUN_POOL, from);
+		*(struct string **) to = (struct string *)str_dup(RUN_POOL, (struct string *)from);
 	} else if (ttype == V_FLOAT)
 		if (ftype == V_FLOAT)
 			*(double *) to = *(double *) from;
@@ -118,7 +118,7 @@ PUBLIC void val_free(void *result, enum VAL_TYPE type)
 PUBLIC double val_double(struct expression *exp) {
 	void *result;
 	enum VAL_TYPE type;
-	double d;
+	double d = 0.0;
 
 	calc_exp(exp,&result,&type);
 
@@ -144,7 +144,7 @@ PUBLIC int val_cmp(int op, void *r1, void *r2, enum VAL_TYPE t1, enum
 			run_error(VALUE_ERR,
 				  "Wrong type (must be string)");
 
-		cmp = str_cmp(r1, r2);
+		cmp = str_cmp((struct string *)r1, (struct string *)r2);
 	} else if (t1 == V_INT && t2 == V_INT) {
 		if (*(long *) r1 == *(long *) r2)
 			cmp = 0;
@@ -211,7 +211,7 @@ PUBLIC void val_neg(void *value, enum VAL_TYPE type)
 
 PUBLIC long *val_int(long i, void *ptr, enum VAL_TYPE *type)
 {
-	long *p = cell_alloc(INT_CPOOL);
+	long *p = (long *)cell_alloc(INT_CPOOL);
 
 	if (ptr)
 		val_free(ptr, *type);
@@ -225,7 +225,7 @@ PUBLIC long *val_int(long i, void *ptr, enum VAL_TYPE *type)
 
 PUBLIC double *val_float(double f, void *ptr, enum VAL_TYPE *type)
 {
-	double *p = cell_alloc(FLOAT_CPOOL);
+	double *p = (double *)cell_alloc(FLOAT_CPOOL);
 
 	if (ptr)
 		val_free(ptr, *type);
@@ -314,7 +314,7 @@ PUBLIC void val_intdiv(long *v1, long *v2, void **result, enum VAL_TYPE
 
 PUBLIC long val_mustbelong(void *value, enum VAL_TYPE type, int freeit) 
 {
-	long n;
+	long n = 0;
 
 	if (type==V_INT) 
 		n=*(long *)value;

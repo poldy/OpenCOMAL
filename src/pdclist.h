@@ -8,4 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
+#ifndef PDCLIST_H
+#define PDCLIST_H
+
 extern void line_list(char **buf, struct comal_line *line);
+
+#endif

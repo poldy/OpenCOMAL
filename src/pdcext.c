@@ -18,6 +18,7 @@
 #include "pdcval.h"
 #include "pdcsym.h"
 #include "version.h"
+#include <string.h>
 
 struct inpfile_stkent {
 	struct inpfile_stkent *next;
@@ -83,7 +84,6 @@ PUBLIC int ext_sys_exp(struct exp_list *exproot, void **result, enum
 		       VAL_TYPE *type)
 {
 	char *cmd;
-	int *flag;
 
 	cmd = exp_cmd(exproot->exp);
 	exproot = exproot->next;
@@ -97,6 +97,8 @@ PUBLIC int ext_sys_exp(struct exp_list *exproot, void **result, enum
 		sscanf(VERSION, "%lG", *(double **) result);
 		*type = V_FLOAT;
 	} else {
+		int *flag;
+
 		flag = is_flag(cmd);
 
 		if (!flag)
@@ -116,7 +118,7 @@ PUBLIC int ext_syss_exp(struct exp_list *exproot, struct string
 {
 	char *cmd;
 	int *flag;
-	char *s;
+	const char *s;
 	extern char *sys_interpreter();
 
 	cmd = exp_cmd(exproot->exp);
@@ -158,7 +160,7 @@ PUBLIC int ext_syss_exp(struct exp_list *exproot, struct string
 
 PRIVATE void push_inpfile()
 {
-	struct inpfile_stkent *work = mem_alloc(MISC_POOL, sizeof(*work));
+	struct inpfile_stkent *work = (struct inpfile_stkent *)mem_alloc(MISC_POOL, sizeof(*work));
 
 	work->inpfile = sys_inpfile;
 	work->next = inpfile_root;
@@ -246,7 +248,7 @@ PUBLIC int ext_sys_stat(struct exp_list *exproot)
 				pop_inpfile();
 				run_error(SYS_ERR,
 					  "Error opening sysin: %s",
-					  sys_errlist[errno]);
+					  strerror(errno));
 			}
 		}
 
@@ -278,7 +280,7 @@ PUBLIC int ext_sys_stat(struct exp_list *exproot)
 
 		if (!sys_outfile && name->s[0])
 			run_error(SYS_ERR, "Error opening sysout: %s",
-				  sys_errlist[errno]);
+				  strerror(errno));
 
 		return 0;
 	} else if (strcmp(cmd, "memdump") == 0) {
@@ -312,13 +314,13 @@ PUBLIC int ext_sys_stat(struct exp_list *exproot)
 }
 
 
-PUBLIC int ext_get(int stream, char *line, int maxlen, char *prompt)
+PUBLIC int ext_get(int stream, char *line, int maxlen, const char *prompt)
 {
-	int eof;
-
 	line[0] = '\0';
 
 	if (sys_inpfile) {
+		int eof;
+
 		if (fgets(line, maxlen, sys_inpfile))
 			return 1;
 
@@ -328,7 +330,7 @@ PUBLIC int ext_get(int stream, char *line, int maxlen, char *prompt)
 
 		if (!eof)
 			run_error(SYS_ERR, "Error reading sysin: %s",
-				  sys_errlist[errno]);
+				  strerror(errno));
 
 		return ext_get(stream, line, maxlen, prompt);
 	}
@@ -354,7 +356,7 @@ PUBLIC void ext_cursor(int x, int y)
 }
 
 
-PUBLIC void ext_put(int stream, char *buf, long len)
+PUBLIC void ext_put(int stream, const char *buf, long len)
 {
 	if (sys_outfile)
 		fputs(buf, sys_outfile);

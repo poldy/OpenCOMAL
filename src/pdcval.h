@@ -10,6 +10,9 @@
 
 /* OpenComal internal data value manipulation header file */
 
+#ifndef PDCVAL_H
+#define PDCVAL_H
+
 extern void val_print_array(int stream, struct var_item *var);
 extern void val_print(int stream, void *result, enum VAL_TYPE type);
 extern void val_copy(void *to, void *from, enum VAL_TYPE ttype, enum VAL_TYPE ftype);
@@ -28,3 +31,5 @@ extern void val_intmul(long *v1, long *v2, void **result,
 		       enum VAL_TYPE *type);
 extern void val_intdiv(long *v1, long *v2, void **result,
 		       enum VAL_TYPE *type);
+
+#endif

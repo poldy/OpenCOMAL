@@ -18,15 +18,15 @@
 #include "pdcsym.h"
 
 
-PRIVATE void free_exp();
-PRIVATE void free_horse();
+PRIVATE void free_exp(struct expression *exp);
+PRIVATE void free_horse(struct comal_line *line);
 
 
 PRIVATE void free_explist(struct exp_list *exproot)
 {
 	while (exproot) {
 		free_exp(exproot->exp);
-		exproot = mem_free(exproot);
+		exproot = (struct exp_list *)mem_free(exproot);
 	}
 }
 
@@ -126,13 +126,13 @@ PRIVATE void free_dim(struct comal_line *line)
 			while (work2) {
 				free_exp(work2->bottom);
 				free_exp(work2->top);
-				work2 = mem_free(work2);
+				work2 = (struct dim_ension *)mem_free(work2);
 			}
 		}
 
 		free_exp(work->strlen);
 
-		work = mem_free(work);
+		work = (struct dim_list *)mem_free(work);
 	}
 }
 
@@ -181,7 +181,7 @@ PRIVATE void free_printlist(struct print_list *printroot)
 {
 	while (printroot) {
 		free_exp(printroot->exp);
-		printroot = mem_free(printroot);
+		printroot = (struct print_list *)mem_free(printroot);
 	}
 }
 
@@ -216,7 +216,7 @@ PRIVATE void free_assign(struct assign_list *assignroot)
 	while (assignroot) {
 		free_exp(assignroot->lval);
 		free_exp(assignroot->exp);
-		assignroot = mem_free(assignroot);
+		assignroot = (struct assign_list *)mem_free(assignroot);
 	}
 }
 
@@ -225,7 +225,7 @@ PRIVATE void free_whenlist(struct when_list *whenroot)
 {
 	while (whenroot) {
 		free_exp(whenroot->exp);
-		whenroot = mem_free(whenroot);
+		whenroot = (struct when_list *)mem_free(whenroot);
 	}
 }
 

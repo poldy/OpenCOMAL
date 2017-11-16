@@ -10,6 +10,9 @@
 
 /* OpenComal line squashing functions for save/load purposes header file */
 
+#ifndef PDCSQASH_H
+#define PDCSQASH_H
+
 #define SQ_COPYRIGHT_MSG	"OpenComal/Sqash (c) 1992-2002 Muppet Lab"
 #define SQ_VERSION		0x1253
 #define SQ_MARKER		"SqAsH"
@@ -43,3 +46,5 @@
 
 extern void sqash_2file(char *fname);
 extern struct comal_line *expand_fromfile(char *fname);
+
+#endif

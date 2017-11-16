@@ -8,5 +8,10 @@
  * License. See doc/LICENSE for more information.
  */
 
+#ifndef PDCCMD_H
+#define PDCCMD_H
+
 extern int cmd_scan(struct comal_line *line);
 extern int cmd_exec(struct comal_line *line, int *result);
+
+#endif

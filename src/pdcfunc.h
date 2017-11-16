@@ -10,6 +10,9 @@
 
 /* Codes for OpenComal functions & constants */
 
+#ifndef PDCFUNC_H
+#define PDCFUNC_H
+
 #define _ABS			4000
 #define _ACS			4001
 #define _ASN			4002
@@ -52,3 +55,5 @@
 #define _LOWER			4036
 #define _FRAC			4037
 #define _ROUND			4038
+
+#endif

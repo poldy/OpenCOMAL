@@ -14,6 +14,9 @@ msg:
 all:
 	@cd src; make
 
+install:
+	cd bin ; make install
+
 clean:
 	cd src; make clean
 

@@ -10,10 +10,12 @@
 
 /* String routines header file */
 
-extern char *my_strdup(int pool, char *s);
-extern char *my_strcpy(char HUGE_POINTER *to, char HUGE_POINTER *from);
+#ifndef PDCSTR_H
+#define PDCSTR_H
+
+extern char *my_strdup(int pool, const char *s);
 extern int str_cmp(struct string *s1, struct string *s2);
-extern struct string *str_make(int pool, char *s);
+extern struct string *str_make(int pool, const char *s);
 extern struct string *str_make2(int pool, long len);
 extern struct string *str_cat(struct string *s1, struct string *s2);
 extern long str_search(struct string *needle, struct string *haystack);
@@ -23,3 +25,5 @@ extern struct string *str_partcpy2(struct string *s1, struct string *s2, long fr
 extern struct string *str_dup(int pool, struct string *s);
 extern struct string *str_maxdup(int pool, struct string *s, long n);
 extern void str_extend(int pool, struct string **s, long newlen);
+
+#endif

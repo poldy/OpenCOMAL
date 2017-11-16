@@ -21,6 +21,8 @@
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
+#include <stdbool.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -39,7 +41,7 @@ PRIVATE Keymap keymap;
 PRIVATE struct {
 	int curses_key;
 	int internal_key;
-	char *function;
+	const char *function;
 } my_keymap[] = {
 	{	KEY_HOME,	1,	"beginning-of-line"		},
 	{	KEY_END,	2,	"end-of-line"			},
@@ -56,7 +58,7 @@ PRIVATE struct {
 	
 };
 
-PRIVATE void int_handler()
+PRIVATE void int_handler(int signum)
 {
 	escape = 1;
 	signal(SIGINT, int_handler);
@@ -146,7 +148,6 @@ PRIVATE int pre_input()
 PRIVATE int startup()
 {
 	int i;
-	rl_command_func_t *func;
 	static int started_up=0;
 
 	if (started_up) return 0;
@@ -155,6 +156,8 @@ PRIVATE int startup()
 	rl_set_keymap(keymap);
 
 	for (i=0; my_keymap[i].curses_key; i++) {
+		rl_command_func_t *func;
+
 		func=rl_named_function(my_keymap[i].function);
 
 		if (func)
@@ -250,7 +253,7 @@ PUBLIC int sys_escape()
 	return 0;
 }
 
-PRIVATE void do_put(int stream, char *buf, long len)
+PRIVATE void do_put(int stream, const char *buf, long len)
 {
 	if (stream == MSG_ERROR)
 		attron(A_REVERSE);
@@ -263,10 +266,9 @@ PRIVATE void do_put(int stream, char *buf, long len)
 	refresh();
 }
 
-PUBLIC void sys_put(int stream, char *buf, long len)
+PUBLIC void sys_put(int stream, const char *buf, long len)
 {
 	int lines;
-	int c;
 
 	if (len < 0)
 		len = strlen(buf);
@@ -284,7 +286,9 @@ PUBLIC void sys_put(int stream, char *buf, long len)
 
 		if (pagern <= 0) {
 
-			while (1 == 1) {
+			while (true) {
+				int c;
+
 				c = my_getch();
 
 				if (c == ' ') {
@@ -332,13 +336,13 @@ PUBLIC void sys_screen_readjust()
 }
 
 
-PUBLIC int sys_yn(int stream, char *prompt)
+PUBLIC int sys_yn(int stream, const char *prompt)
 {
-	char c;
-
 	do_put(stream, prompt, strlen(prompt));
 
 	for (;;) {
+		char c;
+
 		c = my_getch();
 
 		if (sys_escape() || c == 'n' || c == 'N') {
@@ -352,7 +356,7 @@ PUBLIC int sys_yn(int stream, char *prompt)
 }
 
 
-PRIVATE int do_get(int stream, char *line, int maxlen, char *prompt,
+PRIVATE int do_get(int stream, char *line, int maxlen, const char *prompt,
 		   int cursor)
 {
 	int escape=0;
@@ -363,7 +367,8 @@ PRIVATE int do_get(int stream, char *line, int maxlen, char *prompt,
 	getyx(win,gety,getx);
 	addstr(line);
 	refresh();
-	strcpy(line,readline(""));
+	strncpy(line,readline(""),maxlen-1);
+	line[maxlen-1] = '\0';
 	move(gety+rl_end/width,getx+rl_end%width);
 	addch('\n');
 
@@ -376,7 +381,7 @@ PRIVATE int do_get(int stream, char *line, int maxlen, char *prompt,
 }
 
 
-PUBLIC int sys_get(int stream, char *line, int maxlen, char *prompt)
+PUBLIC int sys_get(int stream, char *line, int maxlen, const char *prompt)
 {
 	if (ext_get(stream, line, maxlen, prompt))
 		return 0;
@@ -388,30 +393,6 @@ PUBLIC int sys_get(int stream, char *line, int maxlen, char *prompt)
 PUBLIC int sys_edit(int stream, char line[], int maxlen, int cursor)
 {
 	return do_get(stream, line, maxlen, NULL, cursor);
-}
-
-
-PUBLIC void *sys_alloc(long size)
-{
-	if (size > MAXUNSIGNED)
-		return NULL;
-
-	return calloc(1, (unsigned) size);
-}
-
-
-PUBLIC void *sys_realloc(void *block, long newsize)
-{
-	if (newsize > MAXUNSIGNED)
-		return NULL;
-
-	return realloc(block, (unsigned) newsize);
-}
-
-
-PUBLIC void sys_free(void *p)
-{
-	free(p);
 }
 
 
@@ -433,8 +414,8 @@ PUBLIC char *sys_dir_string()
 	static int buf_size=1024;
 	static char *buf=0;
 
-	while (1==1) {
-		if (!buf) buf=malloc(buf_size);
+	while (true) {
+		if (!buf) buf=(char *)malloc(buf_size);
 
 		if (getcwd(buf,buf_size)!=NULL) return buf;
 
@@ -447,14 +428,15 @@ PUBLIC char *sys_dir_string()
 	}
 }
 
-PUBLIC void sys_dir(char *pattern) {
+PUBLIC void sys_dir(const char *pattern) {
 	FILE *f;
 	int l=strlen(pattern);
-	char *buf=malloc(8+l);
+	char *buf=(char *)malloc(8+l);
 	char line[256];
 	
-	strcpy(buf,"ls -l ");
-	strcat(buf,pattern);
+	strncpy(buf,"ls -l ",7);
+	buf[7] = '\0';
+	strncat(buf,pattern,l);
 	f=popen(buf,"r");
 
 	if (!f) run_error(DIRS_ERR,strerror(errno));
@@ -469,7 +451,7 @@ PUBLIC void sys_dir(char *pattern) {
 	free(buf);
 }
 
-PUBLIC char *sys_unit_string() 
+PUBLIC const char *sys_unit_string() 
 {
 	return "C:"; /* :-) */
 }
@@ -486,7 +468,7 @@ PUBLIC void sys_chdir(char *dir)
 
 PUBLIC void sys_mkdir(char *dir)
 {
-	if (!mkdir(dir,0777)<0)
+	if (mkdir(dir,0777)<0)
 		run_error(DIR_ERR,strerror(errno));
 } 
 
@@ -506,7 +488,7 @@ PUBLIC char *sys_key(long delay)
 	 */
 	if (delay<0) {
 		while (c==ERR && !escape) 
-			c=my_getch_horse(0);
+			c=my_getch_horse();
 	} else if (delay==0) {
 		raw();
 		nodelay(win,TRUE);

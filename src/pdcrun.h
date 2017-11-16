@@ -8,8 +8,13 @@
  * License. See doc/LICENSE for more information.
  */
 
-extern char *sys_interpreter(void);
-extern char *lex_sym(void);
+#ifndef PDCRUN_H
+#define PDCRUN_H
+
+extern const char *sys_interpreter(void);
+extern const char *lex_sym(int sym);
 extern void line_list(char **buf, struct comal_line *line);
 extern void comal_loop(int newstate);
 extern void pdc_go(int argc, char **argv);
+
+#endif

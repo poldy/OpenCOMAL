@@ -34,8 +34,16 @@ typedef struct {
 	CELL *root;
 } CELL_HDR;
 
-#define	CELL_ADDR(h,p,i)  ((CELL *)((char *)(h)->addr+(i)*(sizeof(CELL)+cell_size[(p)])))
-#define CELL_SIZE(p)	  (sizeof(CELL)+cell_size[p])
+static inline CELL *
+CELL_ADDR(CELL_HDR *h, unsigned int p, unsigned int i)
+{
+	return (CELL *)((char *)h->addr + i * (sizeof(CELL) + cell_size[p]));
+}
+static inline long
+CELL_SIZE(unsigned int p)
+{
+	return (sizeof(CELL) + cell_size[p]);
+}
 
 PRIVATE CELL_HDR *cell_hdr[NRCPOOLS];
 PRIVATE struct mem_pool mem_pool[NR_FIXED_POOLS];
@@ -43,9 +51,9 @@ PRIVATE int poolcount = 0;
 
 PRIVATE void cell_init(unsigned pool)
 {
-	CELL_HDR *c = mem_alloc(MISC_POOL, sizeof(CELL_HDR));
+	CELL_HDR *c = (CELL_HDR *)mem_alloc(MISC_POOL, sizeof(CELL_HDR));
 
-	c->addr = mem_alloc(MISC_POOL, CELL_POOLSIZE * CELL_SIZE(pool));
+	c->addr = (CELL *)mem_alloc(MISC_POOL, CELL_POOLSIZE * CELL_SIZE(pool));
 
 	cell_hdr[pool] = c;
 	cell_freepool(pool);
@@ -90,7 +98,7 @@ PUBLIC void mem_tini()
 }
 
 
-PRIVATE void mem_error(char *action, long size)
+PRIVATE void mem_error(const char *action, long size)
 {
 	if (curenv->running == RUNNING)
 		run_error(MEM_ERR, "Out of memory while %s %ld bytes",
@@ -120,7 +128,7 @@ PUBLIC void *cell_alloc(unsigned pool)
 		if (comal_debug)
 			my_printf(MSG_DEBUG, 1, " handing out from heap");
 
-		cell = mem_alloc(RUN_POOL, CELL_SIZE(pool));
+		cell = (CELL *)mem_alloc(RUN_POOL, CELL_SIZE(pool));
 		cell->c.marker = CELL_IN_MEM;
 	}
 
@@ -144,7 +152,7 @@ PUBLIC void *mem_alloc_private(struct mem_pool *pool, long size)
 			  "Mem_alloc block in pool %d, size %ld", pool->id,
 			  size);
 
-	p = sys_alloc(size + sizeof(struct mem_block));
+	p = (struct mem_block *)calloc(1, size + sizeof(struct mem_block));
 
 	if (!p)
 		mem_error("allocating", size);
@@ -169,12 +177,12 @@ PUBLIC void *mem_alloc_private(struct mem_pool *pool, long size)
 
 PUBLIC void *mem_realloc(void *block, long newsize)
 {
-	struct mem_block *memblock = block;
+	struct mem_block *memblock = (struct mem_block *)block;
 
 	--memblock;
 
 	memblock =
-	    sys_realloc(memblock, newsize + sizeof(struct mem_block));
+	    (struct mem_block *)realloc(memblock, newsize + sizeof(struct mem_block));
 
 	if (!memblock)
 		mem_error("reallocating", newsize);
@@ -196,7 +204,7 @@ PUBLIC void *mem_realloc(void *block, long newsize)
 
 PUBLIC void cell_free(void *m)
 {
-	CELL *cell = m;
+	CELL *cell = (CELL *)m;
 	CELL_HDR *c;
 
 	--cell;
@@ -219,7 +227,7 @@ PUBLIC void cell_free(void *m)
 
 PUBLIC void *mem_free(void *m)
 {
-	struct mem_block *memblock = m;
+	struct mem_block *memblock = (struct mem_block *)m;
 	void *result = memblock->next;
 
 	--memblock;
@@ -240,7 +248,7 @@ PUBLIC void *mem_free(void *m)
 		memblock->pool->root = memblock->next;
 
 	memblock->pool->size -= memblock->size;
-	sys_free(memblock);
+	free(memblock);
 
 	return result;
 }
@@ -287,7 +295,7 @@ PUBLIC void mem_freepool_private(struct mem_pool *pool)
 		if (work->marker != MEM_MARKER)
 			fatal("Invalid marker in mem_freepool(%d)", pool);
 
-		sys_free(work);
+		free(work);
 		work = next;
 	}
 
@@ -348,14 +356,4 @@ PUBLIC struct mem_pool *pool_new()
 			  work->id);
 
 	return work;
-}
-
-PUBLIC void pool_free(struct mem_pool *pool)
-{
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Freeing memory pool %d",
-			  pool->id);
-
-	mem_freepool_private(pool);
-	mem_free(pool);
 }

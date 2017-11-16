@@ -14,16 +14,17 @@
 #include "pdclexs.h"
 #include "pdcparss.h"
 #include "pdcmisc.h"
+#include <string.h>
 
 PUBLIC int show_exec = 0;
 
-PRIVATE void list_horse();
-PRIVATE void list_explist();
-PUBLIC void list_exp();
+PRIVATE void list_horse(char **buf, struct comal_line *line);
+PRIVATE void list_explist(char **buf, struct exp_list *exproot, int parens);
+PUBLIC void list_exp(char **buf, struct expression *exp);
 PRIVATE void list_char(char **buf, char c);
 
 
-PRIVATE void list_text(char **buf, char *txt)
+PRIVATE void list_text(char **buf, const char *txt)
 {
 	strcpy(*buf, txt);
 	(*buf) += strlen(txt);
@@ -63,11 +64,12 @@ PRIVATE void list_comma(char **buf, int *first, char c)
 PRIVATE void list_string(char **buf, char str[])
 {
 	int i;
-	char c;
 
 	list_char(buf, '"');
 
 	for (i = 0; str[i]; i++) {
+		char c;
+
 		c = str[i];
 
 		if (c == '"')
@@ -118,7 +120,7 @@ PRIVATE void list_idlist(char **buf, struct id_list *root)
 	}
 }
 
-PRIVATE void list_twoexp(char **buf, struct two_exp *twoexp, char
+PRIVATE void list_twoexp(char **buf, struct two_exp *twoexp, const char
 			 *inter, int compuls)
 {
 	/* 
@@ -824,8 +826,6 @@ PRIVATE void list_horse(char **buf, struct comal_line *line)
 
 PUBLIC void line_list(char **buf, struct comal_line *line)
 {
-	int i;
-
 	if (!line) {
 		sprintf(*buf,"<no line>");
 		(*buf) += 10;
@@ -833,6 +833,8 @@ PUBLIC void line_list(char **buf, struct comal_line *line)
 	}
 
 	if (line->ld) {
+		int i;
+
 		sprintf(*buf, "%9ld  ", line->ld->lineno);
 		(*buf) += 10;
 

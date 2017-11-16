@@ -10,6 +10,9 @@
 
 /* Definitions of the OpenComal message streams */
 
+#ifndef PDCMSG_H
+#define PDCMSG_H
+
 #define MSG_NR_STREAMS		5
 
 #define	MSG_PROGRAM		0
@@ -17,3 +20,5 @@
 #define MSG_ERROR		2
 #define MSG_DIALOG		3
 #define MSG_TRACE		4
+
+#endif

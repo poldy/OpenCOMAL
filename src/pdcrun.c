@@ -19,13 +19,13 @@ PUBLIC int yydebug = 0;		/* To replace YACC's yydebug */
 PUBLIC int show_exec = 0;	/* To replace PDCLIST.C's show_exec */
 
 
-PUBLIC char *sys_interpreter()
+PUBLIC const char *sys_interpreter()
 {
 	return "OpenComalRun";
 }
 
 
-PUBLIC char *lex_sym()
+PUBLIC const char *lex_sym(int sym)
 {
 	return "<Undefined>";
 }

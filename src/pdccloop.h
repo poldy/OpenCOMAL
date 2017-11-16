@@ -10,8 +10,13 @@
 
 /* OpenComal MAIN command loop header file */
 
-extern char *sys_interpreter(void);
+#ifndef PDCCLOOP_H
+#define PDCCLOOP_H
+
+extern const char *sys_interpreter(void);
 extern int process_comal_line(struct comal_line *line);
 extern struct comal_line *crunch_line(char *line);
 extern void comal_loop(int newstate);
 extern void pdc_go(int argc, char **argv);
+
+#endif

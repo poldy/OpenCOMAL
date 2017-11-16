@@ -16,13 +16,24 @@
 #include "pdcstr.h"
 #include "pdcparss.h"
 
+#include <stdarg.h>
+#include <stdbool.h>
+
 PRIVATE int pars_error_happened = 0;
 PRIVATE char pars_errtxt[MAX_LINELEN];
 
-#define ISARRAY(e) ( e && (e->optype==T_ARRAY || e->optype==T_SARRAY) )
-#define ISARRAY2(f) ( f && ISARRAY(f->e.exp) )
+static inline bool
+ISARRAY(struct expression *e)
+{
+	return (e && (e->optype == T_ARRAY || e->optype == T_SARRAY));
+}
+static inline bool
+ISARRAY2(struct expression *f)
+{
+	return (f && ISARRAY(f->e.exp));
+}
 
-PUBLIC void yyerror(char *s)
+PUBLIC void yyerror(const char *s)
 {
 	/* No action here */
 }
@@ -31,7 +42,7 @@ PUBLIC struct id_list *pars_idlist_item(struct id_rec *id,
 					  struct id_list *next)
 {
 	struct id_list *work =
-	    mem_alloc(PARSE_POOL, sizeof(struct id_list));
+	    (struct id_list *)mem_alloc(PARSE_POOL, sizeof(struct id_list));
 
 	work->id = id;
 	work->next = next;
@@ -43,7 +54,7 @@ PUBLIC struct exp_list *pars_explist_item(struct expression *exp,
 					  struct exp_list *next)
 {
 	struct exp_list *work =
-	    mem_alloc(PARSE_POOL, sizeof(struct exp_list));
+	    (struct exp_list *)mem_alloc(PARSE_POOL, sizeof(struct exp_list));
 
 	work->exp = exp;
 	work->next = next;
@@ -57,7 +68,7 @@ PUBLIC struct print_list *pars_printlist_item(int pr_sep,
 					      struct print_list *next)
 {
 	struct print_list *work =
-	    mem_alloc(PARSE_POOL, sizeof(struct print_list));
+	    (struct print_list *)mem_alloc(PARSE_POOL, sizeof(struct print_list));
 
 	work->pr_sep = pr_sep;
 	work->exp = exp;
@@ -72,11 +83,11 @@ PUBLIC struct dim_list *pars_dimlist_item(struct id_rec *id,
 					  struct dim_ension *root)
 {
 	struct dim_list *work =
-	    mem_alloc(PARSE_POOL, sizeof(struct dim_list));
+	    (struct dim_list *)mem_alloc(PARSE_POOL, sizeof(struct dim_list));
 
 	work->id = id;
 	work->strlen = strlen;
-	work->dimensionroot = my_reverse(root);
+	work->dimensionroot = (struct dim_ension *)my_reverse(root);
 
 	return work;
 }
@@ -86,7 +97,7 @@ PUBLIC struct when_list *pars_whenlist_item(int op, struct expression *exp,
 					    struct when_list *next)
 {
 	struct when_list *work =
-	    mem_alloc(PARSE_POOL, sizeof(struct when_list));
+	    (struct when_list *)mem_alloc(PARSE_POOL, sizeof(struct when_list));
 
 	work->op = op;
 	work->exp = exp;
@@ -101,7 +112,7 @@ PUBLIC struct assign_list *pars_assign_item(int op,
 					    struct expression *rval)
 {
 	struct assign_list *work =
-	    mem_alloc(PARSE_POOL, sizeof(struct assign_list));
+	    (struct assign_list *)mem_alloc(PARSE_POOL, sizeof(struct assign_list));
 
 	if (op!=becomesSYM && (ISARRAY(lval) || ISARRAY2(rval)))
 		pars_error("Semi-complex assignment (e.g. :+ and :-) not supported with arrays");
@@ -115,7 +126,7 @@ PUBLIC struct assign_list *pars_assign_item(int op,
 }
 
 
-#define GETEXP(x) struct expression *work=mem_alloc(PARSE_POOL,sizeof(int)+sizeof(enum optype)+(x))
+#define GETEXP(x) struct expression *work=(struct expression *)mem_alloc(PARSE_POOL,sizeof(int)+sizeof(enum optype)+(x))
 
 PUBLIC struct expression *pars_exp_const(int op)
 {
@@ -212,7 +223,7 @@ PUBLIC struct expression *pars_exp_id(int op, struct id_rec *id,
 	work->optype = T_ID;
 	work->op = op;
 	work->e.expid.id = id;
-	work->e.expid.exproot = my_reverse(exproot);
+	work->e.expid.exproot = (struct exp_list *)my_reverse(exproot);
 
 	return work;
 }
@@ -238,13 +249,13 @@ PUBLIC struct expression *pars_exp_sid(struct id_rec *id,
 	work->optype = T_SID;
 	work->op = stringidSYM;
 	work->e.expsid.id = id;
-	work->e.expsid.exproot = my_reverse(exproot);
+	work->e.expsid.exproot = (struct exp_list *)my_reverse(exproot);
 
 	if (!twoexp)
 		work->e.expsid.twoexp = NULL;
 	else {
 		work->e.expsid.twoexp =
-		    mem_alloc(PARSE_POOL, sizeof(struct two_exp));
+		    (struct two_exp *)mem_alloc(PARSE_POOL, sizeof(struct two_exp));
 		*work->e.expsid.twoexp = *twoexp;
 	}
 
@@ -291,13 +302,18 @@ PUBLIC struct expression *pars_exp_str(struct expression *strexp)
 }
 
 
-PUBLIC void pars_error(char *s, ...)
+PUBLIC void pars_error(const char *s, ...)
 {
+	va_list ap;
+
 	if (pars_error_happened)
 		return;
 
+	va_start(ap, s);
+
 	pars_error_happened = lex_pos();
-	vsprintf(pars_errtxt, s, (char *) &s + sizeof(s));
+	vsprintf(pars_errtxt, s, ap);
+	va_end(ap);
 }
 
 

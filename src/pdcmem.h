@@ -10,6 +10,9 @@
 
 /* OpenComal memory management header file */
 
+#ifndef PDCMEM_H
+#define PDCMEM_H
+
 #define NR_FIXED_POOLS		4
 
 #define PARSE_POOL		0
@@ -51,4 +54,5 @@ extern void mem_freepool_private(struct mem_pool *pool);
 extern void mem_shiftmem(unsigned int frompool, struct mem_pool *topool);
 extern void mem_debug(int level);
 extern struct mem_pool *pool_new();
-extern void pool_free(struct mem_pool *pool);
+
+#endif

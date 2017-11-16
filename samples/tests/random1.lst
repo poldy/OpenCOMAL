@@ -1,18 +1,19 @@
        10 // RANDOM sample program
+       13 // This test has a dependency on the machine word size
+       16 // For 32-bit machines, 18 & 9 below must be replaced with 10 & 5
        20 //
        30 TRAP
        40   DELETE "ofile7"
        50 ENDTRAP
        60 //
-       70 OPEN FILE 1, "ofile7", RANDOM 10
+       70 OPEN FILE 1, "ofile7", RANDOM 18
        80 FOR f#:=1 TO 50 DO PRINT FILE 1,f#: 2*f#,2*f#+1
        90 CLOSE FILE 1
       100 //
-      110 OPEN FILE 1, "ofile7", RANDOM 5
+      110 OPEN FILE 1, "ofile7", RANDOM 9
       120 FOR f#:=100 DOWNTO 1 DO
       130   READ FILE 1,f#: g#
       140   PRINT USING "####": g#;
-      150   IF g#<>f#+1 THEN STOP
       160   IF g#<>f#+1 THEN STOP
       170 ENDFOR
       180 CLOSE FILE 1

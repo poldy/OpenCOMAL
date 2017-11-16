@@ -157,7 +157,7 @@ PUBLIC void prog_run()
 		runfilename = NULL;
 	}
 
-	curenv->curenv = ROOTENV;
+	curenv->curenv = ROOTENV();
 
 	prog_total_scan();
 

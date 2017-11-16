@@ -13,6 +13,7 @@
 #ifndef PDCDEF_H
 #define PDCDEF_H
 
+#include "pdcmem.h"
 
 struct my_list {
 	struct my_list *next;
@@ -24,15 +25,26 @@ struct env_list {
 	struct comal_env *env;
 };
 
-#define	STR_ALLOC(p,x)		mem_alloc(p,sizeof(struct string)+x)
-#define	STR_ALLOC_PRIVATE(p,x)	mem_alloc_private(p,sizeof(struct string)+x)
-#define STR_REALLOC(s,l)	mem_realloc(s,sizeof(struct string)+l)
-
 struct string {
 	long len;
 	char s[1];
 };
 
+static inline struct string *
+STR_ALLOC(unsigned int p, long x)
+{
+	return (struct string *)mem_alloc(p, sizeof(struct string) + x);
+}
+static inline struct string *
+STR_ALLOC_PRIVATE(struct mem_pool *p, long x)
+{
+	return (struct string *)mem_alloc_private(p, sizeof(struct string) + x);
+}
+static inline struct string *
+STR_REALLOC(void *s, long l)
+{
+	return (struct string *)mem_realloc(s, sizeof(struct string) + l);
+}
 
 enum SYM_TYPE { S_ERROR, S_VAR, S_NAME, S_PROCVAR, S_FUNCVAR };
 enum VAL_TYPE { V_ERROR, V_INT, V_FLOAT, V_STRING, V_ARRAY };
@@ -69,17 +81,19 @@ struct arr_des {
 	long nritems;
 };
 
+union var_data {
+	long num[1];
+	double fnum[1];
+	struct string *str[1];
+	void *vref;
+};
+
 struct var_item {
 	enum VAL_TYPE type;
 	int ref;
 	struct arr_des *array;
 	long strlen;
-	union var_data {
-		long num[1];
-		double fnum[1];
-		struct string *str[1];
-		void *vref;
-	} data;
+	union var_data data;
 };
 
 
@@ -153,20 +167,22 @@ struct dubbel {
 	char *text;
 };
 
+union exp_data {
+        long num;
+        struct dubbel fnum;
+        struct string *str;
+        struct expression *exp;
+        struct two_exp twoexp;
+        struct exp_id expid;
+        struct exp_sid expsid;
+        struct exp_substr expsubstr;
+        struct exp_list *exproot;
+};
+
 struct expression {
 	enum optype optype;
 	int op;
-	union exp_data {
-		long num;
-		struct dubbel fnum;
-		struct string *str;
-		struct expression *exp;
-		struct two_exp twoexp;
-		struct exp_id expid;
-		struct exp_sid expsid;
-		struct exp_substr expsubstr;
-		struct exp_list *exproot;
-	} e;
+	union exp_data e;
 };
 
 struct two_num {
@@ -324,34 +340,36 @@ struct comal_line_data {
 	struct string *rem;
 };
 
+union line_contents {
+	struct string *str;
+	int inum;
+	struct id_list *idroot;
+	struct id_rec *id;
+	struct two_num twonum;
+	struct two_exp twoexp;
+	struct list_cmd listrec;
+	struct expression *exp;
+	struct exp_list *exproot;
+	struct dim_list *dimroot;
+	struct for_rec forrec;
+	struct ifwhile_rec ifwhilerec;
+	struct import_rec importrec;
+	struct input_rec inputrec;
+	struct open_rec openrec;
+	struct print_rec printrec;
+	struct proc_func_rec pfrec;
+	struct trap_rec traprec;
+	struct read_rec readrec;
+	struct when_list *whenroot;
+	struct write_rec writerec;
+	struct assign_list *assignroot;
+};
+
 struct comal_line {
 	struct comal_line_data *ld;
 	struct comal_line *lineptr;
 	int cmd;
-	union line_contents {
-		struct string *str;
-		int inum;
-		struct id_list *idroot;
-		struct id_rec *id;
-		struct two_num twonum;
-		struct two_exp twoexp;
-		struct list_cmd listrec;
-		struct expression *exp;
-		struct exp_list *exproot;
-		struct dim_list *dimroot;
-		struct for_rec forrec;
-		struct ifwhile_rec ifwhilerec;
-		struct import_rec importrec;
-		struct input_rec inputrec;
-		struct open_rec openrec;
-		struct print_rec printrec;
-		struct proc_func_rec pfrec;
-		struct trap_rec traprec;
-		struct read_rec readrec;
-		struct when_list *whenroot;
-		struct write_rec writerec;
-		struct assign_list *assignroot;
-	} lc;			/* line contents */
+	union line_contents lc;
 };
 
 

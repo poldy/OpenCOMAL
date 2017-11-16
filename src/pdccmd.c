@@ -21,6 +21,7 @@
 #include "pdclist.h"
 #include "pdcsqash.h"
 #include "pdcenv.h"
+#include <string.h>
 
 
 PRIVATE void cmd_list_horse(struct string *filename, long from, long to)
@@ -35,7 +36,7 @@ PRIVATE void cmd_list_horse(struct string *filename, long from, long to)
 
 		if (!listfile)
 			run_error(OPEN_ERR, "File open error %s",
-				  sys_errlist[errno]);
+				  strerror(errno));
 
 		setvbuf(listfile, NULL, _IOFBF, TEXT_BUFSIZE);
 	} else {
@@ -72,8 +73,6 @@ PRIVATE void cmd_list_horse(struct string *filename, long from, long to)
 
 PRIVATE int cmd_list(struct comal_line *line)
 {
-	long from, to;
-	int indent;
 	struct comal_line *curline;
 
 	if (!line->lc.listrec.id)
@@ -81,6 +80,9 @@ PRIVATE int cmd_list(struct comal_line *line)
 			       line->lc.listrec.twonum.num1,
 			       line->lc.listrec.twonum.num2);
 	else {
+		long from, to;
+		int indent;
+
 		curline = curenv->progroot;
 
 		while (curline
@@ -105,7 +107,7 @@ PRIVATE int cmd_list(struct comal_line *line)
 		if (curline)
 			to = curline->ld->lineno;
 		else
-			to = MAXINT;
+			to = INT_MAX;
 
 		cmd_list_horse(line->lc.listrec.str, from, to);
 
@@ -126,7 +128,7 @@ PRIVATE int cmd_enter(struct comal_line *line)
 
 	if (!yyenter)
 		run_error(OPEN_ERR, "File open error: %s",
-			  sys_errlist[errno]);
+			  strerror(errno));
 
 	setvbuf(yyenter, NULL, _IOFBF, TEXT_BUFSIZE);
 	++entering;
@@ -138,7 +140,7 @@ PRIVATE int cmd_enter(struct comal_line *line)
 			if (!feof(yyenter))
 				run_error(CMD_ERR,
 					  "Error when reading ENTER file: %s",
-					  sys_errlist[errno]);
+					  strerror(errno));
 		} else {
 			aline = crunch_line(tline);
 
@@ -240,12 +242,13 @@ PRIVATE int cmd_auto(struct comal_line *line)
 	int direct_cmd = 0;
 	long nr = line->lc.twonum.num1;
 	long step = line->lc.twonum.num2;
-	struct comal_line *work;
-	struct comal_line *aline;
 
 	while (!direct_cmd) {
+		struct comal_line *work;
+		struct comal_line *aline;
+
 		if (nr < 0)
-			return 0;	/* nr<0 after nr+=step past MAXINT */
+			return 0;	/* nr<0 after nr+=step past INT_MAX */
 
 		work = search_line(nr, 1);
 
@@ -294,7 +297,7 @@ PRIVATE int cmd_del(struct comal_line *line)
 	long from = line->lc.twonum.num1;
 	long to = line->lc.twonum.num2;
 
-	if (from == 0 && to == MAXINT)
+	if (from == 0 && to == INT_MAX)
 		run_error(CMD_ERR,
 			  "Please mention a line number range with DEL");
 
@@ -313,11 +316,12 @@ PRIVATE int cmd_edit(struct comal_line *line)
 	long nr = line->lc.twonum.num1;
 	long to = line->lc.twonum.num2;
 	struct comal_line *work;
-	struct comal_line *aline;
 
 	while (result == 0) {
+		struct comal_line *aline;
+
 		if (nr > to || nr < 0)
-			return 0;	/* nr<0 after nr++ at MAXINT */
+			return 0;	/* nr<0 after nr++ at INT_MAX */
 
 		work = search_line(nr, 0);
 
@@ -386,8 +390,10 @@ PRIVATE void cmd_env_list()
 		if (walk->env->progroot) {
 			buf2 = buf;
 			line_list(&buf2, walk->env->progroot);
-		} else
-			strcpy(buf, "       <No program>");
+		} else {
+			strncpy(buf, "       <No program>", MAX_LINELEN - 1);
+			buf[MAX_LINELEN - 1] = '\0';
+		}
 
 		my_printf(MSG_DIALOG, 1, "Environment %s%s:",
 			  walk->env->envname,
@@ -412,7 +418,7 @@ PRIVATE int cmd_env(struct comal_line *line)
 
 PRIVATE struct {
 	int sym;
-	int (*func) ();
+	int (*func) (struct comal_line *line);
 } cmdtab[] = {
 	{
 	listSYM, cmd_list}, {

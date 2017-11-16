@@ -20,6 +20,7 @@
 #include "version.h"
 
 #include <string.h>
+#include <unistd.h>
 
 extern int yydebug;
 
@@ -29,6 +30,27 @@ unsigned _stklen = 32768;
 
 PUBLIC int main(int argc, char *argv[])
 {
+        int c;
+        int errflg = 0;
+
+        while ((c = getopt(argc, argv, "dy")) != -1) {
+                switch (c) {
+                case 'd':
+                        comal_debug++;
+                        break;
+                case 'y':
+                        yydebug++;
+                        break;
+                case '?':
+                        fprintf(stderr, "Unrecognised option: '-%c'\n", optopt);
+                        errflg++;
+                }
+        }
+        if (errflg) {
+                fprintf(stderr, "usage: %s [-dy] ...\n", argv[0]);
+                exit(EXIT_FAILURE);
+        }
+
 	sys_init();
 	copyright = "(c) Copyright 1992-2002  Jos Visser <josv@osp.nl>";
 
@@ -49,9 +71,6 @@ PUBLIC int main(int argc, char *argv[])
 	my_printf(MSG_DIALOG, 1,"(The GPL contains a very nice statement on WARRANTY; you might want to read it)");
 	my_nl(MSG_DIALOG);
 
-	comal_debug = (argc == 2 && strcmp(argv[1], "/d") == 0);
-	yydebug = (argc == 2 && strcmp(argv[1], "/y") == 0);
-
 	mem_init();
 
 	runfilename = NULL;
@@ -60,7 +79,7 @@ PUBLIC int main(int argc, char *argv[])
 	sel_infile = NULL;
 	sel_outfile = NULL;
 
-	pdc_go(argc, argv);
+	pdc_go(argc - optind + 1, &(argv[optind - 1]));
 
 	if (setjmp(RESTART) == 0) {
 		if (sel_infile)

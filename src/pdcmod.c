@@ -16,6 +16,7 @@
 #include "pdcid.h"
 #include "pdcseg.h"
 #include "pdcexec.h"
+#include <assert.h>
 
 
 /*
@@ -148,7 +149,7 @@ PUBLIC int mod_use(struct seg_des *seg, struct id_rec *id, char *errtxt, struct 
                                 
 	if (!defline) {
 		modseg=mod_load(id);
-
+		assert(modseg == NULL);
 		if (!modseg) {
 			sprintf(errtxt,"Module %s can not be found",id->name);
 			return 0;

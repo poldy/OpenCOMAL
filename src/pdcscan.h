@@ -8,8 +8,13 @@
  * License. See doc/LICENSE for more information.
  */
 
+#ifndef PDCSCAN_H
+#define PDCSCAN_H
+
 extern int scan_scan(struct seg_des *seg, char *errtxt,
 		     struct comal_line **errline);
 extern void prog_structure_scan(void);
 extern int scan_nescessary(struct comal_line *line);
 extern int assess_scan(struct comal_line *line);
+
+#endif

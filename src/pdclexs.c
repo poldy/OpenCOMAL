@@ -34,7 +34,7 @@ extern char *yytext;
 PRIVATE struct {
 	int sym;
 	int func;
-	char *txt;
+	const char *txt;
 } lexemetab[] = {
 	{
 	minusSYM, 0, "-"}, {
@@ -302,7 +302,7 @@ PUBLIC int lex_intnum()
 
 PUBLIC int lex_id(int sym)
 {
-	register int i;
+	int i;
 
 	strupr(yytext);
 
@@ -327,7 +327,7 @@ PUBLIC int lex_rem()
 }
 
 
-PUBLIC char *lex_sym(int sym)
+PUBLIC const char *lex_sym(int sym)
 {
 	int i;
 
@@ -338,9 +338,9 @@ PUBLIC char *lex_sym(int sym)
 }
 
 
-PUBLIC char *lex_opsym(int sym)
+PUBLIC const char *lex_opsym(int sym)
 {
-	char *s = lex_sym(sym);
+	const char *s = lex_sym(sym);
 
 	switch (sym) {
 	case andSYM:

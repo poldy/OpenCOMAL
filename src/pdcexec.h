@@ -10,7 +10,10 @@
 
 /* Line execution routines header file */
 
-extern void run_error(int error, char *s, ...);
+#ifndef PDCEXEC_H
+#define PDCEXEC_H
+
+extern void run_error(int error, const char *s, ...);
 extern void exec_call(struct expression *exp, int calltype, void **result,
 		      enum VAL_TYPE *type);
 extern int exec_trap(struct comal_line *line);
@@ -25,3 +28,5 @@ extern void input_file(struct two_exp *twoexp, struct exp_list *lvalroot);
 extern int exec_line(struct comal_line *line);
 extern void exec_seq(struct comal_line *line);
 extern void exec_mod_init(struct comal_line *line);
+
+#endif

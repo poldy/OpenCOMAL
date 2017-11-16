@@ -35,6 +35,10 @@ suffice. If not, some Makefile hacking is in order. I can not really
 help you with this, but if you are getting some strange error messages
 and can not get OpenComal to compile, please contact me!
 
+(Addition by Christian Pietsch <https://github.com/pietsch>:)
+For building this under Debian, your can install requirements like this:
+sudo apt-get install build-essential flex bison libncurses5-dev
+
 -------------------------------
 Building for MsDos and/or Win32
 -------------------------------
@@ -52,3 +56,13 @@ installed:
 
 Then I use Borland make with Makefile.w32 or Makefile.dos to build the
 binaries.
+
+------------------
+Building for macOS
+------------------
+
+(Support for macOS was contributed by poldy <https://github.com/poldy>.)
+
+Install the "readline" package from Homebrew.
+Then run "make OPSYS=macos".
+This was tested on "High Sierra".
