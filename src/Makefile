@@ -28,68 +28,87 @@ OBJ2:=pdcmain.o pdcmisc.o \
 	pdcexp.o pdcmem.o pdcsqash.o pdcstr.o pdcprog.o pdcext.o pdcseg.o \
 	pdcval.o pdcrun.o pdcmod.o
 OS:=pdclinux.o 
-OSLIB:=-lncurses -L/usr/local/opt/readline/lib -lreadline
-STATIC:=
-#PROFILE:=-pg
-PROFILE:=
-OPTIM:=-flto
-ifeq ($(OPSYS),macos)
-OPTIM+=-Oz
+
+# OSLIB
+LDFLAGS+=-lncurses -L/usr/local/opt/readline/lib -lreadline
+
+# STATIC
+#LDFLAGS+=
+
+# PROFILE
+#CFLAGS+=-pg
+#LDFLAGS+=-pg
+
+# OPTIM
+ifdef DEBUG
+	CFLAGS+=-O0
+	ifeq ($(OPSYS),macos)
+		CFLAGS+=-ggdb
+	else
+		CFLAGE+=-ggdb3
+	endif
 else
-OPTIM+=-Os -fomit-frame-pointer
+	CFLAGS+=-flto
+	ifeq ($(OPSYS),macos)
+		CFLAGS+=-Oz
+	else
+		CFLAGS+=-Os -fomit-frame-pointer
+	endif
 endif
 
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
 CC:=gcc
 ifeq ($(CC),c++)
-	CFLAGS+=-Wall -Wextra -Weffc++ -std=c++14 -DOS_LINUX $(PROFILE) $(OPTIM) -I/usr/local/opt/readline/include
+	CFLAGS+=-Wall -Wextra -Weffc++ -std=c++14 -DOS_LINUX -I/usr/local/opt/readline/include
 else
-	CFLAGS+=-Wall -Wextra -std=gnu11 -DOS_LINUX $(PROFILE) $(OPTIM) -D_FORTIFY_SOURCE=2 -I/usr/local/opt/readline/include
+	CFLAGS+=-Wall -Wextra -std=gnu11 -DOS_LINUX -D_FORTIFY_SOURCE=2 -I/usr/local/opt/readline/include
 endif
-LIBS=$(OSLIB)
 ifneq ($(OPSYS),macos)
-LIBS+=-lm
+# LIBS
+LDFLAGS+=-lm
 endif
 
-LDFLAGS+=$(STATIC) $(LIBS) -flto
+ifndef DEBUG
+	LDFLAGS+=-flto
+endif
 
 %.d: %.c
-		set -e; $(CC) -M $(CPPFLAGS) $< \
-			| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
-			[ -s $@ ] || rm -f $@
+	set -e; $(CC) -M $(CPPFLAGS) $< \
+		| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
+		[ -s $@ ] || rm -f $@
 
 .PHONY: all
-all:		build $(TARG1) $(TARG2)
+all: build $(TARG1) $(TARG2)
 
 .depend:	
-		makedepend -f .depend *.c *.y *.l
+	makedepend -f .depend *.c *.y *.l
 
-$(TARG1):	 $(OBJ1) $(OS)
-		$(CC) $(PROFILE) -o $(TARG1) $(OBJ1) $(OS) $(LDFLAGS)
+$(TARG1):  $(OBJ1) $(OS)
+	$(CC) -o $(TARG1) $(OBJ1) $(OS) $(LDFLAGS)
 
-$(TARG2):	 $(OBJ2) $(OS)
-		$(CC) $(PROFILE) -o $(TARG2) $(OBJ2) $(OS) $(LDFLAGS)
+$(TARG2):  $(OBJ2) $(OS)
+	$(CC) -o $(TARG2) $(OBJ2) $(OS) $(LDFLAGS)
 
 .PHONY: build
 build:		
-		../tools/bumpbuild BUILD
-		../tools/genversion
+	../tools/bumpbuild BUILD
+	../tools/genversion
 
-pdcpars.tab.c:	pdcpars.y
-		bison -vd pdcpars.y
+pdcpars.tab.c: pdcpars.y
+	bison -vd pdcpars.y
 
-lex.yy.c:	pdclex.l
-		flex pdclex.l
+lex.yy.c: pdclex.l
+	flex pdclex.l
 
 .PHONY: almostclean
 almostclean:	
-		-rm *.o *.obj *.map *.OBJ *~ *.d
-		-rm lex.yy.c pdcpars.tab.* pdcpars.output
-		-rm pdcpars.c pdclex.c pdcpars.h
+	-rm *.o *.obj *.map *.OBJ *~ *.d
+	-rm lex.yy.c pdcpars.tab.* pdcpars.output
+	-rm pdcpars.c pdclex.c pdcpars.h
 
 .PHONY: clean
-clean:		almostclean
-		-rm $(TARG1) $(TARG2)
-		-rm ../bin/*.exe ../bin/*.EXE
+clean: almostclean
+	-rm $(TARG1) $(TARG2)
+	-rm ../bin/*.exe ../bin/*.EXE
 
 include $(SOURCES:.c=.d)

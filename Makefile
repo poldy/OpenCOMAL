@@ -7,7 +7,7 @@
 # Reading the README is a better way
 
 .PHONY: top
-top:	msg all
+top: msg all
 
 .PHONY: msg
 msg:	
@@ -18,7 +18,7 @@ msg:
 
 .PHONY: all
 all:
-	@cd src; $(MAKE)
+	@cd src; $(MAKE) DEBUG=$(DEBUG) OPSYS=$(OPSYS) CC=$(CC)
 
 .PHONY: install
 install:
@@ -28,7 +28,8 @@ install:
 clean:
 	cd src; $(MAKE) clean
 
-tar:	src
+.PHONY: tar
+tar: src
 	cd src; $(MAKE) almostclean
 	-cd bin; strip opencomal opencomalrun
 	tools/gentar
