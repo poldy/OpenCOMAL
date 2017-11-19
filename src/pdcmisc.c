@@ -64,7 +64,7 @@ PUBLIC void my_printf(int stream, int newline, const char *s, ...)
 	va_list ap;
 
 	va_start(ap, s);
-	vsprintf(buf, s, ap);
+	vsnprintf(buf, MAX_LINELEN, s, ap);
 	va_end(ap);
 	my_put(stream, buf, -1L);
 
@@ -79,7 +79,7 @@ PUBLIC void fatal(const char *s, ...)
 	va_list ap;
 
 	va_start(ap, s);
-	vsprintf(buf, s, ap);
+	vsnprintf(buf, 140, s, ap);
 	va_end(ap);
 	my_printf(MSG_ERROR, 1, "FATAL error: %s", buf);
 

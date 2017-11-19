@@ -8,11 +8,10 @@
        80 //
        90 PRINT "All ok"
       100 //
-      110 PROC aap CLOSED
-      120   IMPORT olifant
-      130   olifant
-      140 ENDPROC
-      150 //
-      160 PROC olifant CLOSED
-      170   PRINT 1/0
+      110 PROC olifant CLOSED
+      120   PRINT 1/0
+      130 ENDPROC
+      140 //
+      150 PROC aap CLOSED
+      170   olifant
       180 ENDPROC

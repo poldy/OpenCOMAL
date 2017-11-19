@@ -64,8 +64,8 @@ else
 	CFLAGS+=-Wall -Wextra -std=gnu11 -DOS_LINUX -D_FORTIFY_SOURCE=2 -I/usr/local/opt/readline/include
 endif
 ifneq ($(OPSYS),macos)
-# LIBS
-LDFLAGS+=-lm
+	# LIBS
+	LDFLAGS+=-lm
 endif
 
 ifndef DEBUG

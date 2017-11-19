@@ -312,7 +312,7 @@ PUBLIC void pars_error(const char *s, ...)
 	va_start(ap, s);
 
 	pars_error_happened = lex_pos();
-	vsprintf(pars_errtxt, s, ap);
+	vsnprintf(pars_errtxt, MAX_LINELEN, s, ap);
 	va_end(ap);
 }
 

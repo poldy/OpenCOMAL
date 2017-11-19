@@ -52,7 +52,7 @@ PUBLIC void run_error(int error, const char *s, ...)
 
 	va_start(ap, s);
 
-	vsprintf(buf2, s, ap);
+	vsnprintf(buf2, MAX_LINELEN, s, ap);
 	va_end(ap);
 
 	curenv->error = curenv->lasterr = error;
@@ -62,12 +62,12 @@ PUBLIC void run_error(int error, const char *s, ...)
 	buf = (char *)mem_alloc(MISC_POOL, MAX_LINELEN);
 
 	if (curenv->running == RUNNING) {
-		sprintf(buf, "Error %d: \"%s\" at line %ld", error, buf2,
+		snprintf(buf, MAX_LINELEN, "Error %d: \"%s\" at line %ld", error, buf2,
 			curenv->curline->ld->lineno);
 		curenv->errline = curenv->curline;
 		curenv->lasterrline = curenv->curline->ld->lineno;
 	} else {
-		sprintf(buf, "Error %d: \"%s\"", error, buf2);
+		snprintf(buf, MAX_LINELEN, "Error %d: \"%s\"", error, buf2);
 		curenv->errline = NULL;
 		curenv->lasterrline = 0;
 	}

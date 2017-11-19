@@ -368,10 +368,11 @@ PRIVATE struct string *my_str(void **result, enum VAL_TYPE *type)
 {
 	char buf[30];
 
-	if (*type == V_INT)
-		sprintf(buf, "%ld", **(long **) result);
-	else
-		sprintf(buf, "%G", **(double **) result);
+	if (*type == V_INT) {
+		snprintf(buf, 30, "%ld", **(long **) result);
+	} else {
+		snprintf(buf, 30, "%G", **(double **) result);
+	}
 
 	*type = V_STRING;
 	cell_free(*result);

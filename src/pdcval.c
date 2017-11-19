@@ -45,11 +45,11 @@ PUBLIC void val_print(int stream, void *result, enum VAL_TYPE type)
 
 	switch (type) {
 	case V_INT:
-		sprintf(buf, "%ld", *(long *) result);
+		snprintf(buf, 64, "%ld", *(long *) result);
 		break;
 
 	case V_FLOAT:
-		sprintf(buf, "%g", *(double *) result);
+		snprintf(buf, 64, "%g", *(double *) result);
 		break;
 
 	case V_STRING:

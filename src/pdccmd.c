@@ -255,8 +255,9 @@ PRIVATE int cmd_auto(struct comal_line *line)
 		if (work) {
 			buf2 = buf;
 			line_list(&buf2, work);
-		} else
-			sprintf(buf, "%9ld  ", nr);
+		} else {
+			snprintf(buf, MAX_LINELEN, "%9ld  ", nr);
+		}
 
 		if (sys_edit(MSG_DIALOG, buf, MAX_LINELEN, 11))
 			return 0;
