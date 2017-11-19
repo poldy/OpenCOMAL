@@ -959,7 +959,7 @@ PUBLIC int exec_trap(struct comal_line *line)
 		return 0;
 	}
 
-	save_err[0] = ERRBUF[0];
+	memcpy(save_err, ERRBUF, sizeof(jmp_buf));
 	seg_marker = curenv->segroot;
 	curenv->nrtraps++;
 
@@ -971,7 +971,7 @@ PUBLIC int exec_trap(struct comal_line *line)
 	}
 
 	curenv->nrtraps--;
-	ERRBUF[0] = save_err[0];
+	memcpy(ERRBUF, save_err, sizeof(jmp_buf));
 
 	if (curenv->error) {
 		curenv->error = 0;
@@ -2386,7 +2386,7 @@ PRIVATE int exec_seq2()
 	jmp_buf save_err;
 	int ret = 0;
 
-	save_err[0] = ERRBUF[0];
+	memcpy(save_err, ERRBUF, sizeof(jmp_buf));
 
 	setjmp(ERRBUF);
 
@@ -2407,7 +2407,7 @@ PRIVATE int exec_seq2()
 		ret = exec_seq3();
 	}
 
-	ERRBUF[0] = save_err[0];
+	memcpy(ERRBUF, save_err, sizeof(jmp_buf));
 
 	return ret;
 }

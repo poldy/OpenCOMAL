@@ -11,6 +11,7 @@
 /* Main file of OpenComal Command loop */
 
 #include <stdbool.h>
+#include <string.h>
 #include "pdcglob.h"
 #include "pdcsym.h"
 #include "pdcmisc.h"
@@ -101,7 +102,7 @@ PUBLIC void comal_loop(int newstate)
 	const char *prompt="$ ";
 
 	curenv->running = newstate;
-	save_err[0] = ERRBUF[0];
+	memcpy(save_err, ERRBUF, sizeof(jmp_buf));
 
 	do {
 		if (curenv->running==HALTED) 
@@ -121,7 +122,7 @@ PUBLIC void comal_loop(int newstate)
 	while (ret == 0);
 
 	curenv->running = RUNNING;
-	ERRBUF[0] = save_err[0];
+	memcpy(ERRBUF, save_err, sizeof(jmp_buf));
 }
 
 

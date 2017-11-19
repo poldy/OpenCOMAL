@@ -36,7 +36,7 @@
       360   //
       370   WHILE f$ IN filename$ DO
       380     filename$:=filename$(1:f$ IN filename$-1)
-      390     IF NOT(filename$ IN "gentest.sq2lst,lst2sq,slpl,trap3") THEN
+      390     IF NOT(filename$ IN "gentest.sq2lst,lst2sq,slpl") THEN
       400       IF a$="A" THEN
       410         PRINT "10 // Force question to proceed with next program"
       420       ENDIF
