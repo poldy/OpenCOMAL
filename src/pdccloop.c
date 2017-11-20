@@ -132,9 +132,8 @@ PUBLIC void pdc_go(int argc, char *argv[])
 
 	restart_err = setjmp(RESTART);
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Interpreter restart code: %d",
-			  restart_err);
+        DBG_PRINTF(1, "Interpreter restart code: %d",
+		  restart_err);
 
 	if (restart_err == PROG_END)
 		clean_runenv(curenv);

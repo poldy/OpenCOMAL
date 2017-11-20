@@ -33,11 +33,16 @@ PUBLIC int main(int argc, char *argv[])
         int c;
         int errflg = 0;
 
+#ifdef NDEBUG
+        while ((c = getopt(argc, argv, "y")) != -1) {
+                switch (c) {
+#else
         while ((c = getopt(argc, argv, "dy")) != -1) {
                 switch (c) {
                 case 'd':
                         comal_debug++;
                         break;
+#endif
                 case 'y':
                         yydebug++;
                         break;
@@ -47,7 +52,11 @@ PUBLIC int main(int argc, char *argv[])
                 }
         }
         if (errflg) {
+#ifdef NDEBUG
+                fprintf(stderr, "usage: %s [-y] ...\n", argv[0]);
+#else
                 fprintf(stderr, "usage: %s [-dy] ...\n", argv[0]);
+#endif
                 exit(EXIT_FAILURE);
         }
 

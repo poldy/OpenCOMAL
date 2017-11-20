@@ -59,8 +59,7 @@ PRIVATE int mod_register(struct comal_line *line, struct seg_des *seg, char *err
 	work->id=line->lc.pfrec.id;
 	work->line=line;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG,1,"Registering MODULE %s",line->lc.pfrec.id->name);
+	DBG_PRINTF(1,"Registering MODULE %s",line->lc.pfrec.id->name);
 
 	/*
 	 * Find all the exports in this MODULE and register them
@@ -77,8 +76,7 @@ PRIVATE int mod_register(struct comal_line *line, struct seg_des *seg, char *err
 					return 0;
 				}
 
-				if (comal_debug)
-					my_printf(MSG_DEBUG,1,"  Exporting %s",fun->lc.pfrec.id->name);
+				DBG_PRINTF(1,"  Exporting %s",fun->lc.pfrec.id->name);
 
 				modfun=GETCORE(RUN_POOL,struct mod_func_entry);
 				modfun->next=mod_func_root;

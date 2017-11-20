@@ -81,8 +81,7 @@ PUBLIC void clean_runenv(struct comal_env *env)
 	struct file_rec *fwalk = curenv->fileroot;
 	struct comal_line *walk;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Cleaning runenv");
+        DBG_PRINTF(1, "Cleaning runenv");
 
 	/*
 	 * Free all the existing static environments of procedures, functions
@@ -111,9 +110,8 @@ PUBLIC void clean_runenv(struct comal_env *env)
 	 * Close all open files
 	 */
 	while (fwalk) {
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1, "Closing comal file %ld",
-				  fwalk->cfno);
+		DBG_PRINTF(1, "Closing comal file %ld",
+			  fwalk->cfno);
 
 		close(fwalk->hfno);
 		fwalk = fwalk->next;

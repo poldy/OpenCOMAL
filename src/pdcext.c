@@ -56,14 +56,15 @@ PUBLIC int ext_call(struct id_rec *id, struct exp_list *exproot, int
 
 PRIVATE int *is_flag(char *cmd)
 {
-	extern int comal_debug;
 	extern int yydebug;
 	extern int show_exec;
 	extern int short_circuit;
+#ifndef NDEBUG
+	extern int comal_debug;
 
 	if (strcmp(cmd, "debug") == 0)
 		return &comal_debug;
-
+#endif
 	if (strcmp(cmd, "yydebug") == 0)
 		return &yydebug;
 

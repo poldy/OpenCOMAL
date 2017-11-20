@@ -16,6 +16,13 @@
 extern void my_nl(int stream);
 extern void my_put(int stream, const char *buf, long len);
 extern void my_printf(int stream, int newline, const char *s, ...);
+
+#ifdef NDEBUG
+#define DBG_PRINTF(...)
+#else
+#define DBG_PRINTF(...) { if (comal_debug) { my_printf(MSG_DEBUG, __VA_ARGS__); } }
+#endif
+
 extern void fatal(const char *s, ...);
 extern void *my_reverse(void *root);
 extern void free_list(struct my_list *root);

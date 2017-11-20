@@ -48,7 +48,7 @@ ifdef DEBUG
 		CFLAGE+=-ggdb3
 	endif
 else
-	CFLAGS+=-flto
+	CFLAGS+=-flto -DNDEBUG
 	ifeq ($(OPSYS),macos)
 		CFLAGS+=-Oz
 	else

@@ -137,8 +137,7 @@ PRIVATE void *exec_lval(struct expression *exp, enum VAL_TYPE *type,
 		lval = &(*var)->data;
 	}
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Exec_LVAL returns %p", lval);
+	DBG_PRINTF(1, "Exec_LVAL returns %p", lval);
 
 	return lval;
 }
@@ -157,13 +156,11 @@ PRIVATE struct comal_line *routine_search_horse(struct id_rec *id,
 						int type,
 						struct comal_line *root)
 {
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Searching routine %s", id->name);
+	DBG_PRINTF(1, "Searching routine %s", id->name);
 
 	while (root) {
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1, "  Examining %s",
-				  root->lc.pfrec.id->name);
+		DBG_PRINTF(1, "  Examining %s",
+			  root->lc.pfrec.id->name);
 
 		if (root->cmd == type && root->lc.pfrec.id == id)
 			return root;
@@ -263,9 +260,8 @@ PRIVATE void parm_array_val(struct sym_env *env, struct id_rec *id,
 	if (type!=V_ARRAY)
 		run_error(PARM_ERR, "Parameter %s should be an array()",id->name);
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "id=%s(%d), type=%d", id->name,
-			  id->type, type);
+	DBG_PRINTF(1, "id=%s(%d), type=%d", id->name,
+		  id->type, type);
 
 	if (lvar->type != id->type)
 		run_error(PARM_ERR,
@@ -1108,10 +1104,9 @@ PRIVATE int exec_for(struct comal_line *line)
 		if (f->mode == downtoSYM)
 			dstep = -dstep;
 
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1,
-				  "FOR from %lf to %lf step %lf",
-				  *(double *) lval, dto, dstep);
+		DBG_PRINTF(1,
+			  "FOR from %lf to %lf step %lf",
+			  *(double *) lval, dto, dstep);
 	} else {
 		val_copy(&lto, eresult, V_INT, etype);
 
@@ -1129,26 +1124,27 @@ PRIVATE int exec_for(struct comal_line *line)
 		if (f->mode == downtoSYM)
 			lstep = -lstep;
 
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1,
-				  "FOR from %ld to %ld step %ld",
-				  *(long *) lval, lto, lstep);
+		DBG_PRINTF(1,
+			  "FOR from %ld to %ld step %ld",
+			  *(long *) lval, lto, lstep);
 	}
 
 	cell_free(eresult);
 
 	while (true) {
-		if (comal_debug) {
-			if (ltype == V_INT)
-				my_printf(MSG_DEBUG, 1,
-					  "FOR loop, lval=%p, %ld", lval,
-					  *(long *) lval);
-			else
-				my_printf(MSG_DEBUG, 1,
-					  "FOR loop, lval=%p, %lf", lval,
-					  *(double *) lval);
-		}
-
+#ifndef NDEBUG
+                if (comal_debug) {
+		        if (ltype == V_INT) {
+			        DBG_PRINTF(1,
+				        "FOR loop, lval=%p, %ld", lval,
+				        *(long *) lval);
+                        } else {
+			        DBG_PRINTF(1,
+				        "FOR loop, lval=%p, %lf", lval,
+				        *(double *) lval);
+		        }
+                }
+#endif
 		if (ltype == V_INT)
 			if (lstep > 0)
 				stopfor = (*(long *) lval > lto);
@@ -1311,10 +1307,9 @@ PRIVATE void exec_close(struct comal_line *line)
 		walk = curenv->fileroot;
 
 		while (walk) {
-			if (comal_debug)
-				my_printf(MSG_DEBUG, 1,
-					  "Closing Comal file %ld",
-					  walk->cfno);
+			DBG_PRINTF(1,
+				  "Closing Comal file %ld",
+				  walk->cfno);
 
 			if (close(walk->hfno) == -1)
 				run_error(CLOSE_ERR,
@@ -1383,11 +1378,10 @@ PRIVATE struct file_rec *pos_file(struct two_exp *r)
 			run_error(POS_ERR,
 				  "Random file record number must be >=1");
 
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1,
-				  "Positioning file %ld (host=%d) to record %ld, offset %ld",
-				  f->cfno, f->hfno, recno,
-				  (recno - 1) * f->reclen);
+		DBG_PRINTF(1,
+			  "Positioning file %ld (host=%d) to record %ld, offset %ld",
+			  f->cfno, f->hfno, recno,
+			  (recno - 1) * f->reclen);
 
 		if (lseek(f->hfno, (recno - 1) * f->reclen, SEEK_SET) ==
 		    -1)
@@ -1412,9 +1406,8 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 	*type = (enum VAL_TYPE)c;
 
 	if (r > 0) {
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1,
-				  "Reading a type %d from file", *type);
+		DBG_PRINTF(1,
+			  "Reading a type %d from file", *type);
 
 		if (*type != id->type)
 			run_error(READ_ERR,
@@ -1441,10 +1434,9 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 		}
 
 		if (r > 0) {
-			if (comal_debug)
-				my_printf(MSG_DEBUG, 1,
-					  "Reading %ld bytes from file %ld (host %d)",
-					  size, f->cfno, f->hfno);
+			DBG_PRINTF(1,
+				  "Reading %ld bytes from file %ld (host %d)",
+				  size, f->cfno, f->hfno);
 
 			if (f->mode == randomSYM) {
 				*totsize += size + 1;	/* 1 extra for type */
@@ -1596,10 +1588,9 @@ PRIVATE void write1(struct file_rec *f, void *data, enum VAL_TYPE type,
 	w = write(f->hfno, &c, 1);
 
 	if (w > 0) {
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1,
-				  "Writing %ld bytes to file %ld (host %d)",
-				  size, f->cfno, f->hfno);
+		DBG_PRINTF(1,
+			  "Writing %ld bytes to file %ld (host %d)",
+			  size, f->cfno, f->hfno);
 
 		if (type == V_STRING) {
 			w = write(f->hfno, &size, sizeof(long));
@@ -1892,9 +1883,8 @@ PRIVATE int input_line(char *s, const char *p)
 				fclose(sel_infile);
 				sel_infile = NULL;
 
-				if (comal_debug)
-					my_printf(MSG_DEBUG, 1,
-						  "Closing SELINPUT file");
+				DBG_PRINTF(1,
+					  "Closing SELINPUT file");
 			} else
 				run_error(SELECT_ERR,
 					  "Read error when reading SELECT INPUT file");
@@ -1964,10 +1954,9 @@ PRIVATE void input_con(struct string *prompt, struct exp_list *lvalroot)
 			}
 		}
 
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1,
-				  "Assessing \"%s\" for input type %d", i,
-				  type);
+		DBG_PRINTF(1,
+			  "Assessing \"%s\" for input type %d", i,
+			  type);
 
 		n = 0;
 		data = field;
@@ -2070,9 +2059,8 @@ PRIVATE void exec_run(struct comal_line *line)
 	runfilename = my_strdup(MISC_POOL, result->s);
 	mem_free(result);
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "About to go RUNning: %s",
-			  runfilename);
+	DBG_PRINTF(1, "About to go RUNning: %s",
+		  runfilename);
 
 	longjmp(RESTART, RUN);
 }
@@ -2397,9 +2385,8 @@ PRIVATE int exec_seq2()
 
 			give_run_err(curenv->errline);
 
-			if (comal_debug)
-				my_printf(MSG_DEBUG, 1,
-					  "Starting secondary COMAL loop");
+			DBG_PRINTF(1,
+				  "Starting secondary COMAL loop");
 
 			comal_loop(HALTED);
 		}
@@ -2426,9 +2413,8 @@ PUBLIC void exec_mod_init(struct comal_line *line)
 	struct sym_env *env;
 	struct sym_env *oldenv=curenv->curenv;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG,1,"Initialising module %s",
-			line->lc.pfrec.id->name);
+	DBG_PRINTF(1,"Initialising module %s",
+		line->lc.pfrec.id->name);
 	env =
 	    sym_newenv(line->lc.pfrec.closed, NULL, NULL, line, line->lc.pfrec.id->name);
 

@@ -689,8 +689,7 @@ PUBLIC void prog_structure_scan()
 	struct comal_line *curline = curenv->progroot;
 	struct scan_entry *p;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Structure scanning...");
+	DBG_PRINTF(1, "Structure scanning...");
 
 	while (curline) {
 		int skip_processing;

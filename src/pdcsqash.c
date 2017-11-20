@@ -818,8 +818,7 @@ PRIVATE struct expression *expand_exp()
 	enum optype o;
 
 	if (c == SQ_EMPTYEXP) {
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1, "Empty exp");
+		DBG_PRINTF(1, "Empty exp");
 
 		return NULL;
 	} else if (c != SQ_EXP)
@@ -903,8 +902,7 @@ PRIVATE struct expression *expand_exp()
 
 	exp->optype = o;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Exp expanded");
+	DBG_PRINTF(1, "Exp expanded");
 
 	return exp;
 }
@@ -1060,8 +1058,7 @@ PRIVATE struct assign_list *expand_assign()
 		work->op = expand_getint();
 		work->exp = expand_exp();
 
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1, "Assign expanded");
+		DBG_PRINTF(1, "Assign expanded");
 	}
 
 	return (struct assign_list *)my_reverse(root);
@@ -1303,12 +1300,12 @@ PRIVATE struct comal_line *expand_horse()
 	default:
 		fatal("cmd switch default action (expand_horse)");
 	}
-
+#ifndef NDEBUG
 	if (comal_debug) {
-		my_printf(MSG_DEBUG, 0, "Line expanded: ");
+		DBG_PRINTF(0, "Line expanded: ");
 		puts_line(MSG_DEBUG, line);
 	}
-
+#endif
 	return line;
 }
 

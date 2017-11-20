@@ -112,9 +112,8 @@ PUBLIC void *exp_lval(struct expression *exp, enum VAL_TYPE *type,
 			if (err)
 				run_error(ARRAY_ERR, err);
 
-			if (comal_debug)
-				my_printf(MSG_DEBUG, 1, "Array index=%ld",
-					  index);
+			DBG_PRINTF(1, "Array index=%ld",
+				  index);
 
 			vdata=(union var_data *)var_data(*varp);
 			lval =
@@ -126,9 +125,8 @@ PUBLIC void *exp_lval(struct expression *exp, enum VAL_TYPE *type,
 	if (err)
 		run_error(ARRAY_ERR, err);
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Exp_lval returns %p for %s", lval,
-			  id->name);
+	DBG_PRINTF(1, "Exp_lval returns %p for %s", lval,
+		  id->name);
 
 	return lval;
 }

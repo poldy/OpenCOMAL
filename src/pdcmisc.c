@@ -17,6 +17,7 @@
 #include "pdcsys.h"
 #include "pdcexec.h"
 #include "pdclist.h"
+#include "pdcmisc.h"
 
 #include <math.h>
 #include <fcntl.h>
@@ -259,8 +260,7 @@ PUBLIC struct comal_line *search_line(long l, int exact)
 {
 	struct comal_line *work = curenv->progroot;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Searching line %ld", l);
+	DBG_PRINTF(1, "Searching line %ld", l);
 
 	while (work && work->ld->lineno < l)
 		work = work->ld->next;
@@ -270,14 +270,15 @@ PUBLIC struct comal_line *search_line(long l, int exact)
 
 	if (exact && work->ld->lineno != l)
 		work = NULL;
-
-	if (comal_debug) {
-		if (work)
-			puts_line(MSG_DEBUG, work);
-		else
-			my_printf(MSG_DEBUG, 1, "Returning NULL");
-	}
-
+#ifndef NDEBUG
+        if (comal_debug) {
+	        if (work) {
+		        puts_line(MSG_DEBUG, work);
+                } else {
+		        DBG_PRINTF(1, "Returning NULL");
+                }
+        }
+#endif
 	return work;
 }
 
@@ -461,8 +462,7 @@ PUBLIC int stat_size(int cmd)
 	i = sizetab[i].size + sizeof(struct comal_line) -
 	    sizeof(union line_contents);
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Stat_size returns %d", i);
+	DBG_PRINTF(1, "Stat_size returns %d", i);
 
 	return i;
 }
@@ -524,18 +524,18 @@ PUBLIC int proclevel(struct comal_line *proc)
 {
 	int i;
 
+#ifndef NDEBUG
 	if (comal_debug) {
-		my_printf(MSG_DEBUG, 0, "ProcLevel of ");
+		DBG_PRINTF(0, "ProcLevel of ");
 		puts_line(MSG_DEBUG, proc);
 	}
-
+#endif
 	if (proc)
 		i = proc->lc.pfrec.level;
 	else
 		i = -1;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "  Returns %d", i);
+	DBG_PRINTF(1, "  Returns %d", i);
 
 	return i;
 }

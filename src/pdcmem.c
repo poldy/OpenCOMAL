@@ -113,20 +113,17 @@ PUBLIC void *cell_alloc(unsigned pool)
 	CELL_HDR *c = cell_hdr[pool];
 	CELL *cell;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 0, "CELL alloc pool %d ", pool);
+	DBG_PRINTF(0, "CELL alloc pool %d ", pool);
 
 	if (c->root != (CELL *) CELL_FULL) {
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1, "handing out cell @ %p",
-				  c->root);
+		DBG_PRINTF(1, "handing out cell @ %p",
+			  c->root);
 
 		cell = c->root;
 		c->root = cell->c.next;
 		cell->c.marker = CELL_MARKER + pool;
 	} else {
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1, " handing out from heap");
+		DBG_PRINTF(1, " handing out from heap");
 
 		cell = (CELL *)mem_alloc(RUN_POOL, CELL_SIZE(pool));
 		cell->c.marker = CELL_IN_MEM;
@@ -147,10 +144,9 @@ PUBLIC void *mem_alloc_private(struct mem_pool *pool, long size)
 {
 	struct mem_block *p;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 0,
-			  "Mem_alloc block in pool %d, size %ld", pool->id,
-			  size);
+	DBG_PRINTF(0,
+		  "Mem_alloc block in pool %d, size %ld", pool->id,
+		  size);
 
 	p = (struct mem_block *)calloc(1, size + sizeof(struct mem_block));
 
@@ -168,8 +164,7 @@ PUBLIC void *mem_alloc_private(struct mem_pool *pool, long size)
 	if (p->next)
 		p->next->prev = p;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, " at %p", p);
+	DBG_PRINTF(1, " at %p", p);
 
 	return ++p;
 }
@@ -209,8 +204,7 @@ PUBLIC void cell_free(void *m)
 
 	--cell;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "CELL free @ %p", cell);
+	DBG_PRINTF(1, "CELL free @ %p", cell);
 
 	if (cell->c.marker == CELL_IN_MEM)
 		mem_free(cell);
@@ -232,9 +226,8 @@ PUBLIC void *mem_free(void *m)
 
 	--memblock;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Memfree block at %p (pool %d)",
-			  memblock, memblock->pool->id);
+	DBG_PRINTF(1, "Memfree block at %p (pool %d)",
+		  memblock, memblock->pool->id);
 
 	if (memblock->marker != MEM_MARKER)
 		fatal("Invalid marker in mem_free()");
@@ -282,13 +275,11 @@ PUBLIC void mem_freepool_private(struct mem_pool *pool)
 	struct mem_block *work = pool->root;
 	struct mem_block *next;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Freepool %d", pool->id);
+	DBG_PRINTF(1, "Freepool %d", pool->id);
 
 	while (work) {
-		if (comal_debug)
-			my_printf(MSG_DEBUG, 1, "  Free block at %p",
-				  work);
+		DBG_PRINTF(1, "  Free block at %p",
+			  work);
 
 		next = work->next;
 
@@ -312,10 +303,9 @@ PUBLIC void mem_shiftmem(unsigned _frompool, struct mem_pool *topool)
 	struct mem_pool *frompool = &mem_pool[_frompool];
 	struct mem_block *work = frompool->root;
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1,
-			  "Shift mem from pool %d to pool %d",
-			  frompool->id, topool->id);
+	DBG_PRINTF(1,
+		  "Shift mem from pool %d to pool %d",
+		  frompool->id, topool->id);
 
 	if (!work)
 		return;
@@ -351,9 +341,8 @@ PUBLIC struct mem_pool *pool_new()
 
 	pool_init(work);
 
-	if (comal_debug)
-		my_printf(MSG_DEBUG, 1, "Allocating new memory pool %d",
-			  work->id);
+	DBG_PRINTF(1, "Allocating new memory pool %d",
+		  work->id);
 
 	return work;
 }
