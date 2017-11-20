@@ -43,8 +43,7 @@ LDFLAGS+=-lncurses -L/usr/local/opt/readline/lib -lreadline
 ifdef DEBUG
 	CFLAGS+=-O0 -ggdb
 else
-	CFLAGS+=-DNDEBUG -Os -flto
-	LDFLAGS+=-flto
+	CFLAGS+=-DNDEBUG -Os
 endif
 
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
@@ -58,6 +57,12 @@ endif
 ifneq ($(OPSYS),macos)
 	# LIBS
 	LDFLAGS+=-lm
+
+	# verbaal_test fails with LTO on macOS.
+	# (Any type of LTO, any optimisation level >= -Og.)
+	# As likely to be a bug in OpenCOMAL as clang, but I couldn't find it.
+	CFLAGS+=-flto
+	LDFLAGS+=-flto
 endif
 
 %.d: %.c
