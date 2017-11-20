@@ -41,35 +41,23 @@ LDFLAGS+=-lncurses -L/usr/local/opt/readline/lib -lreadline
 
 # OPTIM
 ifdef DEBUG
-	CFLAGS+=-O0
-	ifeq ($(OPSYS),macos)
-		CFLAGS+=-ggdb
-	else
-		CFLAGE+=-ggdb3
-	endif
+	CFLAGS+=-O0 -ggdb
 else
-	CFLAGS+=-flto -DNDEBUG
-	ifeq ($(OPSYS),macos)
-		CFLAGS+=-Oz
-	else
-		CFLAGS+=-Os -fomit-frame-pointer
-	endif
+	CFLAGS+=-DNDEBUG -Os -flto
+	LDFLAGS+=-flto
 endif
 
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
 CC:=gcc
+CFLAGS+=-Wall -Wextra -DOS_LINUX -D_FORTIFY_SOURCE=2 -I/usr/local/opt/readline/include
 ifeq ($(CC),c++)
-	CFLAGS+=-Wall -Wextra -Weffc++ -std=c++14 -DOS_LINUX -I/usr/local/opt/readline/include
+	CFLAGS+=-Weffc++ -std=c++14
 else
-	CFLAGS+=-Wall -Wextra -std=gnu11 -DOS_LINUX -D_FORTIFY_SOURCE=2 -I/usr/local/opt/readline/include
+	CFLAGS+=-std=gnu11
 endif
 ifneq ($(OPSYS),macos)
 	# LIBS
 	LDFLAGS+=-lm
-endif
-
-ifndef DEBUG
-	LDFLAGS+=-flto
 endif
 
 %.d: %.c
