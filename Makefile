@@ -16,6 +16,7 @@ msg:
 	@echo whenever they see a Makefile somewhere....
 	@echo
 
+CC:=gcc
 .PHONY: all
 all:
 	@cd src; $(MAKE) DEBUG=$(DEBUG) OPSYS=$(OPSYS) CC=$(CC)
