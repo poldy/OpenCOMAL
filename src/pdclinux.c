@@ -14,6 +14,7 @@
 #include "pdcmisc.h"
 #include "pdcext.h"
 #include "pdcexec.h"
+#include "pdcsys.h"
 
 #include <signal.h>
 #include <string.h>

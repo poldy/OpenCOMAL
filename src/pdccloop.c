@@ -21,6 +21,7 @@
 #include "pdcexec.h"
 #include "pdclexs.h"
 #include "pdcenv.h"
+#include "pdccloop.h"
 
 
 PUBLIC const char *sys_interpreter()

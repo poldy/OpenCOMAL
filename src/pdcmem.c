@@ -13,6 +13,7 @@
 #include "pdcglob.h"
 #include "pdcexec.h"
 #include "pdcmisc.h"
+#include "pdcmem.h"
 
 #define MEM_MARKER 	(0x2468)
 #define CELL_MARKER	0xab00

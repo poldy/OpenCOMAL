@@ -21,6 +21,7 @@
 #include "pdclist.h"
 #include "pdcsqash.h"
 #include "pdcenv.h"
+#include "pdccmd.h"
 #include <string.h>
 
 

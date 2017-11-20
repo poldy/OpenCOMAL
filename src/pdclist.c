@@ -14,6 +14,7 @@
 #include "pdclexs.h"
 #include "pdcparss.h"
 #include "pdcmisc.h"
+#include "pdclist.h"
 #include <string.h>
 
 PUBLIC int show_exec = 0;

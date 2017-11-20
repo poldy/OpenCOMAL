@@ -16,6 +16,7 @@
 #include "pdcmisc.h"
 #include "pdcseg.h"
 #include "pdcsym.h"
+#include "pdcfree.h"
 
 
 PRIVATE void free_exp(struct expression *exp);

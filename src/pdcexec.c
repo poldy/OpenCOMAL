@@ -773,7 +773,7 @@ PRIVATE void do_str_assign(struct string **lval, struct two_exp *twoexp,
 
 PRIVATE void do_str_array_assign(struct var_item *lvar, void *rval, enum VAL_TYPE rtype, int must_free_mem)
 {
-	struct string *str;
+	struct string *str = NULL;
 	struct var_item *var;
 	struct string **from, **to;
 	long nr;
@@ -946,7 +946,7 @@ PRIVATE int exec_repeat(struct comal_line *line)
 PUBLIC int exec_trap(struct comal_line *line)
 {
 	jmp_buf save_err;
-	int retcode = 0;
+	static int retcode = 0;
 	struct seg_des *seg_marker;
 
 	if (line->lc.traprec.esc) {
@@ -2372,7 +2372,7 @@ PRIVATE int exec_seq3()
 PRIVATE int exec_seq2()
 {
 	jmp_buf save_err;
-	int ret = 0;
+	static int ret = 0;
 
 	memcpy(save_err, ERRBUF, sizeof(jmp_buf));
 

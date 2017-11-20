@@ -12,6 +12,7 @@
 
 #include "pdcglob.h"
 #include "pdcmisc.h"
+#include "pdcid.h"
 #include <string.h>
 
 PRIVATE struct id_rec *id_root = NULL;

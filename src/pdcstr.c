@@ -12,6 +12,7 @@
 
 #include <string.h>
 #include "pdcglob.h"
+#include "pdcstr.h"
 
 
 PUBLIC char *my_strdup(int pool, const char *s)

@@ -14,6 +14,7 @@
 #include "pdcstr.h"
 #include "pdcprog.h"
 #include "pdcmisc.h"
+#include "pdcrun.h"
 
 PUBLIC int yydebug = 0;		/* To replace YACC's yydebug */
 PUBLIC int show_exec = 0;	/* To replace PDCLIST.C's show_exec */

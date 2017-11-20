@@ -16,6 +16,7 @@
 #include "pdcmisc.h"
 #include "pdclist.h"
 #include "pdcval.h"
+#include "pdcsym.h"
 
 #include <string.h>
 #include <stdbool.h>
@@ -396,8 +397,8 @@ PRIVATE void sym_list_horse(struct sym_env *env)
 	char line[256];
 	char *buf=line;
 	struct sym_item *walk;
-	const char *s;
-	void (*fun)(struct sym_item *);
+	const char *s = NULL;
+	void (*fun)(struct sym_item *) = NULL;
 	
 	my_printf(MSG_DIALOG,0,"Symbol environment: ");
 	

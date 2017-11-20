@@ -17,6 +17,7 @@
 #include "pdcexec.h"
 #include "pdcexp.h"
 #include "pdcprog.h"
+#include "pdcseg.h"
 
 
 PUBLIC void seg_total_scan(struct seg_des *seg)

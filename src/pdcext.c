@@ -17,6 +17,7 @@
 #include "pdcexp.h"
 #include "pdcval.h"
 #include "pdcsym.h"
+#include "pdcext.h"
 #include "version.h"
 #include <string.h>
 
@@ -340,14 +341,14 @@ PUBLIC int ext_get(int stream, char *line, int maxlen, const char *prompt)
 }
 
 
-PUBLIC void ext_nl()
+PUBLIC void ext_nl(void)
 {
 	if (sys_outfile)
 		fputc('\n', sys_outfile);
 }
 
 
-PUBLIC void ext_page()
+PUBLIC void ext_page(void)
 {
 }
 

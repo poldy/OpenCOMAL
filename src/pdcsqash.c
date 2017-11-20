@@ -918,7 +918,7 @@ PRIVATE void expand_ifwhile(struct comal_line *line)
 PRIVATE void expand_dim(struct comal_line *line)
 {
 	struct dim_list *root = NULL;
-	struct dim_list *work;
+	struct dim_list *work = NULL;
 	struct dim_ension *droot;
 	struct dim_ension *dwork;
 
@@ -1312,7 +1312,7 @@ PRIVATE struct comal_line *expand_horse()
 
 PUBLIC struct comal_line *expand_fromfile(char *fname)
 {
-	struct comal_line *root;
+	struct comal_line *root = NULL;
 	struct comal_line *line;
 	struct comal_line *last = NULL;
 	char *checkstr;
