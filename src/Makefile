@@ -57,12 +57,6 @@ endif
 ifneq ($(OPSYS),macos)
 	# LIBS
 	LDFLAGS+=-lm
-
-	# verbaal_test fails with LTO on macOS.
-	# (Any type of LTO, any optimisation level >= -Og.)
-	# As likely to be a bug in OpenCOMAL as clang, but I couldn't find it.
-	CFLAGS+=-flto
-	LDFLAGS+=-flto
 endif
 
 %.d: %.c

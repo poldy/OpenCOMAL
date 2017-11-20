@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-VERSION=$(<VERSION)
-BUILD=$(<BUILD)
+VERSION=$(cat VERSION)
+BUILD=$(cat BUILD)
 echo "#define OPENCOMAL_VERSION \"$VERSION\"" >version.h
 echo "#define OPENCOMAL_BUILD \"$BUILD\"" >>version.h

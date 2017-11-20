@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-VERSION=$(<src/VERSION)
+VERSION=$(cat src/VERSION)
 cd ..
 mv opencomal opencomal-$VERSION
 tar czvf opencomal-$VERSION.tar.gz --exclude=CVS opencomal-$VERSION

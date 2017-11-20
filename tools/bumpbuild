@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 
-if test $# -ne 1; then
-	echo Arfle Barfle Gloop?
-	exit 1
+if [ $# -ne 1 ]; then
+	echo "Arfle Barfle Gloop?"
+	exit 1;
 fi
 
-N=$(<$1)
-let N=N+1
-echo $N >$1
-echo Build number is $N
+N=$(cat $1)
+N=$(expr $N + 1)
+echo "$N" >$1
+echo "Build number is $N"
