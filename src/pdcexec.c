@@ -946,8 +946,10 @@ PRIVATE int exec_repeat(struct comal_line *line)
 PUBLIC int exec_trap(struct comal_line *line)
 {
 	jmp_buf save_err;
-	static int retcode = 0;
+	static int retcode;
 	struct seg_des *seg_marker;
+
+	retcode = 0;
 
 	if (line->lc.traprec.esc) {
 		curenv->escallowed = (line->lc.traprec.esc == plusSYM);
@@ -2372,7 +2374,9 @@ PRIVATE int exec_seq3()
 PRIVATE int exec_seq2()
 {
 	jmp_buf save_err;
-	static int ret = 0;
+	static int ret;
+
+	ret = 0;
 
 	memcpy(save_err, ERRBUF, sizeof(jmp_buf));
 
