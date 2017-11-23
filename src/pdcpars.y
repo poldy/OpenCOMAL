@@ -23,6 +23,7 @@
 #include "pdcprog.h"
 
 #include <string.h>
+#include <limits.h>
 
 #define yyunion(x,y)	( (*(x)) = (*(y)) )
 
