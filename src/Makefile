@@ -43,7 +43,8 @@ LDFLAGS+=-lncurses -L/usr/local/opt/readline/lib -lreadline
 ifdef DEBUG
 	CFLAGS+=-O0 -ggdb
 else
-	CFLAGS+=-DNDEBUG -Os
+	CFLAGS+=-DNDEBUG -Os -flto
+	LDFLAGS+=-flto
 endif
 
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
