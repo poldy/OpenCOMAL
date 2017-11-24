@@ -58,6 +58,10 @@ endif
 ifneq ($(OPSYS),macos)
 	# LIBS
 	LDFLAGS+=-lm
+
+	include /usr/share/hardening-includes/hardening.make
+	CFLAGS += $(HARDENING_CFLAGS)
+	LDFLAGS += $(HARDENING_LDFLAGS)
 endif
 
 %.d: %.c
