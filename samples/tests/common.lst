@@ -14,7 +14,7 @@
       140     PRINT keyword$;" ";
       150     // IF curcol>70 THEN PRINT 
       160   ENDIF
-      170 ENDPROC passfail
+      170 ENDPROC
       180 //
       190 PROC failures  // print all keywords that failed
       200   PRINT 
@@ -23,17 +23,17 @@
       230     IF resultarray(x)=FALSE THEN
       240       IF perfect THEN PRINT "=========="
       250       perfect:=FALSE
-      260       PRINT keyarray$(x);"failed"
+      260       PRINT keyarray$(x);" failed"
       270     ENDIF
-      280   ENDFOR x
+      280   ENDFOR
       290   IF perfect THEN PRINT "--- no failures ---"
-      300 ENDPROC failures
+      300 ENDPROC
       310 //
       320 passfail("//", test'comment)
       330 FUNC test'comment CLOSED
       340   // this is a comment
       350   RETURN TRUE  // conments are allowed
-      360 ENDFUNC test'comment
+      360 ENDFUNC
       370 //
       380 passfail("abs", test'abs)
       390 FUNC test'abs CLOSED
@@ -42,7 +42,7 @@
       420   IF ABS(0)<>0 THEN RETURN FALSE
       430   IF ABS(-3.9)<>3.9 THEN RETURN FALSE
       440   RETURN TRUE
-      450 ENDFUNC test'abs
+      450 ENDFUNC
       460 //
       470 passfail("and", test'and)
       480 FUNC test'and CLOSED
@@ -51,7 +51,7 @@
       510   IF (FALSE AND TRUE)<>FALSE THEN RETURN FALSE
       520   IF (FALSE AND FALSE)<>FALSE THEN RETURN FALSE
       530   RETURN TRUE
-      540 ENDFUNC test'and
+      540 ENDFUNC
       550 //
       560 // passfail("at",test'at)
       570 // FUNC test'at CLOSED
@@ -73,7 +73,7 @@
       730   IF ABS(ATN(1)-PI/4)>0.000001 THEN RETURN FALSE
       740   IF ABS(ATN(TAN(0.5))-0.5)>0.000001 THEN RETURN FALSE
       750   RETURN TRUE
-      760 ENDFUNC test'atn
+      760 ENDFUNC
       770 //
       780 // passfail("bitand", test'bitand)
       790 // FUNC test'bitand CLOSED
@@ -134,16 +134,16 @@
      1340     OTHERWISE
      1350       IF x<3 THEN RETURN FALSE
      1360     ENDCASE
-     1370   ENDFOR x
+     1370   ENDFOR
      1380   RETURN TRUE
-     1390 ENDFUNC test'case
+     1390 ENDFUNC
      1400 //
      1410 passfail("chr", test'chr)
      1420 FUNC test'chr CLOSED
      1430   IF CHR$(53)<>"5" THEN RETURN FALSE
      1440   IF ORD(CHR$(65))<>65 THEN RETURN FALSE
      1450   RETURN TRUE
-     1460 ENDFUNC test'chr
+     1460 ENDFUNC
      1470 //
      1480 passfail("closed", test'closed)
      1490 FUNC test'closed CLOSED
@@ -153,16 +153,16 @@
      1530   //
      1540   PROC closed'proc CLOSED
      1550     temp:=FALSE
-     1560   ENDPROC closed'proc
+     1560   ENDPROC
      1570   //
-     1580 ENDFUNC test'closed
+     1580 ENDFUNC
      1590 //
      1600 passfail("cos", test'cos)
      1610 FUNC test'cos CLOSED
      1620   IF ABS(COS(0)-1)>0.000001 THEN RETURN FALSE
      1630   IF ABS(COS(PI/3)-0.5)>0.000001 THEN RETURN FALSE
      1640   RETURN TRUE
-     1650 ENDFUNC test'cos
+     1650 ENDFUNC
      1660 //
      1670 // passfail("curcol", test'curcol)
      1680 // FUNC test'curcol CLOSED
@@ -205,7 +205,7 @@
      2050   IF x<>13 THEN RETURN FALSE
      2060   RETURN TRUE
      2070   DATA "passed", 13
-     2080 ENDFUNC test'data
+     2080 ENDFUNC
      2090 //
      2100 passfail("dim", test'dim)
      2110 FUNC test'dim CLOSED
@@ -217,7 +217,7 @@
      2170   IF x(1)<>TRUE THEN RETURN FALSE
      2180   IF z(-1)<>5 THEN RETURN FALSE
      2190   RETURN TRUE
-     2200 ENDFUNC test'dim
+     2200 ENDFUNC
      2210 //
      2220 passfail("div", test'div)
      2230 FUNC test'div CLOSED
@@ -226,7 +226,7 @@
      2260   IF (-7) DIV 3<>(-3) THEN RETURN FALSE
      2270   IF 7 DIV (-3)<>(-3) THEN RETURN FALSE
      2280   RETURN TRUE
-     2290 ENDFUNC test'div
+     2290 ENDFUNC
      2300 //
      2310 passfail("elif", test'elif)
      2320 FUNC test'elif CLOSED
@@ -238,7 +238,7 @@
      2380     RETURN FALSE
      2390   ENDIF
      2400   RETURN TRUE
-     2410 ENDFUNC test'elif
+     2410 ENDFUNC
      2420 //
      2430 passfail("else", test'else)
      2440 FUNC test'else CLOSED
@@ -247,7 +247,7 @@
      2470   ELSE
      2480     RETURN TRUE
      2490   ENDIF
-     2500 ENDFUNC test'else
+     2500 ENDFUNC
      2510 //
      2520 passfail("endcase", test'endcase)
      2530 FUNC test'endcase CLOSED
@@ -258,16 +258,16 @@
      2580     RETURN FALSE
      2590   ENDCASE
      2600   RETURN TRUE
-     2610 ENDFUNC test'endcase
+     2610 ENDFUNC
      2620 //
      2630 passfail("endfor", test'endfor)
      2640 FUNC test'endfor CLOSED
      2650   FOR x#:=1 TO 2 DO
      2660     y#:=x#
-     2670   ENDFOR x#
+     2670   ENDFOR
      2680   IF y#<>2 THEN RETURN FALSE
      2690   RETURN TRUE
-     2700 ENDFUNC test'endfor
+     2700 ENDFUNC
      2710 //
      2720 passfail("endfunc", test'endfunc)
      2730 FUNC test'endfunc CLOSED
@@ -276,8 +276,242 @@
      2760   //
      2770   FUNC int'func# CLOSED
      2780     RETURN 5
-     2790   ENDFUNC int'func#
+     2790   ENDFUNC
      2800   //
-     2810 ENDFUNC test'endfunc
+     2810 ENDFUNC
      2820 //
-     2830 failures
+     2830 passfail("endif", test'endif)
+     2840 FUNC test'endif CLOSED
+     2850   IF FALSE THEN
+     2860     RETURN FALSE
+     2870   ENDIF
+     2880   RETURN TRUE
+     2890 ENDFUNC
+     2900 //
+     2910 passfail("endloop", test'endloop)
+     2920 FUNC test'endloop CLOSED
+     2930   LOOP
+     2940     EXIT
+     2950     RETURN FALSE
+     2960   ENDLOOP
+     2970   RETURN TRUE
+     2980 ENDFUNC
+     2990 //
+     3000 passfail("endproc", test'endproc)
+     3010 FUNC test'endproc CLOSED
+     3020   x:=FALSE
+     3030   setvar(x)
+     3040   RETURN x
+     3050   //
+     3060   PROC setvar(REF var) CLOSED
+     3070     var:=TRUE
+     3080   ENDPROC
+     3090   //
+     3100 ENDFUNC
+     3110 //
+     3120 passfail("endtrap", test'endtrap)
+     3130 FUNC test'endtrap CLOSED
+     3140   TRAP
+     3150     div0:=5/0
+     3160     RETURN FALSE
+     3170   HANDLER
+     3180     NULL
+     3190   ENDTRAP
+     3200   RETURN TRUE
+     3210 ENDFUNC
+     3220 //
+     3230 passfail("endwhile", test'endwhile)
+     3240 FUNC test'endwhile CLOSED
+     3250   WHILE FALSE DO
+     3260     RETURN FALSE
+     3270   ENDWHILE
+     3280   RETURN TRUE
+     3290 ENDFUNC
+     3300 //
+     3310 passfail("eod", test'eod)
+     3320 FUNC test'eod CLOSED
+     3330   IF EOD THEN RETURN FALSE
+     3340   WHILE NOT(EOD) DO READ x
+     3350   IF NOT(EOD) THEN RETURN FALSE
+     3360   RETURN TRUE
+     3370   DATA 13, 14
+     3380 ENDFUNC
+     3390 //
+     3400 // passfail("err", test'err)
+     3410 // FUNC test'err CLOSED
+     3420 //   TRAP
+     3430 //     REPORT 13
+     3440 //   HANDLER
+     3450 //     IF ERR<>13 THEN RETURN FALSE
+     3460 //   ENDTRAP
+     3470 //   RETURN TRUE
+     3480 // ENDFUNC test'err
+     3490 //
+     3500 passfail("errtext", test'errtext)
+     3510 FUNC test'errtext CLOSED
+     3520   TRAP
+     3530     IF LEN(ERRTEXT$)<>0 THEN RETURN FALSE
+     3540     div0:=5/0  //division by 0 error
+     3550   HANDLER
+     3560     IF LEN(ERRTEXT$)>0 THEN RETURN TRUE
+     3570   ENDTRAP
+     3580   RETURN FALSE
+     3590 ENDFUNC
+     3600 //
+     3610 // passfail("esc", test'esc)
+     3620 // FUNC test'esc CLOSED
+     3630 //   TRAP ESC-
+     3640 //   TRAP ESC+
+     3650 //   IF ESC THEN NULL
+     3660 //   IF ESC THEN RETURN FALSE
+     3670 //   RETURN TRUE
+     3680 // ENDFUNC test'esc
+     3690 //
+     3700 passfail("exec", test'exec)
+     3710 FUNC test'exec CLOSED
+     3720   x:=FALSE
+     3730   setx(x)
+     3740   RETURN x
+     3750   //
+     3760   PROC setx(REF y)
+     3770     y:=TRUE
+     3780   ENDPROC
+     3790   //
+     3800 ENDFUNC
+     3810 //
+     3820 passfail("exit", test'exit)
+     3830 FUNC test'exit CLOSED
+     3840   LOOP
+     3850     EXIT
+     3860     RETURN FALSE
+     3870   ENDLOOP
+     3880   RETURN TRUE
+     3890 ENDFUNC
+     3900 //
+     3910 passfail("exp", test'exp)
+     3920 FUNC test'exp CLOSED
+     3930   IF EXP(0)<>1 THEN RETURN FALSE
+     3940   IF ABS(EXP(1)-2.71828)>0.00001 THEN RETURN FALSE
+     3950   IF ABS(EXP(LOG(10))-10)>0.000001 THEN RETURN FALSE
+     3960   RETURN TRUE
+     3970 ENDFUNC
+     3980 //
+     3990 passfail("external", test'external)
+     4000 FUNC test'external EXTERNAL "external.cml"
+     4010 //
+     4020 passfail("false", test'false)
+     4030 FUNC test'false CLOSED
+     4040   IF FALSE<>0 THEN RETURN FALSE
+     4050   RETURN TRUE
+     4060 ENDFUNC
+     4070 //
+     4080 passfail("for", test'for)
+     4090 FUNC test'for CLOSED
+     4100   FOR w:=5 TO 5 DO
+     4110     IF w<>5 THEN RETURN FALSE
+     4120   ENDFOR
+     4130   FOR z:=1 TO 0 DO
+     4140     RETURN FALSE
+     4150   ENDFOR
+     4160   FOR x:=10 TO 7 STEP -2 DO
+     4170     t:=x
+     4180   ENDFOR
+     4190   IF t<>8 THEN RETURN FALSE
+     4200   FOR y#:=1 TO 1 DO
+     4210     RETURN TRUE
+     4220   ENDFOR
+     4230   RETURN FALSE
+     4240 ENDFUNC
+     4250 //
+     4260 passfail("func", test'func)
+     4270 FUNC test'func CLOSED
+     4280   IF hope$<>"hope" THEN RETURN FALSE
+     4290   RETURN TRUE
+     4300   //
+     4310   FUNC hope$ CLOSED
+     4320     RETURN "hope"
+     4330   ENDFUNC
+     4340   //
+     4350 ENDFUNC
+     4360 //
+     4370 // passfail("goto", test'goto)
+     4380 // FUNC test'goto CLOSED
+     4390 //   GOTO this'line'is'making'me'ill
+     4400 //   RETURN FALSE
+     4410 // this'line'is'making'me'ill:
+     4420 //   RETURN TRUE
+     4430 // ENDFUNC test'goto
+     4440 //
+     4450 passfail("handler", test'handler)
+     4460 FUNC test'handler CLOSED
+     4470   TRAP
+     4480     div0:=5/0
+     4490     RETURN FALSE
+     4500   HANDLER
+     4510     RETURN TRUE
+     4520   ENDTRAP
+     4530   RETURN FALSE
+     4540 ENDFUNC
+     4550 //
+     4560 passfail("if", test'if)
+     4570 FUNC test'if CLOSED
+     4580   t:=FALSE
+     4590   IF TRUE THEN
+     4600     t:=TRUE
+     4610   ENDIF
+     4620   IF t THEN RETURN TRUE
+     4630   RETURN FALSE
+     4640 ENDFUNC
+     4650 //
+     4660 passfail("import", test'import)
+     4670 FUNC test'import CLOSED
+     4680   t:=FALSE
+     4690   p
+     4700   RETURN t
+     4710   //
+     4720   PROC p CLOSED
+     4730     IMPORT t
+     4740     t:=TRUE
+     4750   ENDPROC
+     4760   //
+     4770 ENDFUNC
+     4780 //
+     4790 passfail("in", test'in)
+     4800 FUNC test'in CLOSED
+     4810   DIM s$ OF 3
+     4820   s$:="abc"
+     4830   IF ("b" IN s$)<>2 THEN RETURN FALSE
+     4840   IF ("d" IN s$) THEN RETURN FALSE
+     4850   IF ("" IN s$) THEN RETURN FALSE
+     4860   RETURN TRUE
+     4870 ENDFUNC
+     4880 //
+     4890 passfail("int", test'int)
+     4900 FUNC test'int CLOSED
+     4910   IF INT(3)<>3 THEN RETURN FALSE
+     4920   IF INT(3.8)<>3 THEN RETURN FALSE
+     4930   IF INT(-3)<>-3 THEN RETURN FALSE
+     4940   IF INT(-3.3)<>-4 THEN RETURN FALSE
+     4950   RETURN TRUE
+     4960 ENDFUNC
+     4970 //
+     4980 // passfail("key", test'key)
+     4990 // FUNC test'key CLOSED
+     5000 //   WHILE KEY$>CHR$(0) DO NULL
+     5010 //   IF KEY$>"" THEN RETURN FALSE
+     5020 //   IF LEN(KEY$)>0 THEN RETURN FALSE
+     5030 //   RETURN TRUE
+     5040 // ENDFUNC test'key
+     5050 //
+     5060 passfail("label", test'label)
+     5070 FUNC test'label CLOSED
+     5080   RESTORE right'here
+     5090   READ x
+     5100   IF x<>5 THEN RETURN FALSE
+     5110   RETURN TRUE
+     5120   DATA 4
+     5130   right'here:
+     5140   DATA 5
+     5150 ENDFUNC
+     5160 //
+     5170 failures
