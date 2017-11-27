@@ -21,6 +21,7 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <locale.h>
 
 extern int yydebug;
 
@@ -32,6 +33,8 @@ PUBLIC int main(int argc, char *argv[])
 {
         int c;
         int errflg = 0;
+
+        setlocale(LC_ALL, "");
 
 #ifdef NDEBUG
         while ((c = getopt(argc, argv, "y")) != -1) {

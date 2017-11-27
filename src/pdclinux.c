@@ -24,6 +24,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <term.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -31,7 +32,6 @@
 #define HALFDELAY 2
 
 PRIVATE int escape = 0;
-PRIVATE WINDOW *win;
 
 PRIVATE int width, height;
 PRIVATE int paged = 0, pagern;
@@ -73,7 +73,7 @@ PRIVATE int my_getch_horse()
 		c = getch();
 
 		if (c == KEY_RESIZE) {
-			getmaxyx(win, height, width);
+			getmaxyx(stdscr, height, width);
 			continue;
 		} else if (escape)
 			return ERR;
@@ -174,13 +174,13 @@ PRIVATE int startup()
 
 PRIVATE void screen_init()
 {
-	win = initscr();
-	scrollok(win, TRUE);
+	initscr();
+	scrollok(stdscr, TRUE);
 	noecho();
-	keypad(win, TRUE);
+	keypad(stdscr, TRUE);
 	halfdelay(HALFDELAY);
 	refresh();
-	getmaxyx(win, height, width);
+	getmaxyx(stdscr, height, width);
 
 	/*
 	 * Readline initialization
@@ -219,12 +219,16 @@ PUBLIC int sys_system(char *cmd)
 {
 	int rc;
 
-	screen_tini();
+        reset_shell_mode();
+        putp(exit_ca_mode);
+	fflush(stdout);
 	rc = system(cmd);
 	fputs("\nPress return to continue...", stdout);
-	fflush(stdout);
 	while (getchar() != '\n');
-	screen_init();
+        putp(enter_ca_mode);
+        fflush(stdout);
+        reset_prog_mode();
+        refresh();
 
 	return rc;
 }
@@ -269,21 +273,21 @@ PRIVATE void do_put(int stream, const char *buf, long len)
 
 PUBLIC void sys_put(int stream, const char *buf, long len)
 {
-	int lines;
+	int buf_lines;
 
 	if (len < 0)
 		len = strlen(buf);
 
-	lines = len / width;
+	buf_lines = len / width;
 
 	if ((len % width) > 0)
-		lines++;
+		buf_lines++;
 
 	ext_put(stream, buf, len);
 	do_put(stream, buf, len);
 
 	if (paged) {
-		pagern -= lines;
+		pagern -= buf_lines;
 
 		if (pagern <= 0) {
 
@@ -365,7 +369,7 @@ PRIVATE int do_get(int stream, char *line, int maxlen, const char *prompt,
 	rl_num_chars_to_read=maxlen-1;
 	edit_line=line;
 	addstr(prompt);
-	getyx(win,gety,getx);
+	getyx(stdscr,gety,getx);
 	addstr(line);
 	refresh();
 	strncpy(line,readline(""),maxlen-1);
@@ -492,7 +496,7 @@ PUBLIC char *sys_key(long delay)
 			c=my_getch_horse();
 	} else if (delay==0) {
 		raw();
-		nodelay(win,TRUE);
+		nodelay(stdscr,TRUE);
 		c=my_getch_horse();
 		halfdelay(HALFDELAY);
 	} else {
