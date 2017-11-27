@@ -44,7 +44,7 @@ PUBLIC struct comal_env *env_new(const char *name)
 	work->running = 0;
 	work->fileroot = NULL;
 	work->lasterr = 0;
-	work->lasterrmsg = my_strdup(MISC_POOL, copyright);
+	work->lasterrmsg = my_strdup(MISC_POOL, "");
 	work->errline = 0;
 	work->escallowed = 1;
 	work->nrtraps = 0;
@@ -97,7 +97,7 @@ PUBLIC void clean_runenv(struct comal_env *env)
 
 	env->lasterr = 0;
 	mem_free(env->lasterrmsg);
-	env->lasterrmsg = my_strdup(MISC_POOL, copyright);
+	env->lasterrmsg = my_strdup(MISC_POOL, "");
 	env->errline = 0;
 	env->escallowed = 1;
 	env->nrtraps = 0;

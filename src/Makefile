@@ -29,27 +29,15 @@ OBJ2:=pdcmain.o pdcmisc.o \
 	pdcval.o pdcrun.o pdcmod.o
 OS:=pdclinux.o 
 
-# OSLIB
-LDFLAGS+=-lncurses -L/usr/local/opt/readline/lib -lreadline
-
-# STATIC
-#LDFLAGS+=
-
-# PROFILE
-#CFLAGS+=-pg
-#LDFLAGS+=-pg
-
-# OPTIM
-ifdef DEBUG
-	CFLAGS+=-O0 -ggdb
-else
-	CFLAGS+=-DNDEBUG -Os -flto
-	LDFLAGS+=-flto
-endif
-
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
 CC:=gcc
 CFLAGS+=-Wall -Wextra -DOS_LINUX -D_FORTIFY_SOURCE=2 -I/usr/local/opt/readline/include
+LDFLAGS+=-lncurses -L/usr/local/opt/readline/lib -lreadline
+ifdef DEBUG
+	CFLAGS+=-O0 -ggdb
+else
+	CFLAGS+=-DNDEBUG -Os
+endif
 ifeq ($(CC),c++)
 	CFLAGS+=-Weffc++ -std=c++14
 else

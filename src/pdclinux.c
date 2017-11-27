@@ -224,9 +224,9 @@ PUBLIC int sys_system(char *cmd)
 	fflush(stdout);
 	rc = system(cmd);
 	fputs("\nPress return to continue...", stdout);
+        fflush(stdout);
 	while (getchar() != '\n');
         putp(enter_ca_mode);
-        fflush(stdout);
         reset_prog_mode();
         refresh();
 

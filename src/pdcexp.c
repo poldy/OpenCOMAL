@@ -291,10 +291,7 @@ PRIVATE double my_deg(double x)
 
 PRIVATE double my_int(double x)
 {
-	if (x >= 0)
-		return floor(x);
-
-	return -floor(fabs(x));
+	return floor(x);
 }
 
 
@@ -507,10 +504,10 @@ PRIVATE void exp_unary(struct expression *expr, void **result,
 	case _INT:
 		dfunc = my_int;
 		break;
-	case _LN:
+	case _LOG:
 		dfunc = log;
 		break;
-	case _LOG:
+	case _LOG10:
 		dfunc = log10;
 		break;
 	case _SIN:
@@ -605,7 +602,7 @@ PRIVATE void exp_binary_s(int op, void **result, enum VAL_TYPE *type,
 PRIVATE void exp_binary_i(int op, void **result, enum VAL_TYPE *type,
 			  void *v1, void *v2)
 {
-        long *i1, *i2;
+        long *i1, *i2, res;
 
         i1 = (long *)v1;
         i2 = (long *)v2;
@@ -632,11 +629,19 @@ PRIVATE void exp_binary_i(int op, void **result, enum VAL_TYPE *type,
 
 	case divSYM:
 		check0(*i2 == 0);
-		*i1 = *i1 / *i2;
+		res = *i1 / *i2;
+		if ((*i1 % *i2) != 0 && (*i1 ^ *i2) < 0) {
+			res--;
+		}
+		*i1 = res;
 		break;
 	case modSYM:
 		check0(*i2 == 0);
-		*i1 = *i1 % *i2;
+		res = *i1 % *i2;
+		if (res != 0 && (*i1 ^ *i2) < 0) {
+			res += *i2;
+		}
+		*i1 = res;
 		break;
 
 	default:

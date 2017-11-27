@@ -27,8 +27,8 @@
 #define _TRUE			4011
 #define _INT			4012
 #define _LEN			4013
-#define _LN			4014
-#define _LOG			4015
+#define _LOG			4014
+#define _LOG10			4015
 #define _NOT			4016
 #define _ORD			4017
 #define _PI			4018

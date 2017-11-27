@@ -75,7 +75,7 @@ PUBLIC long str_search(struct string *needle, struct string *haystack)
 	char HUGE_POINTER *h = haystack->s;
 	char HUGE_POINTER *n = needle->s;
 
-        if ((h = strstr(h, n)) != NULL) {
+        if (*n != '\0' && (h = strstr(h, n)) != NULL) {
                 return h - haystack->s + 1;
         }
         return 0L;
