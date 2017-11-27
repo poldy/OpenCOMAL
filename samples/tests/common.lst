@@ -514,4 +514,54 @@
      5140   DATA 5
      5150 ENDFUNC
      5160 //
-     5170 failures
+     5170 passfail("len", test'len)
+     5180 FUNC test'len CLOSED
+     5190   DIM s$ OF 5
+     5200   s$:=""
+     5210   IF LEN(s$)<>0 THEN RETURN FALSE
+     5220   s$:="12345"
+     5230   IF LEN(s$)<>5 THEN RETURN FALSE
+     5240   RETURN TRUE
+     5250 ENDFUNC
+     5260 //
+     5270 passfail("log", test'log)
+     5280 FUNC test'log CLOSED
+     5290   IF LOG(1)<>0 THEN RETURN FALSE
+     5300   IF ABS(LOG(2.71828)-1)>0.00001 THEN RETURN FALSE
+     5310   IF ABS(EXP(LOG(10))-10)>0.000001 THEN RETURN FALSE
+     5320   RETURN TRUE
+     5330 ENDFUNC
+     5340 //
+     5350 passfail("loop", test'loop)
+     5360 FUNC test'loop CLOSED
+     5370   count:=0
+     5380   LOOP
+     5390     EXIT WHEN count=2
+     5400     count:+1
+     5410   ENDLOOP
+     5420   IF count<>2 THEN RETURN FALSE
+     5430   RETURN TRUE
+     5440 ENDFUNC
+     5450 //
+     5460 passfail("mod", test'mod)
+     5470 FUNC test'mod CLOSED
+     5480   IF 500 MOD 256<>244 THEN RETURN FALSE
+     5490   IF 1500 MOD 5<>0 THEN RETURN FALSE
+     5500   IF (-7) MOD 3<>2 THEN RETURN FALSE
+     5510   RETURN TRUE
+     5520 ENDFUNC
+     5530 //
+     5540 passfail("not", test'not)
+     5550 FUNC test'not CLOSED
+     5560   IF (NOT(TRUE))=TRUE THEN RETURN FALSE
+     5570   IF (NOT(FALSE))<>TRUE THEN RETURN FALSE
+     5580   RETURN TRUE
+     5590 ENDFUNC
+     5600 //
+     5610 passfail("null", test'null)
+     5620 FUNC test'null CLOSED
+     5630   NULL
+     5640   RETURN TRUE
+     5650 ENDFUNC
+     5660 //
+     5670 failures
