@@ -131,14 +131,6 @@ PRIVATE void curses_redisplay()
 	refresh();
 }
 
-PRIVATE void curses_prep(int meta_flag)
-{
-}
-
-PRIVATE void curses_deprep()
-{
-}
-
 PRIVATE int pre_input()
 {
 	rl_insert_text(edit_line);
@@ -181,14 +173,14 @@ PRIVATE void screen_init()
 	keypad(stdscr, TRUE);
 	halfdelay(HALFDELAY);
         nonl();
-        intrflush(stdscr, FALSE);
+        intrflush(NULL, FALSE);
 	getmaxyx(stdscr, height, width);
 
 	/*
 	 * Readline initialization
 	 */
-	rl_prep_term_function=curses_prep;
-	rl_deprep_term_function=curses_deprep;
+	rl_prep_term_function=NULL;
+	rl_deprep_term_function=NULL;
 	rl_readline_name="OpenComal";
 	rl_redisplay_function=curses_redisplay;
 	rl_pre_input_hook=pre_input;
@@ -196,6 +188,7 @@ PRIVATE void screen_init()
 	rl_startup_hook=startup;
 	rl_catch_signals=0;
 	rl_catch_sigwinch=0;
+        rl_change_environment=0;
 }
 
 PRIVATE void screen_tini()

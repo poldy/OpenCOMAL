@@ -52,7 +52,7 @@ Date: Sun Sep  8 10:17:20 CEST 2002
 
    $ save "first.cml"
 
-9. And now exit the interpreter with the 'quit' command.
+9. And now exit the interpreter with the 'bye' command.
 
 10. And finally, run the program with the 'opencomalrun' runtime-only 
     program:

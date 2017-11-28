@@ -1321,10 +1321,11 @@ routine is removed from memory upon removal of the calling
 dynamic external.
 
 
-6.57 QUIT
+6.57 QUIT, BYE
 
 The QUIT command ends the OpenComal interpreter. Control is
-usually passed to the calling environment.
+usually passed to the calling environment. BYE is an alias for
+QUIT (from Common COMAL).
 
 
 6.58 RANDOM
