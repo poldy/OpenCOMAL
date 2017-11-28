@@ -300,9 +300,9 @@ Takes numeric argument, return numeric:
 	EOF	: end of file reached on specified file?
 	EXP	: argument to the power of e
 	FRAC	: Fractional part of argument
-	INT	: integer part of argument
-	LN	: natural logarithm (e log) 
-	LOG	: 10 log
+	INT	: nearest integer less than or equal to argument
+	LOG	: natural logarithm (e log) 
+	LOG10	: 10 log
 	NOT	: not x (not true=false, not false=true)
 	RAD	: how many radians (0-2pi) is the degree argument
 	ROUND	: Rounds argument with respect to fractional part 0.5

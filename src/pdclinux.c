@@ -176,10 +176,12 @@ PRIVATE void screen_init()
 {
 	initscr();
 	scrollok(stdscr, TRUE);
+        idlok(stdscr, TRUE);
 	noecho();
 	keypad(stdscr, TRUE);
 	halfdelay(HALFDELAY);
-	refresh();
+        nonl();
+        intrflush(stdscr, FALSE);
 	getmaxyx(stdscr, height, width);
 
 	/*
@@ -267,8 +269,6 @@ PRIVATE void do_put(int stream, const char *buf, long len)
 
 	if (stream == MSG_ERROR)
 		attroff(A_REVERSE);
-
-	refresh();
 }
 
 PUBLIC void sys_put(int stream, const char *buf, long len)
@@ -324,7 +324,6 @@ PUBLIC void sys_cursor(FILE * f, long x, long y)
 {
 	ext_cursor(x, y);
 	move(y, x);
-	refresh();
 }
 
 
@@ -332,7 +331,6 @@ PUBLIC void sys_nl(int stream)
 {
 	ext_nl();
 	addch('\n');
-	refresh();
 }
 
 
@@ -378,7 +376,6 @@ PRIVATE int do_get(int stream, char *line, int maxlen, const char *prompt,
 	addch('\n');
 
 	escape=sys_escape();
-	refresh();
 
 	if (!escape) add_history(line);
 
