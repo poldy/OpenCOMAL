@@ -1,0 +1,53 @@
+       10 // Example program to create a binary tree and display
+       20 // its contents in alphabetical order of name.
+       30 // Ported from an example in Brandy BASIC.
+       40 
+       50 DIM g_name$(100), g_value#(100), left#(100), right#(100)
+       60 next#:=1
+       70 root#:=0
+       80 FOR n#:=1 TO 10 DO
+       90   READ x$, x#
+      100   add(x$, x#)
+      110 ENDFOR
+      120 show(root#)
+      130 
+      140 DATA "red", 5, "green", 10, "yellow", 15, "blue", 20, "black", 25, "white", 30
+      150 DATA "orange", 35, "pink", 40, "cyan", 45, "purple", 50
+      160 
+      170 PROC add(name$, value#)
+      180   g_name$(next#):=name$
+      190   g_value#(next#):=value#
+      200   left#(next#):=0
+      210   right#(next#):=0
+      220   IF root#=0 THEN
+      230     root#:=1
+      240     next#:=2
+      250     RETURN 
+      260   ENDIF
+      270   p#:=root#
+      280   done#:=FALSE
+      290   REPEAT
+      300     IF name$<g_name$(p#) THEN
+      310       IF left#(p#)<>0 THEN
+      320         p#:=left#(p#)
+      330       ELSE
+      340         left#(p#):=next#
+      350         done#:=TRUE
+      360       ENDIF
+      370     ELSE
+      380       IF right#(p#)<>0 THEN
+      390         p#:=right#(p#)
+      400       ELSE
+      410         right#(p#):=next#
+      420         done#:=TRUE
+      430       ENDIF
+      440     ENDIF
+      450   UNTIL done#
+      460   next#:+1
+      470 ENDPROC
+      480 
+      490 PROC show(p#)
+      500   IF left#(p#)<>0 THEN show(left#(p#))
+      510   PRINT g_name$(p#);" ";g_value#(p#)
+      520   IF right#(p#)<>0 THEN show(right#(p#))
+      530 ENDPROC
