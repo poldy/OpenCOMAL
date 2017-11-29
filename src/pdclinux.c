@@ -69,18 +69,14 @@ PRIVATE void int_handler(int signum)
 	signal(SIGINT, int_handler);
 }
 
-PRIVATE wint_t my_getch_horse()
+PRIVATE int my_getch_horse(wint_t *c)
 {
-	wint_t c;
 	int status;
 
 	while (1) {
-		status = get_wch(&c);
-		if (status == ERR) {
-			return ERR;
-		}
+		status = get_wch(c);
 
-		if (c == KEY_RESIZE) {
+		if (status == KEY_CODE_YES && *c == KEY_RESIZE) {
 			getmaxyx(stdscr, height, width);
 			continue;
 		} else if (escape) {
@@ -90,7 +86,7 @@ PRIVATE wint_t my_getch_horse()
 		}
 	}
 
-	return c;
+	return status;
 }
 
 PRIVATE char wc_to_latin(wchar_t wc)
@@ -114,33 +110,50 @@ PRIVATE int my_getch()
 	wint_t c;
 	int i;
 	unsigned char lc;
+        int status;
 
 	while (1) {
-		c = my_getch_horse();
-		lc = wc_to_latin(c);
+		status = my_getch_horse(&c);
+                DBG_PRINTF(0, "%s: status %d c %d ", __func__, status, c);
 
-		if (c==ERR) {
+                switch (status) {
+                case ERR:
 			if (escape) {
 				rl_done=1;
 				return 10;
-			} else
+			} else {
 				continue;
-		} else if (lc==10 || lc==13) 
-			break;
-		else if (lc<' ') {
-			beep();
-			continue;
-		} else if (c<256) 
-			break;
-
-		for (i=0; my_keymap[i].curses_key; i++)
-			if (c==my_keymap[i].curses_key)
-				return my_keymap[i].internal_key;
-
-		beep();
+                        }
+                        break;
+                case OK:
+                        lc = wc_to_latin(c);
+                        DBG_PRINTF(1, "lc %d", lc);
+		        if (lc==10 || lc==13)  {
+			        return lc;
+                        } else if (lc<' ') {
+			        beep();
+			        continue;
+		        } else {
+			        return lc;
+                        }
+                        break;
+                case KEY_CODE_YES:
+		        for (i=0; my_keymap[i].curses_key; i++) {
+			        if (c==my_keymap[i].curses_key) {
+                                        DBG_PRINTF(1, "%s: returning internal_key %d", __func__, my_keymap[i].internal_key);
+				        return my_keymap[i].internal_key;
+                                }
+                        }
+		        beep();
+                        return ERR;
+                        break;
+                default:
+                        return ERR;
+                        break;
+                }
 	}
 
-	return lc;
+        return ERR;
 }
 
 
@@ -533,26 +546,30 @@ PUBLIC void sys_rmdir(char *dir)
 PUBLIC char *sys_key(long delay)
 {
 	static char result[2] = {0,0};
-	int c=ERR;
+	int status=ERR;
+        wint_t c;
 
 	/*
 	 * -1 means neverending delay 
 	 */
 	if (delay<0) {
-		while (c==ERR && !escape) 
-			c=my_getch_horse();
+		while (status==ERR && !escape) {
+			status=my_getch_horse(&c);
+                }
 	} else if (delay==0) {
 		raw();
 		nodelay(stdscr,TRUE);
-		c=my_getch_horse();
+		status=my_getch_horse(&c);
 		halfdelay(HALFDELAY);
 	} else {
 		halfdelay(delay*10);
-		c=my_getch_horse();
+		status=my_getch_horse(&c);
 		halfdelay(HALFDELAY);
 	}
 
-	if (c<0) c=0;
+	if (status == ERR) {
+                c=0;
+        }
 
 	*result=wc_to_latin(c);
 	return result;

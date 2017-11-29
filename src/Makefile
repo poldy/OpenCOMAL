@@ -32,7 +32,7 @@ OS:=pdclinux.o
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
 CC:=gcc
 CFLAGS+=-Wall -Wextra -DOS_LINUX -D_FORTIFY_SOURCE=2 -I/usr/local/opt/readline/include
-LDFLAGS+=-L/usr/local/opt/readline/lib -lreadline -liconv
+LDFLAGS+=-L/usr/local/opt/readline/lib -lreadline
 ifdef DEBUG
 	CFLAGS+=-O0 -ggdb
 else
@@ -44,12 +44,12 @@ else
 	CFLAGS+=-std=gnu11
 endif
 ifeq ($(OPSYS),macos)
-	LDFLAGS+=-lncurses
+	LDFLAGS+=-lncurses -liconv
 else
 	CFLAGS+=$(shell ncursesw5-config --cflags)
 
 	# LIBS
-	LDFLAGS+=-lm $(shell ncursesw5-config --lib)
+	LDFLAGS+=-lm $(shell ncursesw5-config --libs)
 
 	include /usr/share/hardening-includes/hardening.make
 	CFLAGS += $(HARDENING_CFLAGS)
