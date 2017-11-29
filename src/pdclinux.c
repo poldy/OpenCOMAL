@@ -34,14 +34,20 @@
 
 #define HALFDELAY 2
 
+#define CHECK(fn, ...) { \
+        if ((fn)(__VA_ARGS__) == ERR) { \
+                errw(#fn); \
+        } \
+}
+
 PRIVATE int escape = 0;
 
-PRIVATE int width, height;
 PRIVATE int paged = 0, pagern;
 PRIVATE int getx,gety;
 PRIVATE char *edit_line;
 PRIVATE Keymap keymap;
 PRIVATE iconv_t latin_to_utf8, utf8_to_latin;
+PRIVATE bool is_visual_mode = false;
 
 PRIVATE struct {
 	int curses_key;
@@ -63,30 +69,19 @@ PRIVATE struct {
 	
 };
 
+PRIVATE void errw(const char *msg)
+{
+        if (is_visual_mode) {
+                endwin();
+        }
+        fprintf(stderr, "%s\n", msg);
+        exit(EXIT_FAILURE);
+}
+
 PRIVATE void int_handler(int signum)
 {
 	escape = 1;
 	signal(SIGINT, int_handler);
-}
-
-PRIVATE int my_getch_horse(wint_t *c)
-{
-	int status;
-
-	while (1) {
-		status = get_wch(c);
-
-		if (status == KEY_CODE_YES && *c == KEY_RESIZE) {
-			getmaxyx(stdscr, height, width);
-			continue;
-		} else if (escape) {
-			return ERR;
-		} else {
-			break;
-		}
-	}
-
-	return status;
 }
 
 PRIVATE char wc_to_latin(wchar_t wc)
@@ -105,6 +100,44 @@ PRIVATE char wc_to_latin(wchar_t wc)
 	return lc;
 }
 		
+PRIVATE int my_getch_horse(wint_t *c, char *lc)
+{
+	int status;
+
+	while (1) {
+		status = get_wch(c);
+
+                switch (status) {
+                case KEY_CODE_YES:
+		        if (*c == KEY_RESIZE) {
+                                CHECK(refresh);
+			        continue;
+                        }
+                        return KEY_CODE_YES;
+                        break;
+                case OK:
+                        *lc = wc_to_latin(*c);
+		        if (escape) {
+			        return ERR;
+                        } else if (*lc=='\f') {
+                                CHECK(clearok, curscr, TRUE);
+                                CHECK(refresh);
+                                continue;
+		        }
+			return OK;
+                        break;
+                case ERR:
+                        return ERR;
+                        break;
+                default:
+                        return ERR;
+                        break;
+		}
+	}
+
+	return ERR;
+}
+
 PRIVATE int my_getch()
 {
 	wint_t c;
@@ -113,38 +146,32 @@ PRIVATE int my_getch()
         int status;
 
 	while (1) {
-		status = my_getch_horse(&c);
-                DBG_PRINTF(0, "%s: status %d c %d ", __func__, status, c);
+		status = my_getch_horse(&c, (char *)&lc);
 
                 switch (status) {
                 case ERR:
 			if (escape) {
 				rl_done=1;
 				return 10;
-			} else {
-				continue;
-                        }
+			}
+			continue;
                         break;
                 case OK:
-                        lc = wc_to_latin(c);
-                        DBG_PRINTF(1, "lc %d", lc);
 		        if (lc==10 || lc==13)  {
 			        return lc;
                         } else if (lc<' ') {
-			        beep();
+			        CHECK(beep);
 			        continue;
-		        } else {
-			        return lc;
-                        }
+		        }
+			return lc;
                         break;
                 case KEY_CODE_YES:
 		        for (i=0; my_keymap[i].curses_key; i++) {
 			        if (c==my_keymap[i].curses_key) {
-                                        DBG_PRINTF(1, "%s: returning internal_key %d", __func__, my_keymap[i].internal_key);
 				        return my_keymap[i].internal_key;
                                 }
                         }
-		        beep();
+		        CHECK(beep);
                         return ERR;
                         break;
                 default:
@@ -180,16 +207,16 @@ PRIVATE void addlstr(const char *lstr)
 	iconv(latin_to_utf8, (char **)&inbuf, &inbytesleft, &outbuf, &outbytesleft);
 	*outbuf = '\0';
 	mbstowcs(wstr, ustr, MAX_LINELEN);
-	addwstr(wstr);
+	CHECK(addwstr, wstr);
 }
 
 PRIVATE void curses_redisplay()
 {
-	move(gety,getx);
+	CHECK(move,gety,getx);
 	addlstr(rl_line_buffer);
-	clrtoeol();
-	move(gety+rl_point/width,getx+rl_point%width);
-	refresh();
+	CHECK(clrtoeol);
+	CHECK(move,gety+rl_point/COLS,getx+rl_point%COLS);
+	CHECK(refresh);
 }
 
 PRIVATE int pre_input()
@@ -204,7 +231,9 @@ PRIVATE int startup()
 	int i;
 	static int started_up=0;
 
-	if (started_up) return 0;
+	if (started_up) {
+                return 0;
+        }
 
 	keymap=rl_make_keymap();
 	rl_set_keymap(keymap);
@@ -225,21 +254,28 @@ PRIVATE int startup()
 	return 0;
 }
 
-PRIVATE void screen_init()
+PRIVATE void init_ncurses(void)
 {
-	initscr();
-	scrollok(stdscr, TRUE);
-        idlok(stdscr, TRUE);
-	noecho();
-	keypad(stdscr, TRUE);
-	halfdelay(HALFDELAY);
-        nonl();
-        intrflush(NULL, FALSE);
-	getmaxyx(stdscr, height, width);
+	if (initscr() == NULL) {
+                errw("initscr");
+        }
+        is_visual_mode = true;
+        if (has_colors()) {
+                CHECK(start_color);
+                CHECK(use_default_colors);
+        }
+	CHECK(scrollok, stdscr, TRUE);
+        CHECK(idlok, stdscr, TRUE);
+	CHECK(noecho);
+	CHECK(keypad, stdscr, TRUE);
+	CHECK(halfdelay, HALFDELAY);
+        CHECK(nonl);
+        CHECK(intrflush, NULL, FALSE);
+        curs_set(2);
+}
 
-	/*
-	 * Readline initialization
-	 */
+PRIVATE void init_readline(void)
+{
 	rl_prep_term_function=NULL;
 	rl_deprep_term_function=NULL;
 	rl_readline_name="OpenComal";
@@ -250,19 +286,37 @@ PRIVATE void screen_init()
 	rl_catch_signals=0;
 	rl_catch_sigwinch=0;
         rl_change_environment=0;
+}
 
-	/*
-	 * Iconv initialization
-	 */
+PRIVATE void init_iconv(void)
+{
 	latin_to_utf8 = iconv_open("utf8", "latin-9");
 	utf8_to_latin = iconv_open("latin-9", "utf8");
 }
 
-PRIVATE void screen_tini()
+PRIVATE void screen_init(void)
 {
-	endwin();
+        init_ncurses();
+        init_readline();
+        init_iconv();
+}
+
+PRIVATE void deinit_ncurses(void)
+{
+	CHECK(endwin);
+        is_visual_mode = false;
+}
+
+PRIVATE void deinit_iconv(void)
+{
 	iconv_close(latin_to_utf8);
 	iconv_close(utf8_to_latin);
+}
+
+PRIVATE void screen_tini(void)
+{
+        deinit_ncurses();
+        deinit_iconv();
 }
 
 PUBLIC void sys_init()
@@ -283,17 +337,18 @@ PUBLIC int sys_system(char *cmd)
 {
 	int rc;
 
-        reset_shell_mode();
-        putp(exit_ca_mode);
+        CHECK(reset_shell_mode);
+        CHECK(putp, exit_ca_mode);
 	fflush(stdout);
 	rc = system(cmd);
 	fputs("\nPress return to continue...", stdout);
         fflush(stdout);
 	while (getchar() != '\n')
 		;
-        putp(enter_ca_mode);
-        reset_prog_mode();
-        refresh();
+        CHECK(putp, enter_ca_mode);
+        CHECK(reset_prog_mode);
+        CHECK(clearok, curscr, TRUE);
+        CHECK(refresh);
 
 	return rc;
 }
@@ -301,7 +356,7 @@ PUBLIC int sys_system(char *cmd)
 PUBLIC void sys_setpaged(int n)
 {
 	paged = n;
-	pagern = height;
+	pagern = LINES;
 }
 
 
@@ -325,13 +380,15 @@ PUBLIC int sys_escape()
 
 PRIVATE void do_put(int stream, const char *buf, long len)
 {
-	if (stream == MSG_ERROR)
-		attron(A_REVERSE);
+	if (stream == MSG_ERROR) {
+		CHECK(attron, A_REVERSE);
+        }
 
 	addlstr(buf);
 
-	if (stream == MSG_ERROR)
-		attroff(A_REVERSE);
+	if (stream == MSG_ERROR) {
+		CHECK(attroff, A_REVERSE);
+        }
 }
 
 PUBLIC void sys_put(int stream, const char *buf, long len)
@@ -341,9 +398,9 @@ PUBLIC void sys_put(int stream, const char *buf, long len)
 	if (len < 0)
 		len = strlen(buf);
 
-	buf_lines = len / width;
+	buf_lines = len / COLS;
 
-	if ((len % width) > 0)
+	if ((len % COLS) > 0)
 		buf_lines++;
 
 	ext_put(stream, buf, len);
@@ -360,7 +417,7 @@ PUBLIC void sys_put(int stream, const char *buf, long len)
 				c = my_getch();
 
 				if (c == ' ') {
-					pagern = height;
+					pagern = LINES;
 					break;
 				} else if (c == '\n') {
 					pagern--;
@@ -379,26 +436,21 @@ PUBLIC void sys_put(int stream, const char *buf, long len)
 PUBLIC void sys_page(FILE * f)
 {
 	ext_page();
-	erase();
+	CHECK(erase);
 }
 
 
 PUBLIC void sys_cursor(FILE * f, long x, long y)
 {
 	ext_cursor(x, y);
-	move(y, x);
+	CHECK(move, y, x);
 }
 
 
 PUBLIC void sys_nl(int stream)
 {
 	ext_nl();
-	addch('\n');
-}
-
-
-PUBLIC void sys_screen_readjust()
-{
+	CHECK(addch, '\n');
 }
 
 
@@ -412,10 +464,10 @@ PUBLIC int sys_yn(int stream, const char *prompt)
 		c = my_getch();
 
 		if (sys_escape() || c == 'n' || c == 'N') {
-			addstr("No\n");
+			CHECK(addstr, "No\n");
 			return 0;
 		} else if (c == 'y' || c == 'Y') {
-			addstr("Yes\n");
+			CHECK(addstr, "Yes\n");
 			return 1;
 		}
 	}
@@ -432,15 +484,17 @@ PRIVATE int do_get(int stream, char *line, int maxlen, const char *prompt,
 	addlstr(prompt);
 	getyx(stdscr,gety,getx);
 	addlstr(line);
-	refresh();
+	CHECK(refresh);
 	strncpy(line,readline(""),maxlen-1);
 	line[maxlen-1] = '\0';
-	move(gety+rl_end/width,getx+rl_end%width);
-	addch('\n');
+	CHECK(move,gety+rl_end/COLS,getx+rl_end%COLS);
+	CHECK(addch, '\n');
 
 	escape=sys_escape();
 
-	if (!escape) add_history(line);
+	if (!escape) {
+                add_history(line);
+        }
 
 	return escape;
 }
@@ -480,16 +534,21 @@ PUBLIC char *sys_dir_string()
 	static char *buf=0;
 
 	while (true) {
-		if (!buf) buf=(char *)malloc(buf_size);
+		if (!buf) {
+                        buf=(char *)malloc(buf_size);
+                }
 
-		if (getcwd(buf,buf_size)!=NULL) return buf;
+		if (getcwd(buf,buf_size)!=NULL) {
+                        return buf;
+                }
 
 		if (errno==ERANGE) { /* buffer too small */
 			buf_size+=1024;
 			free(buf);
 			buf=0;
-		} else
+		} else {
 			run_error(DIRS_ERR,strerror(errno));
+                }
 	}
 }
 
@@ -504,12 +563,15 @@ PUBLIC void sys_dir(const char *pattern) {
 	strncat(buf,pattern,l);
 	f=popen(buf,"r");
 
-	if (!f) run_error(DIRS_ERR,strerror(errno));
+	if (!f) {
+                run_error(DIRS_ERR,strerror(errno));
+        }
 
 	sys_setpaged(1);
 
-	while (fgets(line,254,f))
+	while (fgets(line,254,f)) {
 		sys_put(MSG_PROGRAM,line,-1);
+        }
 
 	sys_setpaged(0);
 	pclose(f);
@@ -545,7 +607,7 @@ PUBLIC void sys_rmdir(char *dir)
 
 PUBLIC char *sys_key(long delay)
 {
-	static char result[2] = {0,0};
+	static char result[2] = {'\0','\0'};
 	int status=ERR;
         wint_t c;
 
@@ -554,24 +616,23 @@ PUBLIC char *sys_key(long delay)
 	 */
 	if (delay<0) {
 		while (status==ERR && !escape) {
-			status=my_getch_horse(&c);
+			status=my_getch_horse(&c, result);
                 }
 	} else if (delay==0) {
-		raw();
-		nodelay(stdscr,TRUE);
-		status=my_getch_horse(&c);
-		halfdelay(HALFDELAY);
+		CHECK(raw);
+		CHECK(nodelay,stdscr,TRUE);
+		status=my_getch_horse(&c, result);
+		CHECK(halfdelay, HALFDELAY);
 	} else {
-		halfdelay(delay*10);
-		status=my_getch_horse(&c);
-		halfdelay(HALFDELAY);
+		CHECK(halfdelay, delay*10);
+		status=my_getch_horse(&c, result);
+		CHECK(halfdelay, HALFDELAY);
 	}
 
 	if (status == ERR) {
-                c=0;
+                *result='\0';
         }
 
-	*result=wc_to_latin(c);
 	return result;
 }
 

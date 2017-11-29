@@ -2153,7 +2153,6 @@ PUBLIC int exec_line(struct comal_line *line)
 			run_error(OS_ERR, "OS command failed");
 
 		mem_free(result);
-		sys_screen_readjust();
 		break;
 
 	case delSYM:
