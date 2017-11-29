@@ -1,0 +1,207 @@
+       10 init
+       20 FOR year:=1 TO 10 DO
+       30   begging'steward
+       40   report'update
+       50   buy'land
+       60   IF buy=0 THEN sell'land
+       70   feed'people
+       80   plant'crops
+       90   do'rats'attack
+      100   pop'increase
+      110   plague'chance
+      120 ENDFOR
+      130 final'report
+      140 end'game
+      150 //
+      160 PROC init
+      170   pcnt'dead:=0; pop'pcnt:=0
+      180   pop:=95; grain:=3; acres:=1000
+      190   harvest:=3000; rat'food:=200
+      200   stored:=harvest-rat'food
+      210   settlers:=5; num'dead:=0
+      220 ENDPROC
+      230 PROC begging'steward
+      240   PAGE
+      250   PRINT "Hammurabi, your humble steward begs to report that in Year ";year;" of your reign:"
+      290   PRINT 
+      300   IF num'dead=0 THEN
+      310     PRINT "None of your loyal subjects perished,"
+      330   ELSE
+      340     PRINT num'dead;" of your loyal subjects perished,";
+      360   ENDIF
+      370   PRINT " and ";settlers;" newcomers settled in the city."
+      390   PRINT 
+      400   pop:+settlers
+      410 ENDPROC
+      420 //
+      430 PROC report'update
+      440   PRINT "Your subjects now number ";pop,"."
+      450   PRINT 
+      460   PRINT "The city owns ";acres;" acres of land."
+      470   PRINT "The harvest yielded ";harvest;" bushels, or ";
+      480   PRINT USING "#.#": harvest/acres;
+      485   PRINT " bushels harvested per acre"
+      490   IF rat'food=0 THEN
+      500     PRINT "Rodents ate none of the grain."
+      510   ELSE
+      520     PRINT "Rodents ate ";rat'food;" bushels of grain."
+      540   ENDIF
+      550   PRINT "The granaries now hold ";stored;" bushels."
+      570   PRINT 
+      580   price:=RND(17,26)
+      590   PRINT "Land is trading at ";price;" bushels per acre."
+      610 ENDPROC
+      620 //
+      630 PROC buy'land
+      640   REPEAT
+      650     INPUT "How many acres do you desire? ": buy
+      660     IF price*buy>stored THEN wrong'grain
+      670   UNTIL buy*price<=stored
+      680   acres:+buy; stored:-grain*buy
+      690 ENDPROC
+      700 //
+      710 PROC sell'land
+      720   REPEAT
+      730     INPUT "How many acres should I sell? ": sell
+      740     IF sell>acres THEN wrong'acres
+      750   UNTIL sell<=acres
+      760   acres:-sell; stored:+price*sell
+      770 ENDPROC
+      780 //
+      790 PROC feed'people
+      800   REPEAT
+      810     PRINT 
+      820     INPUT "How many bushels of grain do you wish to feed your people? ": food
+      840     IF food=0 THEN steward'quits
+      850     IF food>stored THEN wrong'grain
+      860   UNTIL food<=stored
+      870   stored:-food
+      880 ENDPROC
+      890 //
+      900 PROC plant'crops
+      910   REPEAT
+      920     ok:=FALSE
+      930     PRINT 
+      940     INPUT "How many acres of land do you wish to plant with grain? ": plant
+      960     PRINT 
+      970     IF plant>acres THEN
+      980       wrong'acres
+      990     ELIF plant/2>stored
+     1000       wrong'grain
+     1010     ELIF plant>10*pop
+     1020       PRINT "But you have only ";pop;" subjects to tend the fields! Now then,"
+     1040     ELSE
+     1050       ok:=TRUE
+     1060     ENDIF
+     1070   UNTIL ok
+     1080   stored:-(plant DIV 2)
+     1090 ENDPROC
+     1100 //
+     1110 PROC do'rats'attack
+     1120   production:=RND(1,6); rat'food:=0
+     1130   IF RND(1,100)>50 THEN
+     1140     rat'rood:=stored DIV RND(1,6)
+     1150   ENDIF
+     1160   harvest:=stored+plant*production
+     1170   stored:=harvest-rat'food
+     1180 ENDPROC
+     1190 //
+     1200 PROC pop'increase
+     1210   num'dead:=0
+     1220   settlers:=INT(RND(1,6)*(20*acres+stored)/pop/100+1)
+     1230   meals:=food DIV pop
+     1240 ENDPROC
+     1250 //
+     1260 PROC plague
+     1270   num'dead:=pop DIV 2
+     1280   pop:-num'dead
+     1290   PRINT "A horrible plague struck! Half of the people died."
+     1310 ENDPROC
+     1320 //
+     1330 PROC plague'chance
+     1340   IF meals<20 THEN
+     1350     IF RND(1,100)<pcnt'dead THEN
+     1360       plague
+     1370     ELSE
+     1380       starve'the'population
+     1390     ENDIF
+     1400   ENDIF
+     1410 ENDPROC
+     1420 //
+     1430 PROC starve'the'population
+     1440   num'dead:=pop-INT(pop*(meals/20))
+     1450   IF num'dead>0.45*pop THEN starved
+     1460   pop'pcnt:=((year-1)*pop'pcnt+num'dead*100/pop)/year
+     1470   pop:-num'dead
+     1480   pcnt'dead:+num'dead
+     1490 ENDPROC
+     1500 //
+     1510 PROC starved
+     1520   PRINT 
+     1530   PRINT "You starved ";num'dead;" people in one year!!"
+     1550   mismanagement
+     1560 ENDPROC
+     1570 //
+     1580 PROC mismanagement
+     1590   PRINT "Due to this extreme mismanagement you have not only been impeached and thrown out of office, but you have also been declared National Fink!!!"
+     1640   end'game
+     1650 ENDPROC
+     1660 //
+     1670 PROC wrong'grain
+     1680   PRINT 
+     1690   PRINT "Hammurabi, think again.";
+     1700   PRINT "You have only ";stored;" bushels of grain. Now then,"
+     1720 ENDPROC
+     1730 //
+     1740 PROC wrong'acres
+     1750   PRINT 
+     1760   PRINT "Hammurabi, think again.";
+     1770   PRINT "You only own ";acres;" acres. Now then,"
+     1790 ENDPROC
+     1800 //
+     1810 PROC steward'quits
+     1820   PRINT 
+     1830   PRINT "Hammurabi, I cannot do what you wish."
+     1850   PRINT "Get yourself another steward!!!!!!"
+     1860   end'game
+     1870 ENDPROC
+     1880 //
+     1890 PROC final'report
+     1900   PRINT "In your 10-year term of office, ";INT(pop'pcnt),"% of the population starved per year, on the average, I.E. a total of ";INT(pcnt'dead);" people died!!"
+     1960   land:=acres/pop
+     1970   PRINT 
+     1980   PRINT "You started with 10 acres per person and ended with ";land;" per person."
+     2000   PRINT 
+     2010   FOR t:=l TO 1000 DO NULL
+     2020   IF pop'pcnt>33 OR land<7 THEN
+     2030     mismanagement
+     2040   ELIF pop'pcnt>10 OR land<9
+     2050     nero'and'ivan
+     2060   ELIF pop'pcnt>3 OR land<10
+     2070     fair
+     2080   ELSE
+     2090     very'good
+     2100   ENDIF
+     2110 ENDPROC
+     2120 //
+     2130 PROC very'good
+     2140   PRINT "A fantastic performance!";
+     2150   PRINT "Charlemagne, Disraeli, and Jefferson combined could not have done better!"
+     2190 ENDPROC
+     2200 //
+     2210 PROC nero'and'ivan
+     2220   PRINT "Your heavy-handed performance smacks of Nero and Ivan the Terrible.";
+     2250   PRINT "The people (remaining) find you an unpleasant ruler, and, frankly, hate your guts!!"
+     2280 ENDPROC
+     2290 //
+     2300 PROC fair
+     2310   PRINT "Your performance cquld have been somewhat better, but really wasn't too bad."
+     2340   PRINT RND(1,pop*0.8);" people would dearly like to see you assassinated, but we all have our trivial little problems."
+     2380 ENDPROC
+     2390 //
+     2400 PROC end'game
+     2410   PRINT 
+     2420   PRINT "So long for now."
+     2430   PRINT 
+     2440   END  // of the game
+     2450 ENDPROC
