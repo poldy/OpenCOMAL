@@ -10,6 +10,8 @@
 
 /* OpenComal SYS routines for LINUX */
 
+#define _XOPEN_SOURCE_EXTENDED
+
 #include "pdcglob.h"
 #include "pdcmisc.h"
 #include "pdcext.h"
@@ -25,6 +27,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <term.h>
+#include <iconv.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -38,6 +41,7 @@ PRIVATE int paged = 0, pagern;
 PRIVATE int getx,gety;
 PRIVATE char *edit_line;
 PRIVATE Keymap keymap;
+PRIVATE iconv_t latin_to_utf8, utf8_to_latin;
 
 PRIVATE struct {
 	int curses_key;
@@ -65,32 +69,55 @@ PRIVATE void int_handler(int signum)
 	signal(SIGINT, int_handler);
 }
 
-PRIVATE int my_getch_horse()
+PRIVATE wint_t my_getch_horse()
 {
-	int c;
+	wint_t c;
+	int status;
 
 	while (1) {
-		c = getch();
+		status = get_wch(&c);
+		if (status == ERR) {
+			return ERR;
+		}
 
 		if (c == KEY_RESIZE) {
 			getmaxyx(stdscr, height, width);
 			continue;
-		} else if (escape)
+		} else if (escape) {
 			return ERR;
-		else
+		} else {
 			break;
+		}
 	}
 
 	return c;
 }
+
+PRIVATE char wc_to_latin(wchar_t wc)
+{
+	char uc[MB_LEN_MAX], lc;
+	int l;
+	char *inbuf, *outbuf;
+	size_t inbytesleft, outbytesleft;
+
+	l = wctomb(uc, wc);
+	inbuf = uc;
+	inbytesleft = l;
+	outbuf = &lc;
+	outbytesleft = 1;
+	iconv(utf8_to_latin, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+	return lc;
+}
 		
 PRIVATE int my_getch()
 {
-	int c;
+	wint_t c;
 	int i;
+	unsigned char lc;
 
 	while (1) {
 		c = my_getch_horse();
+		lc = wc_to_latin(c);
 
 		if (c==ERR) {
 			if (escape) {
@@ -98,9 +125,9 @@ PRIVATE int my_getch()
 				return 10;
 			} else
 				continue;
-		} else if (c==10 || c==13) 
+		} else if (lc==10 || lc==13) 
 			break;
-		else if (c<' ') {
+		else if (lc<' ') {
 			beep();
 			continue;
 		} else if (c<256) 
@@ -113,7 +140,7 @@ PRIVATE int my_getch()
 		beep();
 	}
 
-	return c;
+	return lc;
 }
 
 
@@ -122,10 +149,31 @@ PRIVATE int curses_getc(FILE *in)
 	return my_getch();
 }
 
+PRIVATE void addlstr(const char *lstr)
+{
+	char ustr[MAX_LINELEN];
+	const char *inbuf;
+	char *outbuf;
+	size_t inbytesleft, outbytesleft;
+	wchar_t wstr[MAX_LINELEN];
+
+	if (lstr == NULL) {
+		return;
+	}
+	inbuf = lstr;
+	inbytesleft = strlen(lstr);
+	outbuf = ustr;
+	outbytesleft = MAX_LINELEN;
+	iconv(latin_to_utf8, (char **)&inbuf, &inbytesleft, &outbuf, &outbytesleft);
+	*outbuf = '\0';
+	mbstowcs(wstr, ustr, MAX_LINELEN);
+	addwstr(wstr);
+}
+
 PRIVATE void curses_redisplay()
 {
 	move(gety,getx);
-	addstr(rl_line_buffer);
+	addlstr(rl_line_buffer);
 	clrtoeol();
 	move(gety+rl_point/width,getx+rl_point%width);
 	refresh();
@@ -189,11 +237,19 @@ PRIVATE void screen_init()
 	rl_catch_signals=0;
 	rl_catch_sigwinch=0;
         rl_change_environment=0;
+
+	/*
+	 * Iconv initialization
+	 */
+	latin_to_utf8 = iconv_open("utf8", "latin-9");
+	utf8_to_latin = iconv_open("latin-9", "utf8");
 }
 
 PRIVATE void screen_tini()
 {
 	endwin();
+	iconv_close(latin_to_utf8);
+	iconv_close(utf8_to_latin);
 }
 
 PUBLIC void sys_init()
@@ -220,7 +276,8 @@ PUBLIC int sys_system(char *cmd)
 	rc = system(cmd);
 	fputs("\nPress return to continue...", stdout);
         fflush(stdout);
-	while (getchar() != '\n');
+	while (getchar() != '\n')
+		;
         putp(enter_ca_mode);
         reset_prog_mode();
         refresh();
@@ -258,7 +315,7 @@ PRIVATE void do_put(int stream, const char *buf, long len)
 	if (stream == MSG_ERROR)
 		attron(A_REVERSE);
 
-	addstr(buf);
+	addlstr(buf);
 
 	if (stream == MSG_ERROR)
 		attroff(A_REVERSE);
@@ -359,9 +416,9 @@ PRIVATE int do_get(int stream, char *line, int maxlen, const char *prompt,
 
 	rl_num_chars_to_read=maxlen-1;
 	edit_line=line;
-	addstr(prompt);
+	addlstr(prompt);
 	getyx(stdscr,gety,getx);
-	addstr(line);
+	addlstr(line);
 	refresh();
 	strncpy(line,readline(""),maxlen-1);
 	line[maxlen-1] = '\0';
@@ -497,7 +554,7 @@ PUBLIC char *sys_key(long delay)
 
 	if (c<0) c=0;
 
-	*result=c;
+	*result=wc_to_latin(c);
 	return result;
 }
 

@@ -69,7 +69,7 @@ PRIVATE void list_string(char **buf, char str[])
 	list_char(buf, '"');
 
 	for (i = 0; str[i]; i++) {
-		char c;
+		unsigned char c;
 
 		c = str[i];
 

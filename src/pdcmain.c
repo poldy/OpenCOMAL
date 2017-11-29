@@ -34,7 +34,10 @@ PUBLIC int main(int argc, char *argv[])
         int c;
         int errflg = 0;
 
-        setlocale(LC_ALL, "");
+        if (setlocale(LC_ALL, "") == NULL) {
+		perror("setlocale");
+		return EXIT_FAILURE;
+	}
 
 #ifdef NDEBUG
         while ((c = getopt(argc, argv, "y")) != -1) {
@@ -60,7 +63,7 @@ PUBLIC int main(int argc, char *argv[])
 #else
                 fprintf(stderr, "usage: %s [-dy] ...\n", argv[0]);
 #endif
-                exit(EXIT_FAILURE);
+                return EXIT_FAILURE;
         }
 
 	sys_init();
