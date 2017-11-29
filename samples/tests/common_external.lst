@@ -1,0 +1,5 @@
+       10 FUNC test'external CLOSED
+       20   // this test'external is only valid if
+       30   // called as an external func
+       40   RETURN TRUE
+       50 ENDFUNC test'external
