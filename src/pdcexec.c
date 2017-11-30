@@ -2158,10 +2158,11 @@ PUBLIC int exec_line(struct comal_line *line)
 	case delSYM:
 		calc_exp(line->lc.exp, (void **) &result, &type);
 
-		if (unlink(result->s) == -1)
+		if (unlink(result->s) == -1 && errno != ENOENT) {
 			run_error(DEL_ERR,
 				  "DELete of %s failed (Read Only?)",
 				  result->s);
+		}
 
 		mem_free(result);
 		break;

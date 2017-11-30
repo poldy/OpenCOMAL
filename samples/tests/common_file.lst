@@ -1,0 +1,24 @@
+       10 DIM filename$ OF 20, filename2$ OF 20, reply$ OF 1
+       20 DIM temp$ OF 40, temp2$ OF 40, screen$ OF 5
+       30 DIM text$ OF 999, text2$ OF 999  //for compare test
+       40 filename$:="uqtestzp.dat"; filename2$:="uqtestzu.dat"
+       50 screen$:="ds:"
+       60 PAGE
+       70 PRINT "This program tests several COMAL"
+       80 PRINT "commands relating to file access."
+       90 PRINT "It uses temporary disk files"
+      100 PRINT filename$;"and";filename2$
+      110 PRINT "Place a NON-write protected"
+      120 PRINT "disk in the current disk drive."
+      130 PRINT 
+      140 INPUT "<return> to start:": reply$
+      150 PAGE
+      160 PRINT "==> making sure files";filename$;
+      170 PRINT "and";filename2$;"are deleted...";
+      180 DELETE filename$
+      190 DELETE filename2$
+      200 PRINT "OK"
+      210 PRINT "==> creating";filename$;"as random file..."
+      220 // create filename$,10,40
+      230 PRINT "==> opening";filename$;"as random file..."
+      240 OPEN FILE 7, filename$, RANDOM 40
