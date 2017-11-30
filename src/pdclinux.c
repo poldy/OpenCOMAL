@@ -389,6 +389,8 @@ PRIVATE void do_put(int stream, const char *buf, long len)
 	if (stream == MSG_ERROR) {
 		CHECK(attroff, A_REVERSE);
         }
+
+        CHECK(refresh);
 }
 
 PUBLIC void sys_put(int stream, const char *buf, long len)
