@@ -22,3 +22,23 @@
       220 // create filename$,10,40
       230 PRINT "==> opening";filename$;"as random file..."
       240 OPEN FILE 7, filename$, RANDOM 40
+      250 PRINT "==> writing 10 records to";filename$;"...";
+      260 FOR x:=10 TO 1 STEP -1 DO
+      270   PRINT x;
+      280   WRITE FILE 7,x: "line", x
+      290 ENDFOR
+      300 PRINT "OK"
+      310 PRINT "==> Reading the 10 lines back..."
+      320 FOR x:=1 TO 10 DO
+      330   READ FILE 7,x: temp$, line
+      340   PRINT temp$;line$
+      350   IF temp$<>"line" OR line<>x THEN
+      360     CLOSE
+      370     END
+      380   ENDIF
+      390 ENDFOR
+      400 PRINT "OK"
+      410 PRINT "==> closing the file..."
+      420 CLOSE
+      430 PRINT "==> deleting file";filename$
+      440 DELETE filename$
