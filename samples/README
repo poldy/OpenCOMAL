@@ -24,6 +24,7 @@ The tests/ directory contains programs that test all OpenComal's statements
 and functions. To do a quick test of everything, follow this procedure:
 
 	- enter "lst2sq.lst"
+        - save "lst2sq.sq"
 	- run
 	(this enters and saves each program)
 	- new

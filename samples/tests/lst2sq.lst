@@ -30,9 +30,9 @@
       300   WHILE f$ IN filename$ DO
       310     filename$:=filename$(1:f$ IN filename$-1)
       320     PRINT "print \"Processing "+filename$
+      325     PRINT "new"
       330     PRINT "enter \""+filename$+f$
       340     PRINT "save \""+filename$+t$
-      360     PRINT "new"
       370     INPUT filename$
       380   ENDWHILE
       390   SELECT OUTPUT ""
