@@ -75,42 +75,42 @@
       750   RETURN TRUE
       760 ENDFUNC
       770 //
-      780 // passfail("bitand", test'bitand)
-      790 // FUNC test'bitand CLOSED
-      800 //   IF (3 BITAND 3)<>3 THEN RETURN FALSE
-      810 //   // (%11 BITAND %11)<>%11 <==binary
-      820 //   IF (3 BITAND 0)<>0 THEN RETURN FALSE
-      830 //   // (%11 BITAND %0)<>%0 <==binary
-      840 //   IF (5 BITAND 6)<>4 THEN RETURN FALSE
-      850 //   // (%101 BITAND %110)<>%100 <==binary
-      860 //   RETURN TRUE
-      870 // ENDFUNC test'bitand
+      780 passfail("bitand", test'bitand)
+      790 FUNC test'bitand CLOSED
+      800   IF (3 BITAND 3)<>3 THEN RETURN FALSE
+      810   // (%11 BITAND %11)<>%11 <==binary
+      820   IF (3 BITAND 0)<>0 THEN RETURN FALSE
+      830   // (%11 BITAND %0)<>%0 <==binary
+      840   IF (5 BITAND 6)<>4 THEN RETURN FALSE
+      850   // (%101 BITAND %110)<>%100 <==binary
+      860   RETURN TRUE
+      870 ENDFUNC test'bitand
       880 //
-      890 // passfail("bitor", test'bitor)
-      900 // FUNC test'bitor CLOSED
-      910 //   IF (3 BITOR 3)<>3 THEN RETURN FALSE
-      920 //   // (%11 BITOR %11)<>%11 <==binary
-      930 //   IF (3 BITOR 0)<>3 THEN RETURN FALSE
-      940 //   // (%11 BITOR %0)<>%11 <==binary
-      950 //   IF (5 BITOR 6)<>7 THEN RETURN FALSE
-      960 //   // %101 BITOR %110)<>%111 <==binary
-      970 //   IF (0 BITOR 0)<>0 THEN RETURN FALSE
-      980 //   // (%0 BITOR %0)<>%0 <==binary
-      990 //   RETURN TRUE
-     1000 // ENDFUNC test'bitor
+      890 passfail("bitor", test'bitor)
+      900 FUNC test'bitor CLOSED
+      910   IF (3 BITOR 3)<>3 THEN RETURN FALSE
+      920   // (%11 BITOR %11)<>%11 <==binary
+      930   IF (3 BITOR 0)<>3 THEN RETURN FALSE
+      940   // (%11 BITOR %0)<>%11 <==binary
+      950   IF (5 BITOR 6)<>7 THEN RETURN FALSE
+      960   // %101 BITOR %110)<>%111 <==binary
+      970   IF (0 BITOR 0)<>0 THEN RETURN FALSE
+      980   // (%0 BITOR %0)<>%0 <==binary
+      990   RETURN TRUE
+     1000 ENDFUNC test'bitor
      1010 //
-     1020 // passfail("bitxor", test'bitxor)
-     1030 // FUNC test'bitxor CLOSED
-     1040 //   IF (3 BITXOR 3)<>0 THEN RETURN FALSE
-     1050 //   // (%11 BITXOR %11)<>%0 <==binary
-     1060 //   IF (3 BITXOR 0)<>3 THEN RETURN FALSE
-     1070 //   // (%11 BITXOR %0)<>%11 <==binary
-     1080 //   IF (5 BITXOR 6)<>3 THEN RETURN FALSE
-     1090 //   // (%101 BITXOR %110)<>%11 <==binary
-     1100 //   IF (0 BITXOR 0)<>0 THEN RETURN FALSE
-     1110 //   // (%0 BITXOR %0)<>%0 <==binary
-     1120 //   RETURN TRUE
-     1130 // ENDFUNC test'bitxor
+     1020 passfail("bitxor", test'bitxor)
+     1030 FUNC test'bitxor CLOSED
+     1040   IF (3 BITXOR 3)<>0 THEN RETURN FALSE
+     1050   // (%11 BITXOR %11)<>%0 <==binary
+     1060   IF (3 BITXOR 0)<>3 THEN RETURN FALSE
+     1070   // (%11 BITXOR %0)<>%11 <==binary
+     1080   IF (5 BITXOR 6)<>3 THEN RETURN FALSE
+     1090   // (%101 BITXOR %110)<>%11 <==binary
+     1100   IF (0 BITXOR 0)<>0 THEN RETURN FALSE
+     1110   // (%0 BITXOR %0)<>%0 <==binary
+     1120   RETURN TRUE
+     1130 ENDFUNC test'bitxor
      1140 //
      1150 passfail("case", test'case)
      1160 FUNC test'case CLOSED

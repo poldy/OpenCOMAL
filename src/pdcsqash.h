@@ -14,7 +14,7 @@
 #define PDCSQASH_H
 
 #define SQ_COPYRIGHT_MSG	"OpenComal/Sqash (c) 1992-2002 Muppet Lab"
-#define SQ_VERSION		0x1253
+#define SQ_VERSION		0x1254
 #define SQ_MARKER		"SqAsH"
 
 /* The sqash items */

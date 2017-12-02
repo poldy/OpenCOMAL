@@ -651,6 +651,16 @@ PRIVATE void exp_binary_i(int op, void **result, enum VAL_TYPE *type,
 		}
 		*i1 = res;
 		break;
+	
+	case bitandSYM:
+		*i1 = *i1 & *i2;
+		break;
+	case bitorSYM:
+		*i1 = *i1 | *i2;
+		break;
+	case bitxorSYM:
+		*i1 = *i1 ^ *i2;
+		break;
 
 	default:
 		fatal("exp_binary_i non-relop switch default action");
@@ -668,6 +678,7 @@ PRIVATE void exp_binary_f(int op, void **result, enum VAL_TYPE *type,
 			  void *v1, void *v2)
 {
         double *f1, *f2;
+	long i1, i2;
 
         f1 = (double *)v1;
         f2 = (double *)v2;
@@ -698,6 +709,22 @@ PRIVATE void exp_binary_f(int op, void **result, enum VAL_TYPE *type,
 	case divSYM:
 		check0(*f2 == 0);
 		*f1 = floor(*f1 / *f2);
+		break;
+
+	case bitandSYM:
+		i1 = d2int(*f1, 1);
+		i2 = d2int(*f2, 1);
+		*f1 = i1 & i2;
+		break;
+	case bitorSYM:
+		i1 = d2int(*f1, 1);
+		i2 = d2int(*f2, 1);
+		*f1 = i1 | i2;
+		break;
+	case bitxorSYM:
+		i1 = d2int(*f1, 1);
+		i2 = d2int(*f2, 1);
+		*f1 = i1 ^ i2;
 		break;
 
 	default:

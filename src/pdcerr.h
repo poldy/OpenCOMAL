@@ -21,7 +21,7 @@
 #define DEL_ERR		3	/* Delete "file" failed */
 #define NORETURN_ERR	4	/* ENDFUNC without RETURN */
 #define DIRECT_ERR	5	/* Error when executing simple_stat in direct mode */
-#define F2INT1_ERR	6	/* floating point to large to convert to int */
+#define F2INT1_ERR	6	/* floating point too large to convert to int */
 #define F2INT2_ERR	7	/* floating point contains frac part */
 #define VAL_ERR		8	/* VAL() failed */
 #define CHR_ERR		9	/* CHR$() of <0 || >255 */

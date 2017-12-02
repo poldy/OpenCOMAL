@@ -70,6 +70,9 @@ extern int yylex();
 %token	becomesSYM 
 %token	becplusSYM
 %token	becminusSYM
+%token	bitandSYM
+%token	bitorSYM
+%token	bitxorSYM
 %token	caseSYM 
 %token	chdirSYM
 %token	closedSYM 
@@ -193,6 +196,7 @@ extern int yylex();
 %left	eqlSYM neqSYM lssSYM gtrSYM leqSYM geqSYM
 %left	plusSYM minusSYM
 %left	timesSYM divideSYM inSYM divSYM modSYM
+%left	bitandSYM, bitorSYM, bitxorSYM
 %right	powerSYM
 %left	USIGN
 
@@ -1416,6 +1420,18 @@ numexp2		:	numexp2 eqlSYM numexp2
 		|	numexp2 eorSYM numexp2		
 			{
 				$$=pars_exp_binary(eorSYM,$1,$3);
+			}
+		|	numexp2 bitandSYM numexp2
+			{
+				$$=pars_exp_binary(bitandSYM,$1,$3);
+			}
+		|	numexp2 bitorSYM numexp2
+			{
+				$$=pars_exp_binary(bitorSYM,$1,$3);
+			}
+		|	numexp2 bitxorSYM numexp2
+			{
+				$$=pars_exp_binary(bitxorSYM,$1,$3);
 			}
 		|	numexp2 plusSYM numexp2		
 			{

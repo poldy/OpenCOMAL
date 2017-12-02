@@ -64,6 +64,9 @@ PRIVATE struct {
 	tnrnSYM, _ASN, "ASN"}, {
 	tnrnSYM, _ATN, "ATN"}, {
 	autoSYM, 0, "AUTO"}, {
+	bitandSYM, 0, "BITAND"}, {
+	bitorSYM, 0, "BITOR"}, {
+	bitxorSYM, 0, "BITXOR"}, {
 	caseSYM, 0, "CASE"}, {
 	chdirSYM, 0, "CHDIR"}, {
 	tnrsSYM, _CHR, "CHR$"}, {
@@ -347,6 +350,12 @@ PUBLIC const char *lex_opsym(int sym)
 	switch (sym) {
 	case andSYM:
 		return " AND ";
+	case bitandSYM:
+		return " BITAND ";
+	case bitorSYM:
+		return " BITOR ";
+	case bitxorSYM:
+		return " BITXOR ";
 	case divSYM:
 		return " DIV ";
 	case eorSYM:
