@@ -12,7 +12,7 @@
       120     PRINT keyword$;" failed"
       130   ELSE
       140     PRINT keyword$;" ";
-      150     // IF curcol>70 THEN PRINT 
+      150     IF curcol>70 THEN PRINT 
       160   ENDIF
       170 ENDPROC
       180 //
@@ -164,37 +164,37 @@
      1640   RETURN TRUE
      1650 ENDFUNC
      1660 //
-     1670 // passfail("curcol", test'curcol)
-     1680 // FUNC test'curcol CLOSED
-     1690 //   col:=CURCOL
-     1700 //   CURSOR 0,30
-     1710 //   IF CURCOL<>30 THEN RETURN FALSE
-     1720 //   CURSOR 0,col
-     1730 //   RETURN TRUE
-     1740 // ENDFUNC test'curcol
+     1670 passfail("curcol", test'curcol)
+     1680 FUNC test'curcol CLOSED
+     1690   col:=CURCOL
+     1700   CURSOR 0,30
+     1710   IF CURCOL<>30 THEN RETURN FALSE
+     1720   CURSOR 0,col
+     1730   RETURN TRUE
+     1740 ENDFUNC test'curcol
      1750 //
-     1760 // passfail("currow", test'currow)
-     1770 // FUNC test'currow CLOSED
-     1780 //   row:=CURROW
-     1790 //   CURSOR 10,0
-     1800 //   IF CURROW<>10 THEN RETURN FALSE
-     1810 //   CURSOR row,O
-     1820 //   RETURN TRUE
-     1830 // ENDFUNC test'currow
+     1760 passfail("currow", test'currow)
+     1770 FUNC test'currow CLOSED
+     1780   row:=CURROW
+     1790   CURSOR 10,0
+     1800   IF CURROW<>10 THEN RETURN FALSE
+     1810   CURSOR row,0
+     1820   RETURN TRUE
+     1830 ENDFUNC test'currow
      1840 //
-     1850 // passfail("cursor", test'cursor)
-     1860 // FUNC test'cursor CLOSED
-     1870 //   row:=CURROW; col:=CURCOL
-     1880 //   CURSOR 10,30
-     1890 //   IF CURROW<>10 THEN RETURN FALSE
-     1900 //   IF CURCOL<>30 THEN RETURN FALSE
-     1910 //   CURSOR 0,20
-     1920 //   IF CURROW<>10 THEN RETURN FALSE
-     1930 //   CURSOR 15,0
-     1940 //   IF CURCOL<>20 THEN RETURN FALSE
-     1950 //   CURSOR row,eol
-     1960 //   RETURN TRUE
-     1970 // ENDFUNC test'cursor
+     1850 passfail("cursor", test'cursor)
+     1860 FUNC test'cursor CLOSED
+     1870   row:=CURROW; col:=CURCOL
+     1880   CURSOR 10,30
+     1890   IF CURROW<>10 THEN RETURN FALSE
+     1900   IF CURCOL<>30 THEN RETURN FALSE
+     1910   CURSOR 0,20
+     1920   IF CURROW<>10 THEN RETURN FALSE
+     1930   CURSOR 15,0
+     1940   IF CURCOL<>20 THEN RETURN FALSE
+     1950   CURSOR row,col
+     1960   RETURN TRUE
+     1970 ENDFUNC test'cursor
      1980 //
      1990 passfail("data", test'data)
      2000 FUNC test'data CLOSED
@@ -593,13 +593,13 @@
      5930   RETURN FALSE
      5940 ENDFUNC
      5950 //
-     5960 // passfail("page", test'page)
-     5970 // FUNC test'page CLOSED
-     5980 //   PAGE
-     5990 //   IF CURCOL<>1 THEN RETURN FALSE
-     6000 //   IF CURROW<>1 THEN RETURN FALSE
-     6010 //   RETURN TRUE
-     6020 // ENDFUNC test'page
+     5960 passfail("page", test'page)
+     5970 FUNC test'page CLOSED
+     5980   PAGE
+     5990   IF CURCOL<>1 THEN RETURN FALSE
+     6000   IF CURROW<>1 THEN RETURN FALSE
+     6010   RETURN TRUE
+     6020 ENDFUNC test'page
      6030 //
      6040 passfail("pi", test'pi)
      6050 FUNC test'pi CLOSED

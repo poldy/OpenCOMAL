@@ -442,10 +442,16 @@ PUBLIC void sys_page(FILE * f)
 }
 
 
-PUBLIC void sys_cursor(FILE * f, long x, long y)
+PUBLIC void sys_cursor(FILE * f, long y, long x)
 {
-	ext_cursor(x, y);
-	CHECK(move, y, x);
+	ext_cursor(y, x);
+	if (y == 0) {
+		y = sys_currow();
+	}
+	if (x == 0) {
+		x = sys_curcol();
+	}
+	CHECK(move, y - 1, x - 1);
 }
 
 
@@ -454,7 +460,7 @@ PUBLIC int sys_curcol(void)
 	int y, x;
 
 	getyx(stdscr, y, x);
-	return x;
+	return x + 1;
 }
 
 
@@ -463,7 +469,7 @@ PUBLIC int sys_currow(void)
 	int y, x;
 
 	getyx(stdscr, y, x);
-	return y;
+	return y + 1;
 }
 
 
