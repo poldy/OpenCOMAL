@@ -180,6 +180,14 @@ PRIVATE void exp_const(struct expression *exp, void **result,
 	case _TRUE:
 		*result = val_int(true, NULL, type);
 		break;
+	
+	case _CURCOL:
+		*result = val_int(sys_curcol(), NULL, type);
+		break;
+	
+	case _CURROW:
+		*result = val_int(sys_currow(), NULL, type);
+		break;
 
 	default:
 		fatal("exp_const default action");

@@ -24,6 +24,8 @@ extern void sys_page(FILE * f);
 extern int sys_system(char *cmd);
 extern void sys_setpaged(int flag);
 extern void sys_cursor(FILE * f, long x, long y);
+extern int sys_curcol(void);
+extern int sys_currow(void);
 extern void sys_nl(int stream);
 extern void sys_screen_readjust(void);
 extern int sys_yn(int stream, const char *s);

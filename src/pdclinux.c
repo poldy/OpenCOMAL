@@ -449,6 +449,24 @@ PUBLIC void sys_cursor(FILE * f, long x, long y)
 }
 
 
+PUBLIC int sys_curcol(void)
+{
+	int y, x;
+
+	getyx(stdscr, y, x);
+	return x;
+}
+
+
+PUBLIC int sys_currow(void)
+{
+	int y, x;
+
+	getyx(stdscr, y, x);
+	return y;
+}
+
+
 PUBLIC void sys_nl(int stream)
 {
 	ext_nl();

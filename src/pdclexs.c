@@ -70,6 +70,8 @@ PRIVATE struct {
 	closeSYM, 0, "CLOSE"}, {
 	closedSYM, 0, "CLOSED"}, {
 	contSYM, 0, "CON"}, {
+	rnSYM, _CURCOL, "CURCOL"}, {
+	rnSYM, _CURROW, "CURROW"}, {
 	cursorSYM, 0, "CURSOR"}, {
 	tnrnSYM, _COS, "COS"}, {
 	dataSYM, 0, "DATA"}, {

@@ -56,4 +56,7 @@
 #define _FRAC			4037
 #define _ROUND			4038
 
+#define _CURCOL			4039
+#define _CURROW			4040
+
 #endif
