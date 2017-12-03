@@ -335,8 +335,8 @@ PRIVATE struct string *my_chr(void **result, enum VAL_TYPE *type)
 	else
 		num = d2int(**(double **) result, 1);
 
-	if (num <= 0 || num > 255)
-		run_error(CHR_ERR, "Illegal value for CHR$ (0<x<=255)");
+	if (num < 0 || num > 255)
+		run_error(CHR_ERR, "Illegal value for CHR$ (0<=x<=255)");
 
 	s->s[0] = (char) num;
 	s->s[1] = '\0';
