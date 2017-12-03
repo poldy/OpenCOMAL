@@ -447,6 +447,8 @@ PRIVATE struct {
 	, {
 	randomizeSYM, sizeof(c_line.lc.exp)}
 	, {
+	reportSYM, sizeof(c_line.lc.exp)}
+	, {
 	-1, -1}
 };
 

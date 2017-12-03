@@ -157,6 +157,7 @@ extern int yylex();
 %token	refSYM
 %token	renumberSYM 
 %token	repeatSYM 
+%token	reportSYM
 %token	restoreSYM 
 %token  retrySYM
 %token	returnSYM 
@@ -239,7 +240,7 @@ extern int yylex();
 %type	<cl>		rmdir_stat mkdir_stat repeat_stat
 %type	<cl>		local_stat trap_stat dir_stat unit_stat static_stat
 %type	<cl>		module_stat export_stat use_stat
-%type	<cl>		randomize_stat
+%type	<cl>		randomize_stat report_stat
 
 %type	<pcl>		optsimple_stat 
 
@@ -496,6 +497,7 @@ simple_stat	:	close_stat
 		|	print_stat
 		|	randomize_stat
 		|	read_stat
+		|	report_stat
 		|	restore_stat
 		|	return_stat
 		|	rmdir_stat
@@ -1109,6 +1111,12 @@ read_stat	:	readSYM optfile lval_list
 				$$.lc.readrec.lvalroot=(struct exp_list *)my_reverse($3);
 			}
 		;
+
+report_stat	:	reportSYM numexp
+	    		{
+				$$.cmd=reportSYM;
+				$$.lc.exp=$2;
+			}
 
 restore_stat	:	restoreSYM optid2
 			{

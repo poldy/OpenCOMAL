@@ -337,15 +337,15 @@
      3370   DATA 13, 14
      3380 ENDFUNC
      3390 //
-     3400 // passfail("err", test'err)
-     3410 // FUNC test'err CLOSED
-     3420 //   TRAP
-     3430 //     REPORT 13
-     3440 //   HANDLER
-     3450 //     IF ERR<>13 THEN RETURN FALSE
-     3460 //   ENDTRAP
-     3470 //   RETURN TRUE
-     3480 // ENDFUNC test'err
+     3400 passfail("err", test'err)
+     3410 FUNC test'err CLOSED
+     3420   TRAP
+     3430     REPORT 13
+     3440   HANDLER
+     3450     IF ERR<>13 THEN RETURN FALSE
+     3460   ENDTRAP
+     3470   RETURN TRUE
+     3480 ENDFUNC test'err
      3490 //
      3500 passfail("errtext", test'errtext)
      3510 FUNC test'errtext CLOSED
@@ -686,16 +686,16 @@
      6860   DATA 10, 3, 5, 4
      6870 ENDFUNC
      6880 //
-     6890 // passfail("report", test'report)
-     6900 // FUNC test'report CLOSED
-     6910 //   TRAP
-     6920 //     REPORT 13
-     6930 //     RETURN FALSE
-     6940 //   HANDLER
-     6950 //     IF ERR=13 THEN RETURN TRUE
-     6960 //   ENDTRAP
-     6970 //   RETURN FALSE
-     6980 // ENDFUNC
+     6890 passfail("report", test'report)
+     6900 FUNC test'report CLOSED
+     6910   TRAP
+     6920     REPORT 13
+     6930     RETURN FALSE
+     6940   HANDLER
+     6950     IF ERR=13 THEN RETURN TRUE
+     6960   ENDTRAP
+     6970   RETURN FALSE
+     6980 ENDFUNC
      6990 //
      7000 passfail("restore", test'restore)
      7010 FUNC test'restore CLOSED

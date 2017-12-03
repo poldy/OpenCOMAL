@@ -168,6 +168,7 @@ PRIVATE struct {
 	renumberSYM, 0, "RENUMBER"}, {
 	renumberSYM, 0, "RENUM"}, {
 	repeatSYM, 0, "REPEAT"}, {
+	reportSYM, 0, "REPORT"}, {
 	restoreSYM, 0, "RESTORE"}, {
 	retrySYM, 0, "RETRY"}, {
 	returnSYM, 0, "RETURN"}, {
