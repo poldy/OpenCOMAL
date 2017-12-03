@@ -102,9 +102,9 @@ PRIVATE char wc_to_latin(wchar_t wc)
 		
 PRIVATE int my_getch_horse(wint_t *c, char *lc)
 {
-	int status;
-
 	while (1) {
+		int status;
+
 		status = get_wch(c);
 
                 switch (status) {
@@ -143,9 +143,10 @@ PRIVATE int my_getch()
 	wint_t c;
 	int i;
 	unsigned char lc;
-        int status;
 
 	while (1) {
+        	int status;
+
 		status = my_getch_horse(&c, (char *)&lc);
 
                 switch (status) {
@@ -364,6 +365,12 @@ PUBLIC void  sys_rand(long *result, long *scale)
 {
 	*result = rand();
 	*scale=RAND_MAX;
+}
+
+
+PUBLIC void sys_randomize(long seed)
+{
+	srand(seed);
 }
 
 

@@ -18,12 +18,13 @@
 extern void sys_init(void);
 extern void sys_tini(void);
 extern void sys_rand(long *result, long *scale);
+extern void sys_randomize(long seed);
 extern int sys_escape(void);
 extern void sys_put(int stream, const char *buf, long len);
 extern void sys_page(FILE * f);
 extern int sys_system(char *cmd);
 extern void sys_setpaged(int flag);
-extern void sys_cursor(FILE * f, long x, long y);
+extern void sys_cursor(FILE * f, long y, long x);
 extern int sys_curcol(void);
 extern int sys_currow(void);
 extern void sys_nl(int stream);

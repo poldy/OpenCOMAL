@@ -286,6 +286,7 @@ PRIVATE void free_horse(struct comal_line *line)
 	case exitSYM:
 	case traceSYM:
 	case untilSYM:
+	case randomizeSYM:
 		free_exp(line->lc.exp);
 		break;
 

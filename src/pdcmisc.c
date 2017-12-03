@@ -445,6 +445,8 @@ PRIVATE struct {
 	, {
 	idSYM, sizeof(c_line.lc.id)}
 	, {
+	randomizeSYM, sizeof(c_line.lc.exp)}
+	, {
 	-1, -1}
 };
 

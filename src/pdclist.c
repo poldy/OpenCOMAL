@@ -593,6 +593,7 @@ PRIVATE void list_horse(char **buf, struct comal_line *line)
 	case elifSYM:
 	case traceSYM:
 	case untilSYM:
+	case randomizeSYM:
 		list_symsp(buf, line->cmd);
 		list_exp(buf, line->lc.exp);
 		break;

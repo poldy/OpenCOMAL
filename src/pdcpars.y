@@ -151,6 +151,7 @@ extern int yylex();
 %token	procSYM 
 %token	quitSYM
 %token	randomSYM 
+%token	randomizeSYM
 %token	readSYM 
 %token	read_onlySYM 
 %token	refSYM
@@ -196,7 +197,7 @@ extern int yylex();
 %left	eqlSYM neqSYM lssSYM gtrSYM leqSYM geqSYM
 %left	plusSYM minusSYM
 %left	timesSYM divideSYM inSYM divSYM modSYM
-%left	bitandSYM, bitorSYM, bitxorSYM
+%left	bitandSYM bitorSYM bitxorSYM
 %right	powerSYM
 %left	USIGN
 
@@ -209,6 +210,7 @@ extern int yylex();
 %type	<exp>		optstep optexp lvalue numlvalue numlvalue2 strlvalue
 %type	<exp>		exp numexp stringexp xid numexp2 stringexp2 opt_stringexp
 %type	<exp>		string_factor strlvalue2 optnumlvalue opt_arg
+%type	<exp>		opt_numexp
 %type	<extptr>	opt_external
 %type	<twoexp>	file_designator substr_spec substr_spec2
 %type	<twoexpp>	optfile
@@ -237,6 +239,7 @@ extern int yylex();
 %type	<cl>		rmdir_stat mkdir_stat repeat_stat
 %type	<cl>		local_stat trap_stat dir_stat unit_stat static_stat
 %type	<cl>		module_stat export_stat use_stat
+%type	<cl>		randomize_stat
 
 %type	<pcl>		optsimple_stat 
 
@@ -491,6 +494,7 @@ simple_stat	:	close_stat
 		|	open_stat
 		|	os_stat
 		|	print_stat
+		|	randomize_stat
 		|	read_stat
 		|	restore_stat
 		|	return_stat
@@ -1092,6 +1096,12 @@ proc_stat	:	procSYM idSYM procfunc_head optclosed opt_external
 			}
 		;
 
+randomize_stat	:	randomizeSYM opt_numexp
+	       		{
+				$$.cmd=randomizeSYM;
+				$$.lc.exp=$2;
+			}
+
 read_stat	:	readSYM optfile lval_list
 			{
 				$$.cmd=readSYM;
@@ -1559,6 +1569,13 @@ stringexp2	:	stringexp2 plusSYM string_factor
 
 opt_stringexp	:	stringexp
 		|	/* epsilon */
+			{
+				$$=NULL;
+			}
+		;
+
+opt_numexp	:	numexp
+	   	|	/* epsilon */
 			{
 				$$=NULL;
 			}

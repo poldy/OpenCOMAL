@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <time.h>
 
 
 #ifdef MSDOS
@@ -2344,6 +2345,15 @@ PUBLIC int exec_line(struct comal_line *line)
 
 	case retrySYM:
 		return retrySYM;
+	
+	case randomizeSYM:
+		if (line->lc.exp) {
+			sys_randomize(calc_intexp(line->lc.exp));
+		} else {
+			sys_randomize(time(NULL));
+		}
+
+		break;
 
 	default:
 		fatal("exec_line default action");

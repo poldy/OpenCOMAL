@@ -161,6 +161,7 @@ PRIVATE struct {
 	quitSYM, 0, "BYE"}, {
 	tnrnSYM, _RAD, "RAD"}, {
 	randomSYM, 0, "RANDOM"}, {
+	randomizeSYM, 0, "RANDOMIZE"}, {
 	readSYM, 0, "READ"}, {
 	read_onlySYM, 0, "READ ONLY"}, {
 	refSYM, 0, "REF"}, {

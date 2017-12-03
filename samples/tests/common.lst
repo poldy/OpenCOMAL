@@ -635,22 +635,22 @@
      6350   //
      6360 ENDFUNC
      6370 //
-     6380 // passfail("randomize", test'randomize)
-     6390 // FUNC test'randomize CLOSED
-     6400 //   RANDOMIZE
-     6410 //   FOR x:=1 TO 50 DO
-     6420 //     r:=RND(1,20)
-     6430 //     IF (r<1) OR (r>20) THEN RETURN FALSE
-     6440 //   ENDFOR x
-     6450 //   DIM rarray(1:9)
-     6460 //   RANDOMIZE 9 //specific set of numbers
-     6470 //   FOR x=1 TO 9 DO rarray(x)=RND(1,99)
-     6480 //   RANDOMIZE 9 //reset to specific set
-     6490 //   FOR x=1 TO 9 DO
-     6500 //     IF RND(1,99)<>rarray(x) THEN RETURN FALSE
-     6510 //   ENDFOR x
-     6520 //   RETURN TRUE
-     6530 // ENDFUNC test'randomize
+     6380 passfail("randomize", test'randomize)
+     6390 FUNC test'randomize CLOSED
+     6400   RANDOMIZE
+     6410   FOR x:=1 TO 50 DO
+     6420     r:=RND(1,20)
+     6430     IF (r<1) OR (r>20) THEN RETURN FALSE
+     6440   ENDFOR x
+     6450   DIM rarray(1:9)
+     6460   RANDOMIZE 9 //specific set of numbers
+     6470   FOR x=1 TO 9 DO rarray(x)=RND(1,99)
+     6480   RANDOMIZE 9 //reset to specific set
+     6490   FOR x=1 TO 9 DO
+     6500     IF RND(1,99)<>rarray(x) THEN RETURN FALSE
+     6510   ENDFOR x
+     6520   RETURN TRUE
+     6530 ENDFUNC test'randomize
      6540 //
      6550 passfail("read", test'read)
      6560 FUNC test'read CLOSED
@@ -726,7 +726,7 @@
      7260 //
      7270 passfail("rnd", test'rnd)
      7280 FUNC test'rnd CLOSED
-     7290   // RANDOMIZE
+     7290   RANDOMIZE
      7300   FOR x:=1 TO 50 DO
      7310     r:=RND(1,20)
      7320     IF (r<1) OR (r>20) THEN RETURN FALSE
