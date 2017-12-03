@@ -495,13 +495,13 @@
      4950   RETURN TRUE
      4960 ENDFUNC
      4970 //
-     4980 // passfail("key", test'key)
-     4990 // FUNC test'key CLOSED
-     5000 //   WHILE KEY$>CHR$(0) DO NULL
-     5010 //   IF KEY$>"" THEN RETURN FALSE
-     5020 //   IF LEN(KEY$)>0 THEN RETURN FALSE
-     5030 //   RETURN TRUE
-     5040 // ENDFUNC test'key
+     4980 passfail("key", test'key)
+     4990 FUNC test'key CLOSED
+     5000   WHILE KEY$>CHR$(0) DO NULL
+     5010   IF KEY$>"" THEN RETURN FALSE
+     5020   IF LEN(KEY$)>0 THEN RETURN FALSE
+     5030   RETURN TRUE
+     5040 ENDFUNC test'key
      5050 //
      5060 passfail("label", test'label)
      5070 FUNC test'label CLOSED
