@@ -110,7 +110,7 @@ PRIVATE struct {
 	rnSYM, _ERR, "ERR"}, {
 	rnSYM, _ERRLINE, "ERRLINE"}, {
 	rsSYM, _ERRTEXT, "ERRTEXT$"}, {
-	escSYM, 0, "ESC"}, {
+	escSYM, _ESC, "ESC"}, {
 	execSYM, 0, "EXEC"}, {
 	exitSYM, 0, "EXIT"}, {
 	exportSYM, 0, "EXPORT"}, {

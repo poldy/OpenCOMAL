@@ -358,14 +358,14 @@
      3580   RETURN FALSE
      3590 ENDFUNC
      3600 //
-     3610 // passfail("esc", test'esc)
-     3620 // FUNC test'esc CLOSED
-     3630 //   TRAP ESC-
-     3640 //   TRAP ESC+
-     3650 //   IF ESC THEN NULL
-     3660 //   IF ESC THEN RETURN FALSE
-     3670 //   RETURN TRUE
-     3680 // ENDFUNC test'esc
+     3610 passfail("esc", test'esc)
+     3620 FUNC test'esc CLOSED
+     3630   TRAP ESC-
+     3640   TRAP ESC+
+     3650   IF ESC THEN NULL
+     3660   IF ESC THEN RETURN FALSE
+     3670   RETURN TRUE
+     3680 ENDFUNC test'esc
      3690 //
      3700 passfail("exec", test'exec)
      3710 FUNC test'exec CLOSED

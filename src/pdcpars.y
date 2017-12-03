@@ -108,7 +108,6 @@ extern int yylex();
 %token	eolnSYM 
 %token	eorSYM 
 %token	eqlSYM 
-%token	escSYM
 %token	execSYM 
 %token	exitSYM
 %token	exportSYM
@@ -188,7 +187,7 @@ extern int yylex();
 %token	whileSYM 
 %token	writeSYM
 
-%token	<inum>		rnSYM rsSYM tnrnSYM tnrsSYM tsrnSYM tonrsSYM tsrsSYM
+%token	<inum>		rnSYM rsSYM tnrnSYM tnrsSYM tsrnSYM tonrsSYM tsrsSYM escSYM
 %token	<dubbel>	floatnumSYM
 %token	<id>		idSYM intidSYM stringidSYM
 %token	<num>		intnumSYM
@@ -1545,6 +1544,10 @@ numexp2		:	numexp2 eqlSYM numexp2
 				$$=pars_exp_binary(_RND,$3,$5);
 			}
 		|	rnSYM
+			{
+				$$=pars_exp_const($1);
+			}
+		|	escSYM
 			{
 				$$=pars_exp_const($1);
 			}

@@ -58,5 +58,6 @@
 
 #define _CURCOL			4039
 #define _CURROW			4040
+#define _ESC			4041
 
 #endif
