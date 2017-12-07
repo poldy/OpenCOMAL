@@ -13,11 +13,11 @@
       120 PROC update
       130   LOCAL n#, k#
       140   FOR n#:=1 TO 19 DO
-      150     CURSOR 1,n#
+      150     CURSOR n#,1
       160     PRINT USING "######": a#(n#);
       170     PRINT "  ";
       180     FOR k#:=1 TO a#(n#) DIV 250 DO PRINT "*";
       190   ENDFOR n#
-      200   CURSOR 1,22
+      200   CURSOR 22,1
       210   PRINT "Samples so far: ";f#;
       220 ENDPROC update

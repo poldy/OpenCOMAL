@@ -6,12 +6,12 @@
        60   plot(f, LN(f))
        70 ENDFOR
        80 //
-       90 CURSOR 1,23
+       90 CURSOR 23,1
       100 PRINT "If the above looks like a natural logarithm curve, all might be ok"
       110 //
       120 PROC plot(x, y)
       130   x#:=INT(x*20)
       140   y#:=11-5*y
-      150   CURSOR x#,y#
+      150   CURSOR y#,x#
       160   PRINT "*";
       170 ENDPROC

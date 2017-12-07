@@ -9,7 +9,7 @@
        90   num:=RND(0)
       100   sum1:+num
       110   sum2:+0.500000
-      120   CURSOR 1,4
+      120   CURSOR 4,1
       130   PRINT sum1
       140   PRINT sum2
       150   PRINT ABS(sum1-sum2)

@@ -109,7 +109,7 @@
      1090 //
      1100 PROC output2
      1110   FOR p:=1 TO aantalp DO
-     1120     CURSOR tijd,p
+     1120     CURSOR p,tijd
      1130     IF bewerking(p)=0 THEN
      1140       PRINT " ";
      1150     ELSE

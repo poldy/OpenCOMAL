@@ -3,7 +3,7 @@
        30 PAGE
        40 PRINT "Please stand by for arc tangent check"
        50 FOR f:=0 TO 2*PI STEP 0.050000 DO
-       60   CURSOR 1,4
+       60   CURSOR 4,1
        70   PRINT USING "#.####": f;
        80   d:=(ABS(f-ATN(TAN(f)))) MOD PI
        90   IF d>0.000000 THEN STOP

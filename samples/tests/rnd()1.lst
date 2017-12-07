@@ -8,6 +8,6 @@
        80 WHILE TRUE DO
        90   a#:=RND(1)
       100   count#(a#):+1
-      110   CURSOR 1,a#+4
+      110   CURSOR a#+4,1
       120   PRINT count#(a#);
       130 ENDWHILE

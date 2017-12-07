@@ -3,7 +3,7 @@
        30 PAGE
        40 PRINT "Please stand by for tangent check"
        50 FOR f:=0 TO 2*PI STEP PI/32 DO
-       60   CURSOR 1,4
+       60   CURSOR 4,1
        70   PRINT USING "#.########": f;
        80   d:=TAN(f)-SIN(f)/COS(f)
        90   IF ABS(d)>0.000000 THEN STOP

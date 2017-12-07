@@ -36,7 +36,8 @@ LDFLAGS+=-L/usr/local/opt/readline/lib -lreadline
 ifdef DEBUG
 	CFLAGS+=-O0 -ggdb
 else
-	CFLAGS+=-DNDEBUG -Os
+	CFLAGS+=-DNDEBUG -Os -flto
+	LDFLAGS+=-flto
 endif
 ifeq ($(CC),c++)
 	CFLAGS+=-Weffc++ -std=c++14

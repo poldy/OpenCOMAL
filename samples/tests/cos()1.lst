@@ -5,12 +5,12 @@
        50 FOR f:=0 TO 2*PI STEP PI/32 DO
        60   plot(f, COS(f))
        70 ENDFOR
-       80 CURSOR 1,23
+       80 CURSOR 23,1
        90 PRINT "If the above looks like a cosine curve, it might be ok"
       100 //
       110 PROC plot(x, y)
       120   x#:=1+INT(x*10)
       130   y#:=11+10*y
-      140   CURSOR x#,y#
+      140   CURSOR y#,x#
       150   PRINT "*";
       160 ENDPROC

@@ -3,7 +3,7 @@
        30 PAGE
        40 PRINT "Please stand by for arc cosinus check"
        50 FOR f:=-1 TO 1 STEP 0.010000 DO
-       60   CURSOR 1,4
+       60   CURSOR 4,1
        70   PRINT USING "#.#####": f;
        80   d:=ABS(f-COS(ACS(f)))
        90   IF d>0.000000 THEN STOP

@@ -4,12 +4,12 @@
        40 //
        50 x#:=20
        60 FOR y#:=2 TO 21 DO
-       70   CURSOR x#,y#
+       70   CURSOR y#,x#
        80   PRINT "XX";
-       90   CURSOR x#,23-y#
+       90   CURSOR 23-y#,x#
       100   PRINT "XX";
       110   x#:+2
       120 ENDFOR
       130 //
-      140 CURSOR 1,23
+      140 CURSOR 23,1
       150 PRINT "If the above looks like a big X, all is ok"

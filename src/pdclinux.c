@@ -451,6 +451,9 @@ PUBLIC void sys_page(FILE * f)
 
 PUBLIC void sys_cursor(FILE * f, long y, long x)
 {
+        if (y > COLS || x > LINES) {
+                run_error(CURSOR_ERR, "Coordinates off-screen");
+        }
 	ext_cursor(y, x);
 	if (y == 0) {
 		y = sys_currow();

@@ -12,7 +12,7 @@
       120 //
       130 PROC loopje(y#)
       140   FOR f#:=0 TO 500 DO
-      150     CURSOR 1,y#
+      150     CURSOR y#,1
       160     PRINT f#;
       170   ENDFOR
       180 ENDPROC
