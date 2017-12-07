@@ -1,0 +1,102 @@
+       10 // "A Way to File" Demo.
+       20 // Ported from Forth code by Doug Hoffman, apparently in turn derived from
+       30 // Brodie.
+       40 // NB: This PROC is designed to be EXECed from 'awaytofile1.lst'.
+       50 //
+       60 // It's interesting how parallel, fixed-length arrays can do most of the
+       70 // things other langauges use tuples, lists and a heap for. trees1.lst
+       80 // teaches a similar lesson.
+       90 
+      100 PROC awaytofile2 CLOSED
+      110   rec_count#:=0
+      120   max_recs#:=256
+      130   curr_rec#:=0
+      140   kind$:=""
+      150   what$:=""
+      160   DIM surnames$(max_recs#), givens$(max_recs#), jobs$(max_recs#), phones$(max_recs#)
+      170   my_open("mydatafile.dat")
+      180   my_print
+      190   find("job", "news")
+      200   get("job")
+      210   all
+      220   
+      230   // Open the named file and read all records into memory
+      240   PROC my_open(file$) CLOSED
+      250     IMPORT rec_count#, surnames$(), givens$(), jobs$(), phones$()
+      260     TRAP
+      270       OPEN FILE 1, file$, READ 
+      280       INPUT FILE 1: rec_count#
+      290       FOR n#:=1 TO rec_count# DO
+      300         INPUT FILE 1: surnames$(n#), givens$(n#), jobs$(n#), phones$(n#)
+      310       ENDFOR
+      320       CLOSE FILE 1
+      330     HANDLER
+      340       PRINT "File '";file$;"' not found"
+      350     ENDTRAP
+      360   ENDPROC
+      370   
+      380   // Print the contents of all records and fields
+      390   PROC my_print CLOSED
+      400     IMPORT rec_count#, surnames$(), givens$(), jobs$(), phones$()
+      410     FOR n#:=1 TO rec_count# DO
+      420       PRINT surnames$(n#);",";givens$(n#);",";jobs$(n#);",";phones$(n#)
+      430     ENDFOR
+      440   ENDPROC
+      450   
+      460   // Find the record in which there is a match between the contents of the
+      470   // given field and the given string
+      480   PROC find(field$, string$)
+      490     curr_rec#:=0
+      500     kind$:=field$
+      510     what$:=string$
+      520     find_internal(field$, string$, TRUE)
+      530   ENDPROC
+      540   
+      550   PROC find_internal(field$, string$, first_only#)
+      560     CASE field$ OF
+      570     WHEN "surname"
+      580       find_kind(surnames$(), string$, first_only#)
+      590     WHEN "given"
+      600       find_kind(givens$(), string$, first_only#)
+      610     WHEN "job"
+      620       find_kind(jobs$(), string$, first_only#)
+      630     WHEN "phone"
+      640       find_kind(phones$(), string$, first_only#)
+      650     ENDCASE
+      660   ENDPROC
+      670   
+      680   PROC find_kind(fields$(), string$, first_only#)
+      690     FOR curr_rec#:=1 TO rec_count# DO
+      700       IF string$ IN fields$(curr_rec#) THEN
+      710         print_name(curr_rec#)
+      720         IF first_only# THEN
+      730           RETURN 
+      740         ENDIF
+      750       ENDIF
+      760     ENDFOR
+      770   ENDPROC
+      780   
+      790   PROC print_name(record#)
+      800     PRINT givens$(record#);" ";surnames$(record#)
+      810   ENDPROC
+      820   
+      830   // Prints the contents of the given type of field from the current record
+      840   PROC get(field$)
+      850     CASE field$ OF
+      860     WHEN "surname"
+      870       PRINT surnames$(curr_rec#)
+      880     WHEN "given"
+      890       PRINT givens$(curr_rec#)
+      900     WHEN "job"
+      910       PRINT jobs$(curr_rec#)
+      920     WHEN "phone"
+      930       PRINT phones$(curr_rec#)
+      940     ENDCASE
+      950   ENDPROC
+      960   
+      970   // Beginning at the top of the file, use kind$ to determine type of field
+      980   // and find all matches on what$
+      990   PROC all
+     1000     find_internal(kind$, what$, FALSE)
+     1010   ENDPROC
+     1020 ENDPROC

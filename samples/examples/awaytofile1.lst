@@ -1,0 +1,50 @@
+       10 // "A Way to File" Demo.
+       20 // This program sets up the input data file and should chain to 'awaytofile2.lst'
+       30 // to process it.
+       40 
+       50 OPEN FILE 1, "mydatafile.dat", WRITE 
+       60 PRINT FILE 1: 0
+       70 READ surname$
+       80 rec_count#:=0
+       90 WHILE surname$<>"***" DO
+      100   READ firstname$, job$, phone$
+      110   PRINT FILE 1: surname$,firstname$,job$,phone$
+      120   rec_count#:+1
+      130   READ surname$
+      140 ENDWHILE
+      150 CLOSE FILE 1
+      160 OPEN FILE 1, "mydatafile.dat", WRITE 
+      170 PRINT FILE 1: rec_count#
+      180 CLOSE FILE 1
+      190 awaytofile2
+      200 PROC awaytofile2 EXTERNAL "awaytofile2.cml"
+      210 
+      220 // ==============================================================
+      230 
+      240 DATA "Fillmore", "Millard", "president", "NO PHONE"
+      250 DATA "Lincoln", "Abraham", "president", "NO PHONE"
+      260 DATA "Bronte", "Emily", "writer", "NO PHONE"
+      270 DATA "Rather", "Dan", "newscaster", "555-9876"
+      280 DATA "Fitzgerald", "Ella", "singer", "555-6789"
+      290 DATA "Savitch", "Jessica", "newscaster", "555-9653"
+      300 DATA "Mc Cartney", "Paul", "songwriter", "555-1212"
+      310 DATA "Washington", "George", "president", "NO PHONE"
+      320 DATA "Reynolds", "Frank", "newscaster", "555-8765"
+      330 DATA "Sills", "Beverley", "opera star", "555-9876"
+      340 DATA "Ford", "Henry", "capitalist", "NO PHONE"
+      350 DATA "Dewhurst", "Coleen", "actress", "555-9876"
+      360 DATA "Wonder", "Stevie", "songwriter", "555-0097"
+      370 DATA "Fuller", "Buckminster", "world architect", "555-7604"
+      380 DATA "Rawles", "John", "philosopher", "555-9702"
+      390 DATA "Trudeau", "Garry", "cartoonist", "555-9832"
+      400 DATA "Van Buren", "Abigail", "columnist", "555-8743"
+      410 DATA "Abzug", "Bella", "politician", "555-4443"
+      420 DATA "Thompson", "Hunter S.", "gonzo journalist", "555-9854"
+      430 DATA "Sinatra", "Frank", "singer", "555-9412"
+      440 DATA "Jabbar", "Kareem Abdul", "basketball player", "555-4439"
+      450 DATA "Mc Gee", "Travis", "fictitious detective", "555-8887"
+      460 DATA "Didion", "Joan ", "writer", "555-0009"
+      470 DATA "Frazetta", "Frank", "artist", "555-9991"
+      480 DATA "Henson", "Jim", "puppeteer", "555-0001"
+      490 DATA "Sagan", "Carl", "astronomer", "555-7070"
+      500 DATA "***"
