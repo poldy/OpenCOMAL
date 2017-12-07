@@ -6,7 +6,7 @@
        60   CURSOR 4,1
        70   PRINT USING "#.####": f;
        80   d:=(ABS(f-ATN(TAN(f)))) MOD PI
-       90   IF d>0.000000 THEN STOP
+       90   IF d>0.0000001 THEN STOP
       100 ENDFOR
       110 PRINT 
       120 PRINT "No abnormal differences found"

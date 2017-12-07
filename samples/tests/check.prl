@@ -1,7 +1,7 @@
        10 // check
        20 // External procedure used in checking programs
        30 //
-       40 PROC check(truth#)
+       40 PROC check(truth#) CLOSED
        50   IF NOT(truth#) THEN
        60     PRINT "Check failed"
        70     STOP
