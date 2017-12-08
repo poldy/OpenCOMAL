@@ -16,6 +16,7 @@ TODO
 - Document the array rvalue stuff that changed in 0.2.5-pre3
 - Document CHDIR, MKDIR, RMDIR, KEY$ and INKEY$
 - Document UPPER$ and LOWER$
+- Document CURROW, CURCOL, BITAND, BITOR, BITXOR, RANDOMIZE, REPORT, ESC
 
 
 1. Intro Info
