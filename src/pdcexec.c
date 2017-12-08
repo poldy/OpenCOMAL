@@ -1248,6 +1248,10 @@ PRIVATE void exec_open(struct comal_line *line)
 	struct file_rec *frec;
 	struct open_rec *o = &line->lc.openrec;
 	int flags = 0;
+        const char *inbuf;
+        char *outbuf;
+        size_t inbytesleft, outbytesleft;
+        char fname[PATH_MAX];
 
 	calc_exp(o->filename, (void **) &name, &type);
 	frec = (struct file_rec *)mem_alloc(RUN_POOL, sizeof(struct file_rec));
@@ -1292,7 +1296,13 @@ PRIVATE void exec_open(struct comal_line *line)
 		fatal("open filemode switch default action");
 	}
 
-	frec->hfno = open(name->s, flags | O_BINARY, S_IRUSR | S_IWUSR);
+        inbuf = name->s;
+        inbytesleft = strlen(name->s);
+        outbuf = fname;
+        outbytesleft = PATH_MAX;
+        iconv(latin_to_utf8, (char **)&inbuf, &inbytesleft, &outbuf, &outbytesleft);
+        *outbuf = '\0';
+	frec->hfno = open(fname, flags | O_BINARY, S_IRUSR | S_IWUSR);
 
 	if (frec->hfno == -1)
 		run_error(OPEN_ERR, "OPEN error: %s", strerror(errno));

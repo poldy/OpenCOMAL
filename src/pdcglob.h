@@ -39,6 +39,7 @@
 #include <stdio.h>
 #include <setjmp.h>
 #include <locale.h>
+#include <iconv.h>
 
 #define PRIVATE static
 #define PUBLIC
@@ -79,5 +80,6 @@ EXTERN char *runfilename;
 EXTERN struct env_list *env_root;
 
 EXTERN locale_t latin_loc;
+EXTERN iconv_t latin_to_utf8;
 
 #endif

@@ -27,7 +27,6 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <term.h>
-#include <iconv.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -46,7 +45,7 @@ PRIVATE int paged = 0, pagern;
 PRIVATE int getx,gety;
 PRIVATE char *edit_line;
 PRIVATE Keymap keymap;
-PRIVATE iconv_t latin_to_utf8, utf8_to_latin;
+PRIVATE iconv_t utf8_to_latin;
 PRIVATE bool is_visual_mode = false;
 
 PRIVATE struct {
