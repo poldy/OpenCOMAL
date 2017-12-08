@@ -32,6 +32,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <time.h>
+#include <ctype.h>
 
 
 #ifdef MSDOS
@@ -1946,7 +1947,7 @@ PRIVATE void input_con(struct string *prompt, struct exp_list *lvalroot)
 		type = work->exp->e.expid.id->type;
 
 		while (true) {
-			while (*i && (*i == ' ' || *i == '\t'))
+			while (*i && isspace_l(*i, latin_loc))
 				i++;
 
 			if (*i)
@@ -1992,7 +1993,7 @@ PRIVATE void input_con(struct string *prompt, struct exp_list *lvalroot)
 				j++;
 			}
 
-			while ((field[n] == ' ' || field[n] == '\t')
+			while (isspace_l(field[n], latin_loc)
 			       && n >= 0)
 				--n;
 
@@ -2015,7 +2016,7 @@ PRIVATE void input_con(struct string *prompt, struct exp_list *lvalroot)
 		if (nr != 1)
 			run_error(INPUT_ERR, "Input error @ %s", i);
 
-		while (*i && (*i == ' ' || *i == '\t'))
+		while (*i && isspace_l(*i, latin_loc))
 			i++;
 
 		if (*i == ',')

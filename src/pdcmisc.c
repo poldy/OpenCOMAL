@@ -24,6 +24,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <assert.h>
+#include <ctype.h>
 
 
 struct int_trace {
@@ -619,8 +620,7 @@ PUBLIC void trace_reset()
 PUBLIC void strupr(char *s)
 {
 	while (*s) {
-		if (*s >= 'a' && *s <= 'z')
-			*s = *s - 'a' + 'A';
+                *s = toupper_l(*s, latin_loc);
 
 		s++;
 	}
@@ -629,8 +629,7 @@ PUBLIC void strupr(char *s)
 PUBLIC void strlwr(char *s)
 {
 	while (*s) {
-		if (*s >= 'A' && *s <= 'Z')
-			*s = *s - 'A' + 'a';
+                *s = tolower_l(*s, latin_loc);
 
 		s++;
 	}

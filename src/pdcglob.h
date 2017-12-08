@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <setjmp.h>
+#include <locale.h>
 
 #define PRIVATE static
 #define PUBLIC
@@ -76,5 +77,7 @@ EXTERN const char *copyright;
 EXTERN char *runfilename;
 
 EXTERN struct env_list *env_root;
+
+EXTERN locale_t latin_loc;
 
 #endif

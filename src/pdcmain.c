@@ -21,7 +21,6 @@
 
 #include <string.h>
 #include <unistd.h>
-#include <locale.h>
 
 #define LOCNAME_MAX 32
 
@@ -38,7 +37,7 @@ PUBLIC int main(int argc, char *argv[])
         char *locname, nlocname[LOCNAME_MAX];
         int utf8_suffixlen, lang_countrylen;
         const char *utf8_suffix = ".utf8", *latin_suffix = "@euro";
-        locale_t loc, nloc;
+        locale_t loc;
 
         if ((locname = setlocale(LC_ALL, "")) == NULL) {
 		perror("setlocale");
@@ -55,12 +54,11 @@ PUBLIC int main(int argc, char *argv[])
                         perror("duplocale");
                         return EXIT_FAILURE;
                 }
-                nloc = newlocale(LC_ALL_MASK, nlocname, loc);
-                if (nloc == (locale_t)0) {
+                latin_loc = newlocale(LC_ALL, nlocname, loc);
+                if (latin_loc == (locale_t)0) {
                         perror("newlocale");
                         return EXIT_FAILURE;
                 }
-                uselocale(nloc);
         }
 
 #ifdef NDEBUG
@@ -136,6 +134,7 @@ PUBLIC int main(int argc, char *argv[])
 	}
 
 	sys_tini();
+        freelocale(latin_loc);
 
 	return 0;
 }

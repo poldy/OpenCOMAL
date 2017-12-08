@@ -77,8 +77,8 @@ X			[Xx]
 Y			[Yy]
 
 number			[0-9]
-letter			[A-Za-z'_]
-netter			[A-Za-z'_0-9]
+letter			[A-Za-z'_\xa6\xa8\xb4\xb8\xbe\xc0-\xd6\xd8-\xf6\xf8-\xff]
+netter			[A-Za-z'_\xa6\xa8\xb4\xb8\xbe\xc0-\xd6\xd8-\xf6\xf8-\xff0-9]
 exp			[Ee][\-\+]?{number}+
 
 %%
