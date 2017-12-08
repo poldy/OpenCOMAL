@@ -26,9 +26,7 @@
 #include "pdcdsys.h"
 #include "pdcmod.h"
 
-#include <fcntl.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <time.h>
@@ -1247,7 +1245,7 @@ PRIVATE void exec_open(struct comal_line *line)
 	enum VAL_TYPE type;
 	struct file_rec *frec;
 	struct open_rec *o = &line->lc.openrec;
-	int flags = 0;
+	const char *flags;
         const char *inbuf;
         char *outbuf;
         size_t inbytesleft, outbytesleft;
@@ -1265,16 +1263,16 @@ PRIVATE void exec_open(struct comal_line *line)
 
 	switch (frec->mode) {
 	case readSYM:
-		flags = O_RDONLY;
+		flags = "rb";
 		frec->read_only = 1;
 		break;
 
 	case writeSYM:
-		flags = O_RDWR | O_CREAT;
+		flags = "wb";
 		break;
 
 	case appendSYM:
-		flags = O_RDWR | O_APPEND;
+		flags = "ab";
 		break;
 
 	case randomSYM:
@@ -1285,10 +1283,11 @@ PRIVATE void exec_open(struct comal_line *line)
 				  frec->reclen);
 
 		if (o->read_only) {
-			flags = O_RDONLY;
+                        flags = "rb";
 			frec->read_only = 1;
-		} else
-			flags = O_RDWR | O_CREAT;
+		} else {
+                        flags = "wb";
+                }
 
 		break;
 
@@ -1302,9 +1301,9 @@ PRIVATE void exec_open(struct comal_line *line)
         outbytesleft = PATH_MAX;
         iconv(latin_to_utf8, (char **)&inbuf, &inbytesleft, &outbuf, &outbytesleft);
         *outbuf = '\0';
-	frec->hfno = open(fname, flags | O_BINARY, S_IRUSR | S_IWUSR);
+	frec->hfptr = fopen(fname, flags);
 
-	if (frec->hfno == -1)
+	if (frec->hfptr == NULL)
 		run_error(OPEN_ERR, "OPEN error: %s", strerror(errno));
 
 	frec->next = curenv->fileroot;
@@ -1325,7 +1324,7 @@ PRIVATE void exec_close(struct comal_line *line)
 				  "Closing Comal file %ld",
 				  walk->cfno);
 
-			if (close(walk->hfno) == -1)
+			if (fclose(walk->hfptr) == EOF)
 				run_error(CLOSE_ERR,
 					  "Close error on file %ld: %s",
 					  walk->cfno, strerror(errno));
@@ -1352,7 +1351,7 @@ PRIVATE void exec_close(struct comal_line *line)
 				run_error(CLOSE_ERR, "File %ld not open",
 					  fno);
 
-			if (close(walk->hfno) == -1)
+			if (fclose(walk->hfptr) == EOF)
 				run_error(CLOSE_ERR,
 					  "CLOSE error on file %ld: %s",
 					  walk->cfno, strerror(errno));
@@ -1393,11 +1392,11 @@ PRIVATE struct file_rec *pos_file(struct two_exp *r)
 				  "Random file record number must be >=1");
 
 		DBG_PRINTF(1,
-			  "Positioning file %ld (host=%d) to record %ld, offset %ld",
-			  f->cfno, f->hfno, recno,
+			  "Positioning file %ld (host=%p) to record %ld, offset %ld",
+			  f->cfno, f->hfptr, recno,
 			  (recno - 1) * f->reclen);
 
-		if (lseek(f->hfno, (recno - 1) * f->reclen, SEEK_SET) ==
+		if (fseek(f->hfptr, (recno - 1) * f->reclen, SEEK_SET) ==
 		    -1)
 			run_error(POS_ERR,
 				  "Random file positioning error: %s",
@@ -1416,10 +1415,10 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 	char c;
 
 	*type = (enum VAL_TYPE) 0;
-	r = read(f->hfno, &c, 1);
+        c = fgetc(f->hfptr);
 	*type = (enum VAL_TYPE)c;
 
-	if (r > 0) {
+	if (c != EOF) {
 		DBG_PRINTF(1,
 			  "Reading a type %d from file", *type);
 
@@ -1440,17 +1439,17 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 			break;
 
 		case V_STRING:
-			r = read(f->hfno, &size, sizeof(long));
+			r = fread(&size, sizeof(long), 1, f->hfptr);
 			break;
 
 		default:
 			fatal("read1 type switch default action");
 		}
 
-		if (r > 0) {
+                if (!(*type == V_STRING && r == 0)) {
 			DBG_PRINTF(1,
-				  "Reading %ld bytes from file %ld (host %d)",
-				  size, f->cfno, f->hfno);
+				  "Reading %ld bytes from file %ld (host %p)",
+				  size, f->cfno, f->hfptr);
 
 			if (f->mode == randomSYM) {
 				*totsize += size + 1;	/* 1 extra for type */
@@ -1465,18 +1464,19 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 
 			if (*type == V_STRING) {
 				*data = STR_ALLOC(RUN_POOL, size);
-				r = read(f->hfno,
-					    (*(struct string **) data)->s,
-					    size);
+				r = fread((*(struct string **)data)->s, 1, size, f->hfptr);
 				(*(struct string **) data)->len = size;
-			} else
-				r = read(f->hfno, (char *)*data, size);
+			} else {
+				r = fread((char *)*data, 1, size, f->hfptr);
+                        }
+                        if (r == size) {
+                                return;
+                        }
 		}
 	}
 
-	if (r < 0)
-		run_error(READ_ERR, "INPUT/READ file error: %s",
-			  strerror(errno));
+	run_error(READ_ERR, "INPUT/READ file error: %s",
+		  strerror(errno));
 }
 
 
@@ -1599,27 +1599,29 @@ PRIVATE void write1(struct file_rec *f, void *data, enum VAL_TYPE type,
 	}
 
 	c = (char) type;
-	w = write(f->hfno, &c, 1);
+        w = fputc(c, f->hfptr);
 
-	if (w > 0) {
+	if (w != EOF) {
 		DBG_PRINTF(1,
-			  "Writing %ld bytes to file %ld (host %d)",
-			  size, f->cfno, f->hfno);
+			  "Writing %ld bytes to file %ld (host %p)",
+			  size, f->cfno, f->hfptr);
 
 		if (type == V_STRING) {
-			w = write(f->hfno, &size, sizeof(long));
+			w = fwrite(&size, sizeof(long), 1, f->hfptr);
 
-			if (w > 0)
-				w = write(f->hfno,
-					     ((struct string *) data)->s,
-					     size);
-		} else
-			w = write(f->hfno, (char *)data, size);
+			if (w > 0) {
+				w = fwrite(((struct string *)data)->s, 1, size, f->hfptr);
+                        }
+		} else {
+			w = fwrite((char *)data, 1, size, f->hfptr);
+                }
+                if (w == size) {
+                        return;
+                }
 	}
 
-	if (w < 0)
-		run_error(WRITE_ERR, "File write error: %s",
-			  strerror(errno));
+	run_error(WRITE_ERR, "File write error: %s",
+		  strerror(errno));
 }
 
 

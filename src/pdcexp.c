@@ -24,6 +24,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #ifdef HAS_ROUND
 extern double round(double x);
@@ -228,7 +229,7 @@ PRIVATE long my_eof2(long fno)
 	if (!f)
 		run_error(EOF_ERR, "File not open");
 
-	result = eof(f->hfno);
+	result = feof(f->hfptr);
 
 	if (result == -1)
 		run_error(EOF_ERR, "Error when checking for EOF: %s",

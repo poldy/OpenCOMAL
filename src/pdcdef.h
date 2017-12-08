@@ -15,6 +15,8 @@
 
 #include "pdcmem.h"
 
+#include <stdio.h>
+
 struct my_list {
 	struct my_list *next;
 	/* variable part here */
@@ -376,7 +378,7 @@ struct comal_line {
 struct file_rec {
 	struct file_rec *next;
 	long cfno;
-	int hfno;
+	FILE *hfptr;
 	int mode;
 	int read_only;
 	long reclen;

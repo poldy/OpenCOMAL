@@ -19,6 +19,7 @@
 #include "pdcsym.h"
 #include "pdcenv.h"
 #include <string.h>
+#include <stdio.h>
 
 PUBLIC struct comal_env *env_new(const char *name)
 {
@@ -114,7 +115,7 @@ PUBLIC void clean_runenv(struct comal_env *env)
 		DBG_PRINTF(1, "Closing comal file %ld",
 			  fwalk->cfno);
 
-		close(fwalk->hfno);
+		fclose(fwalk->hfptr);
 		fwalk = fwalk->next;
 	}
 
