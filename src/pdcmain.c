@@ -54,7 +54,7 @@ PUBLIC int main(int argc, char *argv[])
                         perror("duplocale");
                         return EXIT_FAILURE;
                 }
-                latin_loc = newlocale(LC_ALL, nlocname, loc);
+                latin_loc = newlocale(LC_ALL_MASK, nlocname, loc);
                 if (latin_loc == (locale_t)0) {
                         perror("newlocale");
                         return EXIT_FAILURE;
