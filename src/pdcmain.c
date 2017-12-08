@@ -23,6 +23,8 @@
 #include <unistd.h>
 #include <locale.h>
 
+#define LOCNAME_MAX 32
+
 extern int yydebug;
 
 #ifdef TURBOC
@@ -33,11 +35,33 @@ PUBLIC int main(int argc, char *argv[])
 {
         int c;
         int errflg = 0;
+        char *locname, nlocname[LOCNAME_MAX];
+        int utf8_suffixlen, lang_countrylen;
+        const char *utf8_suffix = ".utf8", *latin_suffix = "@euro";
+        locale_t loc, nloc;
 
-        if (setlocale(LC_ALL, "") == NULL) {
+        if ((locname = setlocale(LC_ALL, "")) == NULL) {
 		perror("setlocale");
 		return EXIT_FAILURE;
 	}
+        utf8_suffixlen = strlen(utf8_suffix);
+        lang_countrylen = strlen(locname) - utf8_suffixlen;
+        if (strncmp(locname + lang_countrylen, utf8_suffix, utf8_suffixlen) == 0) {
+                strncpy(nlocname, locname, lang_countrylen);
+                nlocname[lang_countrylen] = '\0';
+                strncat(nlocname, latin_suffix, LOCNAME_MAX - lang_countrylen - 1);
+                loc = duplocale(LC_GLOBAL_LOCALE);
+                if (loc == (locale_t)0) {
+                        perror("duplocale");
+                        return EXIT_FAILURE;
+                }
+                nloc = newlocale(LC_ALL_MASK, nlocname, loc);
+                if (nloc == (locale_t)0) {
+                        perror("newlocale");
+                        return EXIT_FAILURE;
+                }
+                uselocale(nloc);
+        }
 
 #ifdef NDEBUG
         while ((c = getopt(argc, argv, "y")) != -1) {
