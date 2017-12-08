@@ -1286,7 +1286,7 @@ PRIVATE void exec_open(struct comal_line *line)
                         flags = "rb";
 			frec->read_only = 1;
 		} else {
-                        flags = "wb";
+                        flags = "wb+";
                 }
 
 		break;
@@ -1301,6 +1301,9 @@ PRIVATE void exec_open(struct comal_line *line)
         outbytesleft = PATH_MAX;
         iconv(latin_to_utf8, (char **)&inbuf, &inbytesleft, &outbuf, &outbytesleft);
         *outbuf = '\0';
+        if (frec->mode == writeSYM && access(fname, F_OK) == 0) {
+                run_error(OPEN_ERR, "OPEN error: file exists");
+        }
 	frec->hfptr = fopen(fname, flags);
 
 	if (frec->hfptr == NULL)
