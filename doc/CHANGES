@@ -135,3 +135,10 @@
 	  interpreter is in HALTED state (program was stopped but could
 	  be continued).
 	- Added the STATIC command (also see "whitepaper1.txt".)
+        - Ported to macOS
+        - The following changes were made to aligh better with Common COMAL:
+        - Added CURROW, CURCOL, BITAND, BITOR, BITXOR, RANDOMIZE, REPORT, ESC
+          keywords.
+        - Changed CURSOR arguments from (x, y) to (row, column).
+        - Changed DIV, MOD to be floored rather than symmetric
+        - Renamed LN to LOG and LOG to LOG10.

@@ -321,7 +321,7 @@ Takes string argument, returns numeric:
 
 	VAL	: numeric value of string argument
 	ORD	: numeric systems collating sequence code of first 
-  		  character in string argument (usually ASCII code)
+  		  character in string argument (Latin-9 encoding)
 	LEN	: length of argument string
 
 

@@ -128,7 +128,13 @@ PUBLIC struct string *str_partcpy2(struct string *s1, struct string *s2,
 	char HUGE_POINTER *w1 = s1->s+from-1; /* Comal strings start at offset 1 */
 	char HUGE_POINTER *w2 = s2->s;
 
+#ifdef STD_STRFNS
+        // This call breaks the "padding with spaces" test in common_string.lst
         strncpy(w1, w2, to - from + 1);
+#else
+	while (from <= to && *w2)
+		*w1 = *w2, w1++, w2++, from++;
+#endif
 
 	return s1;
 }
