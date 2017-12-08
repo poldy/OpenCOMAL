@@ -38,7 +38,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <setjmp.h>
+#if defined(__APPLE__) && defined(__MACH__)
+#include <xlocale.h>
+#else
 #include <locale.h>
+#endif
 #include <iconv.h>
 
 #define PRIVATE static

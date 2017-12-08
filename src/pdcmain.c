@@ -21,6 +21,7 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <locale.h>
 
 #define LOCNAME_MAX 32
 
@@ -36,7 +37,11 @@ PUBLIC int main(int argc, char *argv[])
         int errflg = 0;
         char *locname, nlocname[LOCNAME_MAX];
         int utf8_suffixlen, lang_countrylen;
+#if defined(__APPLE__) && defined(__MACH__)
+        const char *utf8_suffix = ".UTF-8", *latin_suffix = ".ISO8859-15";
+#else
         const char *utf8_suffix = ".utf8", *latin_suffix = "@euro";
+#endif
         locale_t loc;
 
         if ((locname = setlocale(LC_ALL, "")) == NULL) {
@@ -57,7 +62,7 @@ PUBLIC int main(int argc, char *argv[])
                 latin_loc = newlocale(LC_ALL_MASK, nlocname, loc);
                 if (latin_loc == (locale_t)0) {
                         perror("newlocale");
-                        return EXIT_FAILURE;
+			latin_loc = loc;	// Fallback
                 }
         }
 
