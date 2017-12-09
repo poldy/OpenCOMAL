@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <ctype.h>
+#include <fcntl.h>
 
 
 #ifdef MSDOS
@@ -1268,7 +1269,7 @@ PRIVATE void exec_open(struct comal_line *line)
 		break;
 
 	case writeSYM:
-		flags = "wb";
+		flags = "wbx";
 		break;
 
 	case appendSYM:
@@ -1286,7 +1287,7 @@ PRIVATE void exec_open(struct comal_line *line)
                         flags = "rb";
 			frec->read_only = 1;
 		} else {
-                        flags = "wb+";
+                        flags = "rb+";
                 }
 
 		break;
@@ -1301,9 +1302,14 @@ PRIVATE void exec_open(struct comal_line *line)
         outbytesleft = PATH_MAX;
         iconv(latin_to_utf8, (char **)&inbuf, &inbytesleft, &outbuf, &outbytesleft);
         *outbuf = '\0';
-        if (frec->mode == writeSYM && access(fname, F_OK) == 0) {
-                run_error(OPEN_ERR, "OPEN error: file exists");
-        }
+	if (frec->mode == randomSYM && !o->read_only && access(fname, F_OK) != 0) {
+		// The modern replacement for creat(2)
+		int fd = open(fname, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
+		if (fd < 0) {
+			run_error(OPEN_ERR, "OPEN error: %s", strerror(errno));
+		}
+		close(fd);
+	}
 	frec->hfptr = fopen(fname, flags);
 
 	if (frec->hfptr == NULL)
@@ -1478,8 +1484,10 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 		}
 	}
 
-	run_error(READ_ERR, "INPUT/READ file error: %s",
-		  strerror(errno));
+	if (ferror(f->hfptr)) {
+		run_error(READ_ERR, "INPUT/READ file error: %s",
+		  	strerror(errno));
+	}
 }
 
 
@@ -1623,8 +1631,10 @@ PRIVATE void write1(struct file_rec *f, void *data, enum VAL_TYPE type,
                 }
 	}
 
-	run_error(WRITE_ERR, "File write error: %s",
-		  strerror(errno));
+	if (ferror(f->hfptr)) {
+		run_error(WRITE_ERR, "File write error: %s",
+		  	strerror(errno));
+	}
 }
 
 

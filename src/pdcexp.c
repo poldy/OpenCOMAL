@@ -224,12 +224,16 @@ PRIVATE long my_eof2(long fno)
 {
 	struct file_rec *f = fsearch(fno);
 	long result;
-	extern int eof(int file);
+	int c;
 
 	if (!f)
 		run_error(EOF_ERR, "File not open");
 
+	c = fgetc(f->hfptr);
 	result = feof(f->hfptr);
+	if (!result) {
+		ungetc(c, f->hfptr);
+	}
 
 	if (result == -1)
 		run_error(EOF_ERR, "Error when checking for EOF: %s",

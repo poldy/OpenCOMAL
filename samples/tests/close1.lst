@@ -1,15 +1,19 @@
        10 // CLOSE sample program
        20 //
+       25 ddelete
        30 oopen
        40 CLOSE
        50 //
+       55 ddelete
        60 oopen
        70 CLOSE FILE 1
        80 CLOSE FILE 2
        90 //
+       95 ddelete
       100 oopen
       110 CLOSE FILE 1, 2
       120 //
+      125 ddelete
       130 oopen
       140 CLOSE
       150 //
@@ -19,3 +23,12 @@
       190   OPEN FILE 1, "ofile4", WRITE 
       200   OPEN FILE 2, "ofile5", WRITE 
       210 ENDPROC
+      220 //
+      230 PROC ddelete
+      240   TRAP
+      250     DELETE "ofile4"
+      260   ENDTRAP
+      270   TRAP
+      280     DELETE "ofile5"
+      290   ENDTRAP
+      300 ENDPROC
