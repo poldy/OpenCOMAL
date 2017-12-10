@@ -39,6 +39,16 @@ PRIVATE struct string *empty_string = &e_s;
 PUBLIC int short_circuit = 0;
 
 
+static inline long max(long x, long y)
+{
+	if (x > y) {
+		return x;
+	} else {
+		return y;
+	}
+}
+
+
 PUBLIC void *exp_lval(struct expression *exp, enum VAL_TYPE *type,
 		      struct var_item **varp, long *strlen)
 {
@@ -133,6 +143,20 @@ PUBLIC void *exp_lval(struct expression *exp, enum VAL_TYPE *type,
 }
 
 
+PRIVATE long my_highest_file(void)
+{
+	struct file_rec *walk;
+	long result = 0;
+
+	walk = curenv->fileroot;
+	while(walk) {
+		result = max(result, walk->cfno);
+		walk = walk->next;
+	}
+	return result;
+}
+
+
 PRIVATE void exp_const(struct expression *exp, void **result,
 		       enum VAL_TYPE *type)
 {
@@ -192,6 +216,10 @@ PRIVATE void exp_const(struct expression *exp, void **result,
 	
 	case _ESC:
 		*result = val_int(sys_escape(), NULL, type);
+		break;
+	
+	case _FREEFILE:
+		*result = val_int(my_highest_file() + 1, NULL, type);
 		break;
 
 	default:

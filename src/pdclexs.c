@@ -120,6 +120,7 @@ PRIVATE struct {
 	fileSYM, 0, "FILE"}, {
 	forSYM, 0, "FOR"}, {
 	tnrnSYM, _FRAC, "FRAC"}, {
+	rnSYM, _FREEFILE, "FREEFILE"}, {
 	funcSYM, 0, "FUNC"}, {
 	importSYM, 0, "IMPORT"}, {
 	importSYM, 0, "GLOBAL"}, {
