@@ -1,12 +1,13 @@
        10 MODULE standard
        20   EXPORT file'exists
+       25   EXPORT type
        30   EXPORT version'standard$
        40   
-       50   FUNC version'standard$
+       50   FUNC version'standard$ CLOSED
        60     RETURN " 1.17 Standard package by Lindsay & Warman"
-       70   ENDFUNC
+       70   ENDFUNC version'standard$
        80   
-       90   FUNC file'exists(filename$)
+       90   FUNC file'exists(filename$) CLOSED
       100     TRAP
       110       f:=FREEFILE
       120       OPEN FILE f, filename$, READ 
@@ -20,14 +21,14 @@
       200       ENDTRAP
       210       RETURN FALSE
       220     ENDTRAP
-      230   ENDFUNC
+      230   ENDFUNC file'exists
       240   
-      250   PROC type(filenames)
+      250   PROC type(filename$) CLOSED
       260     IF file'exists(filename$) THEN
-      270       f:=FREEFILE
-      280       OPEN FILE f, filename$, READ 
-      290       WHILE NOT(EOF(f)) DO
-      300         a$:=get$(f, 1)
+      270       f#:=FREEFILE
+      280       OPEN FILE f#, filename$, READ 
+      290       WHILE NOT(EOF(f#)) DO
+      300         a$:=GET$(f#,1)
       310         CASE ORD(a$) OF
       320         WHEN 13  // cr
       330           NULL  // ignore them
@@ -38,16 +39,16 @@
       380         ENDCASE
       390         reply$:=KEY$
       400         IF reply$=CHR$(27) THEN  //ESC key to end
-      410           CLOSE FILE f
+      410           CLOSE FILE f#
       420           PRINT 
       430           RETURN 
-      440         ELIF reply$>""  //any key to pause
-      450           waitkey
+      440           // ELIF reply$>""  //any key to pause
+      450           // waitkey
       460         ENDIF
       470       ENDWHILE
-      480       CLOSE FILE f
+      480       CLOSE FILE f#
       490     ELSE
       500       PRINT "File not found."
       510     ENDIF
-      520   ENDPROC
-      530 ENDMODULE
+      520   ENDPROC type
+      530 ENDMODULE standard
