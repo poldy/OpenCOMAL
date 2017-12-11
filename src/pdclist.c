@@ -164,7 +164,15 @@ PRIVATE void list_rnd(char **buf, struct expression *exp)
 	}
 }
 
-
+PRIVATE void list_get(char **buf, struct expression *exp)
+{
+	list_sym(buf,getSYM);
+	list_char(buf,'(');
+	list_exp(buf,exp->e.twoexp.exp1);
+	list_char(buf,',');
+	list_exp(buf,exp->e.twoexp.exp2);
+	list_char(buf,')');
+}
 
 PUBLIC void list_exp(char **buf, struct expression *exp)
 {
@@ -205,6 +213,8 @@ PUBLIC void list_exp(char **buf, struct expression *exp)
 	case T_BINARY:
 		if (exp->op==_RND)
 			list_rnd(buf,exp);
+		else if (exp->op==_GET)
+			list_get(buf,exp);
 		else
 			list_twoexp(buf, &exp->e.twoexp, lex_opsym(exp->op), 1);
 		break;

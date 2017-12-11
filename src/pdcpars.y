@@ -116,6 +116,7 @@ extern int yylex();
 %token	forSYM 
 %token	funcSYM 
 %token	geqSYM 
+%token	getSYM
 %token	gtrSYM 
 %token	handlerSYM
 %token	ifSYM 
@@ -1624,6 +1625,10 @@ string_factor	:	strlvalue2
 		|	lparenSYM stringexp2 rparenSYM
 			{
 				$$=pars_exp_unary(lparenSYM,$2);
+			}
+		|	getSYM lparenSYM numexp2 commaSYM numexp2 rparenSYM
+			{
+				$$=pars_exp_binary(_GET,$3,$5);
 			}
 		;
 

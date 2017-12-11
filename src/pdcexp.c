@@ -644,6 +644,23 @@ PRIVATE void exp_binary_s(int op, void **result, enum VAL_TYPE *type,
 }
 
 
+PRIVATE struct string *my_get(enum VAL_TYPE *type, long fno, long size)
+{
+	struct file_rec *f;
+	struct string *s;
+
+	f = fsearch(fno);
+	if (!f) {
+		run_error(EOF_ERR, "File not open");
+	}
+	s = STR_ALLOC(RUN_POOL, size);
+	s->len = fread(s->s, 1, size, f->hfptr);
+	s->s[s->len] = '\0';
+	*type = V_STRING;
+	return s;
+}
+
+
 PRIVATE void exp_binary_i(int op, void **result, enum VAL_TYPE *type,
 			  void *v1, void *v2)
 {
@@ -697,6 +714,10 @@ PRIVATE void exp_binary_i(int op, void **result, enum VAL_TYPE *type,
 		break;
 	case bitxorSYM:
 		*i1 = *i1 ^ *i2;
+		break;
+
+	case _GET:
+		*result = my_get(type, *i1, *i2);
 		break;
 
 	default:

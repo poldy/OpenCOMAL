@@ -60,5 +60,6 @@
 #define _CURROW			4040
 #define _ESC			4041
 #define _FREEFILE		4042
+#define _GET			4043
 
 #endif

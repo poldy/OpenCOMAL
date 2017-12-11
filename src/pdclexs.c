@@ -123,6 +123,7 @@ PRIVATE struct {
 	rnSYM, _FREEFILE, "FREEFILE"}, {
 	funcSYM, 0, "FUNC"}, {
 	importSYM, 0, "IMPORT"}, {
+	getSYM, _GET, "GET$"}, {
 	importSYM, 0, "GLOBAL"}, {
 	handlerSYM, 0, "HANDLER"}, {
 	ifSYM, 0, "IF"}, {
