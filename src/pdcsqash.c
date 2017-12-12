@@ -461,6 +461,7 @@ PRIVATE void sqash_horse(struct comal_line *line)
 	case untilSYM:
 	case randomizeSYM:
 	case reportSYM:
+	case delaySYM:
 		sqash_exp(line->lc.exp);
 		break;
 
@@ -1209,6 +1210,7 @@ PRIVATE struct comal_line *expand_horse()
 	case untilSYM:
 	case randomizeSYM:
 	case reportSYM:
+	case delaySYM:
 		line->lc.exp = expand_exp();
 		break;
 

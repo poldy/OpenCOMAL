@@ -2384,6 +2384,10 @@ PUBLIC int exec_line(struct comal_line *line)
 	case reportSYM:
 		run_error(calc_intexp(line->lc.exp), "");
 		break;
+	
+	case delaySYM:
+		sleep(calc_intexp(line->lc.exp));
+		break;
 
 	default:
 		fatal("exec_line default action");

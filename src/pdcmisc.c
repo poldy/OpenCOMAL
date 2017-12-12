@@ -450,6 +450,8 @@ PRIVATE struct {
 	, {
 	reportSYM, sizeof(c_line.lc.exp)}
 	, {
+	delaySYM, sizeof(c_line.lc.exp)}
+	, {
 	-1, -1}
 };
 

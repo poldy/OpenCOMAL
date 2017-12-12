@@ -81,6 +81,7 @@ PRIVATE struct {
 	tnrnSYM, _DEG, "DEG"}, {
 	delSYM, 0, "DELETE"}, {
 	delSYM, 0, "DEL"}, {
+	delaySYM, 0, "DELAY"}, {
 	dimSYM, 0, "DIM"}, {
 	dirSYM, 0, "DIR"}, {
 	rsSYM, _DIR, "DIR$"}, {

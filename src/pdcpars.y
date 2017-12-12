@@ -83,6 +83,7 @@ extern int yylex();
 %token	cursorSYM
 %token	dataSYM 
 %token	delSYM 
+%token	delaySYM
 %token	dimSYM
 %token  dirSYM
 %token	divideSYM 
@@ -240,7 +241,7 @@ extern int yylex();
 %type	<cl>		rmdir_stat mkdir_stat repeat_stat
 %type	<cl>		local_stat trap_stat dir_stat unit_stat static_stat
 %type	<cl>		module_stat export_stat use_stat
-%type	<cl>		randomize_stat report_stat
+%type	<cl>		randomize_stat report_stat delay_stat
 
 %type	<pcl>		optsimple_stat 
 
@@ -483,6 +484,7 @@ simple_stat	:	close_stat
 		|	chdir_stat
 		|	cursor_stat
 		|	del_stat
+		|	delay_stat
 		|	dim_stat
 		|	dir_stat
 		|	local_stat
@@ -690,6 +692,13 @@ data_stat	:	dataSYM exp_list
 del_stat	:	delSYM stringexp
 			{
 				$$.cmd=delSYM;
+				$$.lc.exp=$2;
+			}
+		;
+
+delay_stat	:	delaySYM numexp
+	    		{
+				$$.cmd=delaySYM;
 				$$.lc.exp=$2;
 			}
 		;
