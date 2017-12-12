@@ -1,0 +1,191 @@
+#!/bin/sh
+#
+# INSTALL (C) 2002 Emile van Bergen. Distribution of this file is allowed under
+# the conditions detailed in the GNU General Public License (GPL). See the file
+# COPYING for more information.
+#
+# This script installs zero or more files into a specified directory. If one or
+# more components of the destination path do not exist, they are created.  The
+# permissions of the destination file and the destination directory(s), if any
+# need to be created, can be specified separately. The user can also specify
+# that the operation must be skipped if the destination file or the destination
+# directory already exists. Source files are stripped of their directory
+# components before determining the destination name.
+#
+# It is intended to replace the /usr/bin/install command, which has no portable
+# subset of features that offers anything above /bin/cp. Each version is broken
+# in its own ways, the most annoying examples being that some can only install
+# a single file at a time and that some do not create destination directories
+# recursively. Hence this shell script, that is intended to be portable across
+# all POSIX-compliant /bin/sh shells. It does not assume a working 'mkdir -p'
+# command.
+#
+# Invocation:
+#
+# install arguments...
+#
+# Each argument is either an option, as specified below, a source file, or
+# a destination directory, with -d prepended. Each time a destination
+# directory is encountered, the source files leading up to it are installed,
+# and then all options are reset, allowing you to perform multiple install
+# operations with one command.
+#
+# Options:
+#
+#	-h	Show a brief usage message
+# 	-v	Show what's being done
+#	-m	specify mode of destination files
+#	-md	specify mode of destination directories, if any are created
+#	-n	skip operation if destination file exists
+#	-nd	skip operation if destination directory exists
+#
+# Return values:
+#
+# 	0	Successful completion
+#	>0	Error occurred
+#
+# Limitations:
+#
+# * Source files cannot start with a '-' or contain spaces
+# * Destination directories cannot start with a '-' or contain spaces
+# * If multiple different modes are desired for files in a single destination 
+#   directory, you must specify multiple installation sets (-d options), one 
+#   for each mode (eg. install -m 644 file1 file2 -d dir file3 -m 600 -d dir).
+# * The /bin/sh shell used to run this script must support user-defined 
+#   functions.
+# * The system must have mkdir, chmod, basename, tr, sed and cp available.
+#   If needed, basename and tr could be provided by sed, but I don't think
+#   that should be done by default as they are very common.
+#
+# Notes (not bugs, features. Really!):
+#
+# * If the destination directory already exists, its mode is not changed
+#   even if -md is specified; that mode is only used when creating new ones.
+# * If the destination file already exists but is overwritten because no -n
+#   was specified, the new mode, if specified, is applied as well.
+# * QNX-style paths starting with // are honored, as are .. path components.
+#   An initial .. works as expected, and a destination path a/b/../c creates
+#   a, a/b, a/c and installs the files in a/c.
+#
+# History
+#
+# 2002/09/13 - EvB - Created
+
+
+make_dir() {
+
+  dir="$1"
+  [ -n "$verbose" ] && echo "Creating directory $dir"
+
+  mkdir "$dir" || exit 1
+
+  if [ -n "$mode_dir" ] 
+  then
+    chmod "$mode_dir" "$dir" || exit 2
+  fi
+
+  return
+}
+
+
+make_dir_tree() {
+
+  root=`echo $1 | sed -e 's/[^/].*$//g'`
+  components=`echo $1 | tr / " "`
+
+  cumul=
+  for comp in $components
+  do
+    if [ -n "$cumul" ] 
+    then
+      cumul="$cumul/$comp"
+    else
+      cumul="$comp"
+    fi
+    [ "$comp" = "." ] || [ "$comp" = ".." ] || 
+      [ -d "$root$cumul" ] || make_dir "$root$cumul"
+  done
+
+  dest=$root$cumul
+}
+
+
+do_install() {
+
+  dest="$1"
+
+  if [ ! -d "$dest" ] 
+  then
+    make_dir_tree "$dest"
+  else
+    if [ -n "$new_dir" ]
+    then
+      echo "$me: Directory $dest already exists -- skipping"
+      return
+    fi
+  fi
+
+  for src_file in $src
+  do
+    file=`basename $src_file`
+    dest_file="$dest/$file"
+
+    if [ -n "$new" ] && [ -f $dest_file ]
+    then
+      echo "$me: File $dest_file already exists -- skipping"
+      continue
+    fi
+
+    [ -n "$verbose" ] && echo "Copying $src_file to $dest_file"
+    cp "$src_file" "$dest_file" || exit 3
+
+    if [ -n "$mode" ] 
+    then
+      chmod "$mode" "$dest_file" || exit 4
+    fi
+  done
+
+  return
+}
+
+
+init_opts() {
+# verbose=
+  mode=
+  mode_dir=
+  new=
+  new_dir=
+  src=
+}
+
+
+### Main entry point
+
+me=`basename $0`
+init_opts
+while [ -n "$1" ]
+do
+  case "$1" in
+
+    -v) verbose=1 ;;
+    
+    -m) mode="$2" ; shift ;;
+    -md) mode_dir="$2" ; shift ;;
+
+    -n) new=1 ;;
+    -nd) new_dir=1 ;;
+
+    -d) do_install "$2" ; init_opts ; shift ;;
+
+    -*)
+      echo Usage: $me [options] [file...] -d directory
+      exit 5
+      ;;
+
+    *) src="$src $1" ;;
+
+  esac
+  shift
+done
+
+exit 0

@@ -6,6 +6,8 @@
 #
 # Reading the README is a better way
 
+PREFIX?=/usr/local
+
 .PHONY: top
 top: msg all
 
@@ -22,7 +24,7 @@ all:
 
 .PHONY: install
 install:
-	cd bin ; $(MAKE) install
+	cd bin ; $(MAKE) install PREFIX=$(PREFIX)
 
 .PHONY: clean
 clean:

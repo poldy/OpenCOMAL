@@ -3,5 +3,6 @@
 
 .PHONY: install
 install:
-	install opencomal /usr/local/bin
-	install opencomalrun /usr/local/bin
+	strip opencomal opencomalrun
+	../build/install opencomal -d $(PREFIX)/bin
+	../build/install opencomalrun -d $(PREFIX)/bin
