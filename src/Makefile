@@ -30,7 +30,7 @@ OBJ2:=pdcmain.o pdcmisc.o \
 OS:=pdclinux.o 
 
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
-CC:=gcc
+CC:=../build/ccd-gcc
 CFLAGS+=-Wall -Wextra -DOS_LINUX -D_FORTIFY_SOURCE=2
 ifdef DEBUG
 	CFLAGS+=-O0 -ggdb
@@ -38,7 +38,7 @@ else
 	CFLAGS+=-DNDEBUG -Os -flto
 	LDFLAGS+=-flto
 endif
-ifeq ($(CC),c++)
+ifeq ($(REALCC),c++)
 	CFLAGS+=-Weffc++ -std=c++14
 else
 	CFLAGS+=-std=gnu11
@@ -55,16 +55,8 @@ else
 	LDFLAGS += $(HARDENING_LDFLAGS)
 endif
 
-%.d: %.c
-	set -e; $(CC) -M $(CPPFLAGS) $< \
-		| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
-		[ -s $@ ] || rm -f $@
-
 .PHONY: all
 all: build $(TARG1) $(TARG2)
-
-.depend:	
-	makedepend -f .depend *.c *.y *.l
 
 $(TARG1):  $(OBJ1) $(OS)
 	$(CC) -o $(TARG1) $(OBJ1) $(OS) $(LDFLAGS)
@@ -85,13 +77,14 @@ lex.yy.c: pdclex.l
 
 .PHONY: almostclean
 almostclean:	
-	-rm *.o *.obj *.map *.OBJ *~ *.d
-	-rm lex.yy.c pdcpars.tab.* pdcpars.output
-	-rm pdcpars.c pdclex.c pdcpars.h
+	$(RM) *.o *.obj *.map *.OBJ *~ *.d
+	$(RM) lex.yy.c pdcpars.tab.* pdcpars.output
+	$(RM) pdcpars.c pdclex.c pdcpars.h
 
 .PHONY: clean
 clean: almostclean
-	-rm $(TARG1) $(TARG2)
-	-rm ../bin/*.exe ../bin/*.EXE
+	$(RM) $(TARG1) $(TARG2)
+	$(RM) ../bin/*.exe ../bin/*.EXE
 
-include $(SOURCES:.c=.d)
+DEPS		:= $(SOURCES:%.c=%.o.d)
+-include	$(DEPS)
