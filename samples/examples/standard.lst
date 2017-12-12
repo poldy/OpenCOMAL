@@ -5,7 +5,7 @@
        40   
        50   FUNC version'standard$ CLOSED
        60     RETURN " 1.17 Standard package by Lindsay & Warman"
-       70   ENDFUNC version'standard$
+       70   ENDFUNC
        80   
        90   FUNC file'exists(filename$) CLOSED
       100     TRAP
@@ -21,7 +21,7 @@
       200       ENDTRAP
       210       RETURN FALSE
       220     ENDTRAP
-      230   ENDFUNC file'exists
+      230   ENDFUNC
       240   
       250   PROC type(filename$) CLOSED
       260     IF file'exists(filename$) THEN
@@ -50,5 +50,96 @@
       490     ELSE
       500       PRINT "File not found."
       510     ENDIF
-      520   ENDPROC type
-      530 ENDMODULE standard
+      520   ENDPROC
+      530   
+      540   PROC clearkeys CLOSED  // clear keyboard buffer
+      550     WHILE KEY$>"" DO NULL
+      560   ENDPROC
+      570   
+      580   FUNC getkey$ CLOSED  //like KEY$ but no blinking cursor
+      590     clearkeys
+      600     REPEAT
+      610       reply$:=KEY$
+      620     UNTIL reply$>CHR$(0)
+      630     RETURN reply$
+      640   ENDFUNC
+      650   
+      660   FUNC getvalidkey$(valid$) CLOSED
+      670     clearkeys
+      680     REPEAT
+      690       reply$:=KEY$
+      700     UNTIL reply$ IN valid$
+      710     RETURN reply$
+      720   ENDFUNC
+      730   
+      740   FUNC stripchar$(text$, char$) CLOSED
+      750     length:=LEN(text$)
+      760     IF text$=char$ THEN
+      770       RETURN ""
+      780     ELIF text$(length:length)=char$
+      790       RETURN stripchar$(text$(:length-1), char$)
+      800     ELSE
+      810       RETURN text$
+      820     ENDIF
+      830   ENDFUNC
+      840   
+      850   FUNC number(text$) CLOSED  //returns TRUE if text$ is a number
+      860     TRAP
+      870       x:=VAL(text$)
+      880       RETURN TRUE
+      890     HANDLER
+      900       RETURN FALSE
+      910     ENDTRAP
+      920   ENDFUNC
+      930   
+      940   PROC quicksort(REF a$(), m, n) CLOSED
+      950     part(m, n, m, n)
+      960     PROC part(l, r, i, j) CLOSED
+      970       p$:=a$((l+r) DIV 2)
+      980       REPEAT
+      990         WHILE p$>a$(i) DO i:+1
+     1000         WHILE p$<a$(j) DO j:-1
+     1010         IF i<=j THEN
+     1020           swap(a$(i), a$(j))
+     1030           i:+1; j:-1
+     1040         ENDIF
+     1050       UNTIL i>j
+     1060       IF l<j THEN part(l, j, l, j)
+     1070       IF i<r THEN part(i, r, i, r)
+     1080     ENDPROC
+     1090     PROC swap(REF a$, REF b$) CLOSED
+     1100       buff$:=a$; a$:=b$; b$:=buff$
+     1110     ENDPROC
+     1120   ENDPROC
+     1130   
+     1140   PROC quicksortnum(REF a(), m, n) CLOSED
+     1150     part'num(m, n, m, n)
+     1160     PROC part'num(l, r, i, j) CLOSED
+     1170       p:=a((l+r) DIV 2)
+     1180       REPEAT
+     1190         WHILE p>a(i) DO i:+1
+     1200         WHILE p<a(j) DO j:-1
+     1210         IF i<=j THEN
+     1220           swap'num(a(i), a(j))
+     1230           i:+1; j:-1
+     1240         ENDIF
+     1250       UNTIL i>j
+     1260       IF l<j THEN part'num(l, j, l, j)
+     1270       IF i<r THEN part'num(i, r, i, r)
+     1280     ENDPROC
+     1290     PROC swap'num(REF a, REF b) CLOSED
+     1300       buff:=a; a:=b; b:=buff
+     1310     ENDPROC
+     1320   ENDPROC
+     1330   
+     1340   FUNC yes(prompt$) CLOSED
+     1350     PRINT prompt$
+     1360     reply$:=getvalidkey$("yYnN")
+     1370     IF reply$ IN "Yy" THEN
+     1380       PRINT "YES"
+     1390     ELSE
+     1400       PRINT "NO"
+     1410     ENDIF
+     1420     RETURN reply$ IN "Yy"
+     1430   ENDFUNC
+     1440 ENDMODULE
