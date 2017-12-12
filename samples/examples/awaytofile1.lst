@@ -1,7 +1,11 @@
        10 // "A Way to File" Demo.
        20 // This program sets up the input data file and should chain to 'awaytofile2.lst'
        30 // to process it.
-       40 
+       33 
+       36 TRAP
+       40   DELETE "mydatafile.dat"
+       43 ENDTRAP
+       46 
        50 OPEN FILE 1, "mydatafile.dat", WRITE 
        60 PRINT FILE 1: 0
        70 READ surname$
