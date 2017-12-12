@@ -17,8 +17,8 @@
       130   READ surname$
       140 ENDWHILE
       150 CLOSE FILE 1
-      160 OPEN FILE 1, "mydatafile.dat", WRITE 
-      170 PRINT FILE 1: rec_count#
+      160 OPEN FILE 1, "mydatafile.dat", RANDOM 9
+      170 PRINT FILE 1,1: rec_count#
       180 CLOSE FILE 1
       190 awaytofile2
       200 PROC awaytofile2 EXTERNAL "awaytofile2.cml"
