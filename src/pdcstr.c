@@ -32,7 +32,7 @@ PUBLIC int str_cmp(struct string *s1, struct string *s2)
 	char HUGE_POINTER *w1 = s1->s;
 	char HUGE_POINTER *w2 = s2->s;
 
-	return strcmp(w1, w2);
+	return strcoll_l(w1, w2, latin_loc);
 }
 
 

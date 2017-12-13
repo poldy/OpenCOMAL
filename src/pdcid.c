@@ -71,7 +71,7 @@ PRIVATE struct id_rec *id_horse(char *idname)
 	int found = 0;
 
 	while (walk != NULL && !found) {
-		int cmp = strcmp(idname, walk->name);
+		int cmp = strcoll_l(idname, walk->name, latin_loc);
 
 		lastone = walk;
 
