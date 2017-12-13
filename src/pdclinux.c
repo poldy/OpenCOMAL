@@ -594,17 +594,19 @@ PUBLIC void sys_dir(const char *pattern) {
 	FILE *f;
 	char *upattern;
 	int l;
-	char *buf=(char *)malloc(8+l);
+	char *buf;
 	char line[256];
 	
-	strncpy(buf,"ls -l ",7);
-	buf[7] = '\0';
 	upattern = str_ltou(pattern);
 	l=strlen(upattern);
+	buf=(char *)malloc(8+l);
+	strncpy(buf,"ls -l ",7);
+	buf[7] = '\0';
 	strncat(buf,upattern,l);
 	f=popen(buf,"r");
 
 	if (!f) {
+		free(buf);
                 run_error(DIRS_ERR,strerror(errno));
         }
 
