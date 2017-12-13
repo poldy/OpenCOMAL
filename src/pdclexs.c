@@ -79,9 +79,9 @@ PRIVATE struct {
 	tnrnSYM, _COS, "COS"}, {
 	dataSYM, 0, "DATA"}, {
 	tnrnSYM, _DEG, "DEG"}, {
+	delaySYM, 0, "DELAY"}, {
 	delSYM, 0, "DELETE"}, {
 	delSYM, 0, "DEL"}, {
-	delaySYM, 0, "DELAY"}, {
 	dimSYM, 0, "DIM"}, {
 	dirSYM, 0, "DIR"}, {
 	rsSYM, _DIR, "DIR$"}, {
@@ -163,8 +163,8 @@ PRIVATE struct {
 	quitSYM, 0, "QUIT"}, {
 	quitSYM, 0, "BYE"}, {
 	tnrnSYM, _RAD, "RAD"}, {
-	randomSYM, 0, "RANDOM"}, {
 	randomizeSYM, 0, "RANDOMIZE"}, {
+	randomSYM, 0, "RANDOM"}, {
 	readSYM, 0, "READ"}, {
 	read_onlySYM, 0, "READ ONLY"}, {
 	refSYM, 0, "REF"}, {
