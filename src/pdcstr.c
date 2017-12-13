@@ -177,3 +177,19 @@ PUBLIC void str_extend(int pool, struct string **s, long newlen)
 	mem_free(*s);
 	*s=work;
 }
+
+PUBLIC char *str_ltou(const char *lstr)
+{
+	static char ustr[PATH_MAX];
+	const char *inbuf;
+	char *outbuf;
+	size_t inbytesleft, outbytesleft;
+
+	inbuf = lstr;
+	inbytesleft = strlen(lstr);
+	outbuf = ustr;
+	outbytesleft = PATH_MAX;
+	iconv(latin_to_utf8, (char **)&inbuf, &inbytesleft, &outbuf, &outbytesleft);
+	*outbuf = '\0';
+	return ustr;
+}

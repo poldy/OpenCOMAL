@@ -17,6 +17,7 @@
 #include "pdcext.h"
 #include "pdcexec.h"
 #include "pdcsys.h"
+#include "pdcstr.h"
 
 #include <signal.h>
 #include <string.h>
@@ -42,6 +43,7 @@
 PRIVATE int escape = 0;
 
 PRIVATE int paged = 0, pagern;
+PRIVATE bool is_utf8_put = false;
 PRIVATE int getx,gety;
 PRIVATE char *edit_line;
 PRIVATE Keymap keymap;
@@ -191,21 +193,17 @@ PRIVATE int curses_getc(FILE *in)
 
 PRIVATE void addlstr(const char *lstr)
 {
-	char ustr[MAX_LINELEN];
-	const char *inbuf;
-	char *outbuf;
-	size_t inbytesleft, outbytesleft;
+	char *ustr;
 	wchar_t wstr[MAX_LINELEN];
 
 	if (lstr == NULL) {
 		return;
 	}
-	inbuf = lstr;
-	inbytesleft = strlen(lstr);
-	outbuf = ustr;
-	outbytesleft = MAX_LINELEN;
-	iconv(latin_to_utf8, (char **)&inbuf, &inbytesleft, &outbuf, &outbytesleft);
-	*outbuf = '\0';
+	if (is_utf8_put) {
+		ustr = (char *)lstr;
+	} else {
+		ustr = str_ltou(lstr);
+	}
 	mbstowcs(wstr, ustr, MAX_LINELEN);
 	CHECK(addwstr, wstr);
 }
@@ -340,7 +338,7 @@ PUBLIC int sys_system(char *cmd)
         CHECK(reset_shell_mode);
         CHECK(putp, exit_ca_mode);
 	fflush(stdout);
-	rc = system(cmd);
+	rc = system(str_ltou(cmd));
 	fputs("\nPress return to continue...", stdout);
         fflush(stdout);
 	while (getchar() != '\n')
@@ -357,6 +355,11 @@ PUBLIC void sys_setpaged(int n)
 {
 	paged = n;
 	pagern = LINES;
+}
+
+PUBLIC void sys_setutf8(bool u)
+{
+	is_utf8_put = u;
 }
 
 
@@ -589,13 +592,16 @@ PUBLIC char *sys_dir_string()
 
 PUBLIC void sys_dir(const char *pattern) {
 	FILE *f;
-	int l=strlen(pattern);
+	char *upattern;
+	int l;
 	char *buf=(char *)malloc(8+l);
 	char line[256];
 	
 	strncpy(buf,"ls -l ",7);
 	buf[7] = '\0';
-	strncat(buf,pattern,l);
+	upattern = str_ltou(pattern);
+	l=strlen(upattern);
+	strncat(buf,upattern,l);
 	f=popen(buf,"r");
 
 	if (!f) {
@@ -603,12 +609,14 @@ PUBLIC void sys_dir(const char *pattern) {
         }
 
 	sys_setpaged(1);
+	sys_setutf8(true);
 
 	while (fgets(line,254,f)) {
 		sys_put(MSG_PROGRAM,line,-1);
         }
 
 	sys_setpaged(0);
+	sys_setutf8(false);
 	pclose(f);
 	free(buf);
 }

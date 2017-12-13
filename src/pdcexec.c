@@ -1250,7 +1250,7 @@ PRIVATE void exec_open(struct comal_line *line)
         const char *inbuf;
         char *outbuf;
         size_t inbytesleft, outbytesleft;
-        char fname[PATH_MAX];
+        char *fname;
 
 	calc_exp(o->filename, (void **) &name, &type);
 	frec = (struct file_rec *)mem_alloc(RUN_POOL, sizeof(struct file_rec));
@@ -1296,12 +1296,7 @@ PRIVATE void exec_open(struct comal_line *line)
 		fatal("open filemode switch default action");
 	}
 
-        inbuf = name->s;
-        inbytesleft = strlen(name->s);
-        outbuf = fname;
-        outbytesleft = PATH_MAX;
-        iconv(latin_to_utf8, (char **)&inbuf, &inbytesleft, &outbuf, &outbytesleft);
-        *outbuf = '\0';
+	fname = str_ltou(name->s);
 	if (frec->mode == randomSYM && !o->read_only && access(fname, F_OK) != 0) {
 		// The modern replacement for creat(2)
 		int fd = open(fname, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);

@@ -25,5 +25,6 @@ extern struct string *str_partcpy2(struct string *s1, struct string *s2, long fr
 extern struct string *str_dup(int pool, struct string *s);
 extern struct string *str_maxdup(int pool, struct string *s, long n);
 extern void str_extend(int pool, struct string **s, long newlen);
+extern char *str_ltou(const char *lstr);
 
 #endif
