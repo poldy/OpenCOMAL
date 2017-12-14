@@ -50,7 +50,7 @@ else
 	CFLAGS+=$(shell ncursesw5-config --cflags)
 	LDFLAGS+=-lreadline -lm $(shell ncursesw5-config --libs)
 
-	include /usr/share/hardening-includes/hardening.make
+	-include /usr/share/hardening-includes/hardening.make
 	CFLAGS += $(HARDENING_CFLAGS)
 	LDFLAGS += $(HARDENING_LDFLAGS)
 endif

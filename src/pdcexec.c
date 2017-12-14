@@ -1416,7 +1416,7 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 {
 	long size;
 	long r;
-	char c;
+	int c;
 
 	*type = (enum VAL_TYPE) 0;
         c = fgetc(f->hfptr);
