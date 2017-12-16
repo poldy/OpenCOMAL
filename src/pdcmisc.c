@@ -48,6 +48,18 @@ PUBLIC void my_nl(int stream)
 }
 
 
+PUBLIC void my_ht(int stream)
+{
+	if (sel_outfile && stream == MSG_PROGRAM) {
+		if (fputc('\t', sel_outfile) == EOF)
+			run_error(SELECT_ERR,
+				  "Error when writing to SELECT OUTPUT file %s",
+				  strerror(errno));
+	} else
+		sys_ht(stream);
+}
+
+
 PUBLIC void my_put(int stream, const char *buf, long len)
 {
 	if (sel_outfile && stream == MSG_PROGRAM) {
@@ -451,6 +463,8 @@ PRIVATE struct {
 	reportSYM, sizeof(c_line.lc.exp)}
 	, {
 	delaySYM, sizeof(c_line.lc.exp)}
+	, {
+	zoneSYM, sizeof(c_line.lc.exp)}
 	, {
 	-1, -1}
 };

@@ -209,6 +209,7 @@ PRIVATE struct {
 	whenSYM, 0, "WHEN"}, {
 	whileSYM, 0, "WHILE"}, {
 	writeSYM, 0, "WRITE"}, {
+	zoneSYM, _ZONE, "ZONE"}, {
 	0, 0, "<undefined>"}
 };
 

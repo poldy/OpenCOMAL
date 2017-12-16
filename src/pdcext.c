@@ -348,6 +348,13 @@ PUBLIC void ext_nl(void)
 }
 
 
+PUBLIC void ext_ht(void)
+{
+	if (sys_outfile)
+		fputc('\t', sys_outfile);
+}
+
+
 PUBLIC void ext_page(void)
 {
 }

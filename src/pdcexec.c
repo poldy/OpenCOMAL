@@ -32,6 +32,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <fcntl.h>
+#include <assert.h>
 
 
 #ifdef MSDOS
@@ -1700,6 +1701,18 @@ PRIVATE void print_con(struct print_list *printroot, int pr_sep)
 	struct print_list *work = printroot;
 
 	while (work) {
+		assert(work->pr_sep == 0 || work->pr_sep == commaSYM || work->pr_sep == semicolonSYM);
+		switch (work->pr_sep) {
+		case 0:
+			break;
+		case commaSYM:
+			break;
+		case semicolonSYM:
+			my_ht(MSG_PROGRAM);
+			break;
+		default:
+			break;
+		}
 		calc_exp(work->exp, &result, &type);
 		val_print(MSG_PROGRAM, result, type);
 		val_free(result, type);
@@ -2382,6 +2395,10 @@ PUBLIC int exec_line(struct comal_line *line)
 	
 	case delaySYM:
 		sleep(calc_intexp(line->lc.exp));
+		break;
+	
+	case zoneSYM:
+		sys_zone(calc_intexp(line->lc.exp));
 		break;
 
 	default:

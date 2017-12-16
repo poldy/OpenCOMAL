@@ -289,6 +289,7 @@ PRIVATE void free_horse(struct comal_line *line)
 	case randomizeSYM:
 	case reportSYM:
 	case delaySYM:
+	case zoneSYM:
 		free_exp(line->lc.exp);
 		break;
 

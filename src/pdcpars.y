@@ -188,8 +188,9 @@ extern int yylex();
 %token	whenSYM 
 %token	whileSYM 
 %token	writeSYM
+%token	zoneSYM
 
-%token	<inum>		rnSYM rsSYM tnrnSYM tnrsSYM tsrnSYM tonrsSYM tsrsSYM escSYM
+%token	<inum>		rnSYM rsSYM tnrnSYM tnrsSYM tsrnSYM tonrsSYM tsrsSYM escSYM zoneSYM
 %token	<dubbel>	floatnumSYM
 %token	<id>		idSYM intidSYM stringidSYM
 %token	<num>		intnumSYM
@@ -241,7 +242,7 @@ extern int yylex();
 %type	<cl>		rmdir_stat mkdir_stat repeat_stat
 %type	<cl>		local_stat trap_stat dir_stat unit_stat static_stat
 %type	<cl>		module_stat export_stat use_stat
-%type	<cl>		randomize_stat report_stat delay_stat
+%type	<cl>		randomize_stat report_stat delay_stat zone_stat
 
 %type	<pcl>		optsimple_stat 
 
@@ -513,6 +514,7 @@ simple_stat	:	close_stat
 		|	unit_stat
 		|	use_stat
 		|	write_stat
+		|	zone_stat
 		|	xid
 			{
 				$$.cmd=execSYM;
@@ -1311,6 +1313,13 @@ write_stat	:	writeSYM file_designator exp_list
 				$$.cmd=writeSYM;
 				$$.lc.writerec.twoexp=$2;
 				$$.lc.writerec.exproot=(struct exp_list *)my_reverse($3);
+			}
+		;
+
+zone_stat	:	zoneSYM numexp
+	    		{
+				$$.cmd=zoneSYM;
+				$$.lc.exp=$2;
 			}
 		;
 

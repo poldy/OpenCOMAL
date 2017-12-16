@@ -24,6 +24,7 @@ extern int ext_syss_exp(struct exp_list *exproot, struct string **result,
 extern int ext_sys_stat(struct exp_list *exproot);
 extern int ext_get(int stream, char *line, int maxlen, const char *prompt);
 extern void ext_nl(void);
+extern void ext_ht(void);
 extern void ext_page(void);
 extern void ext_cursor(int y, int x);
 extern void ext_put(int stream, const char *buf, long len);

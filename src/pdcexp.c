@@ -221,6 +221,10 @@ PRIVATE void exp_const(struct expression *exp, void **result,
 	case _FREEFILE:
 		*result = val_int(my_highest_file() + 1, NULL, type);
 		break;
+	
+	case _ZONE:
+		*result = val_int(sys_zone_num(), NULL, type);
+		break;
 
 	default:
 		fatal("exp_const default action");

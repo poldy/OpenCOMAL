@@ -61,5 +61,6 @@
 #define _ESC			4041
 #define _FREEFILE		4042
 #define _GET			4043
+#define _ZONE			4044
 
 #endif

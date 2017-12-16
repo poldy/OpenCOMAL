@@ -608,20 +608,20 @@
      6080   RETURN ABS(PI-4*ATN(1))<1e-06
      6090 ENDFUNC
      6100 //
-     6110 // passfail("print", test'print)
-     6120 // FUNC test'print CLOSED
-     6130 //   cc:=CURCOL
-     6140 //   PRINT "",
-     6150 //   IF CURCOL<>cc THEN RETURN FALSE
-     6160 //   zz:=ZONE
-     6170 //   ZONE 5
-     6180 //   PRINT "";
-     6190 //   cc:=CURCOL
-     6200 //   PRINT "";
-     6210 //   IF cc+5<>CURCOL THEN RETURN FALSE
-     6220 //   ZONE zz //reset zone
-     6230 //   RETURN TRUE
-     6240 // ENDFUNC test'print
+     6110 passfail("print", test'print)
+     6120 FUNC test'print CLOSED
+     6130   cc:=CURCOL
+     6140   PRINT "",
+     6150   IF CURCOL<>cc THEN RETURN FALSE
+     6160   zz:=ZONE
+     6170   ZONE 5
+     6180   PRINT "";
+     6190   cc:=CURCOL
+     6200   PRINT "";
+     6210   IF cc+5<>CURCOL THEN RETURN FALSE
+     6220   ZONE zz //reset zone
+     6230   RETURN TRUE
+     6240 ENDFUNC test'print
      6250 //
      6260 passfail("proc", test'proc)
      6270 FUNC test'proc CLOSED
@@ -909,18 +909,18 @@
      9090   RETURN TRUE
      9100 ENDFUNC
      9110 //
-     9120 // passfail("zone", test'zone)
-     9130 // FUNC test'zone CLOSED
-     9140 //   PRINT // force new line
-     9150 //   z:=ZONE
-     9160 //   ZONE 10
-     9170 //   PRINT "";"";
-     9180 //   IF CURCOL<>21 THEN RETURN FALSE
-     9190 //   PRINT "",
-     9200 //   IF CURCOL<>21 THEN RETURN FALSE
-     9210 //   CURSOR 0,1
-     9220 //   ZONE z
-     9230 //   RETURN TRUE
-     9240 // ENDFUNC test'zone
+     9120 passfail("zone", test'zone)
+     9130 FUNC test'zone CLOSED
+     9140   PRINT // force new line
+     9150   z:=ZONE
+     9160   ZONE 10
+     9170   PRINT "";"";
+     9180   IF CURCOL<>21 THEN RETURN FALSE
+     9190   PRINT "",
+     9200   IF CURCOL<>21 THEN RETURN FALSE
+     9210   CURSOR 0,1
+     9220   ZONE z
+     9230   RETURN TRUE
+     9240 ENDFUNC test'zone
      9250 //
      9260 failures

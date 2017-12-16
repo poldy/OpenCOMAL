@@ -606,6 +606,7 @@ PRIVATE void list_horse(char **buf, struct comal_line *line)
 	case randomizeSYM:
 	case reportSYM:
 	case delaySYM:
+	case zoneSYM:
 		list_symsp(buf, line->cmd);
 		list_exp(buf, line->lc.exp);
 		break;

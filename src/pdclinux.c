@@ -49,6 +49,7 @@ PRIVATE char *edit_line;
 PRIVATE Keymap keymap;
 PRIVATE iconv_t utf8_to_latin;
 PRIVATE bool is_visual_mode = false;
+PRIVATE long zone = 1;
 
 PRIVATE struct {
 	int curses_key;
@@ -270,6 +271,7 @@ PRIVATE void init_ncurses(void)
         CHECK(nonl);
         CHECK(intrflush, NULL, FALSE);
         curs_set(2);
+	set_tabsize(zone);
 }
 
 PRIVATE void init_readline(void)
@@ -489,6 +491,26 @@ PUBLIC void sys_nl(int stream)
 {
 	ext_nl();
 	CHECK(addch, '\n');
+}
+
+
+PUBLIC void sys_ht(int stream)
+{
+	ext_ht();
+	CHECK(addch, '\t');
+}
+
+
+PUBLIC long sys_zone_num(void)
+{
+	return zone;
+}
+
+
+PUBLIC void sys_zone(long size)
+{
+	set_tabsize(size);
+	zone = size;
 }
 
 
