@@ -736,7 +736,7 @@
      7360   RETURN TRUE
      7370 ENDFUNC
      7380 //
-     7390 // passfail("select", test'select)
+     7390 passfail("select", test'select)
      7400 FUNC test'select CLOSED
      7410   TRAP
      7420     SELECT OUTPUT "lp:"  //printer

@@ -1841,9 +1841,13 @@ PRIVATE void exec_selfile(FILE ** f, struct expression *exp, const char *mode)
 
 	calc_exp(exp, (void **) &result, &type);
 
-	if (result->len == 0)
+	if (result->len == 0 || strncmp(result->s, "ds:", 3) == 0) {
 		*f = NULL;
-	else {
+	} else {
+		if (strcmp(result->s, "lp:") == 0) {
+			run_error(NIMP_ERR, "SELECT \"lp:\" not implemented");
+		}
+
 		*f = fopen(result->s, mode);
 
 		if (!*f)
