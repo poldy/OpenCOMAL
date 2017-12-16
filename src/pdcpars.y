@@ -1570,6 +1570,10 @@ numexp2		:	numexp2 eqlSYM numexp2
 			{
 				$$=pars_exp_const($1);
 			}
+		|	zoneSYM
+			{
+				$$=pars_exp_const($1);
+			}
 		|	sysSYM lparenSYM exp_list rparenSYM
 			{
 				$$=pars_exp_sys(sysSYM,T_SYS,$3);
