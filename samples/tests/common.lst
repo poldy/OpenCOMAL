@@ -867,14 +867,14 @@
      8670   RETURN x<1
      8680 ENDFUNC
      8690 //
-     8700 // passfail("using", test'using)
-     8710 // FUNC test'using CLOSED
-     8720 //   PRINT // move to next line
-     8730 //   x:=42.8923
-     8740 //   PRINT USING "Test'using -##.#": x,
-     8750 //   IF CURCOL<>11 THEN RETURN FALSE
-     8760 //   RETURN TRUE
-     8770 // ENDFUNC test'using
+     8700 passfail("using", test'using)
+     8710 FUNC test'using CLOSED
+     8720   PRINT // move to next line
+     8730   x:=42.8923
+     8740   PRINT USING "Test'using -##.#": x,
+     8750   IF CURCOL<>17 THEN RETURN FALSE
+     8760   RETURN TRUE
+     8770 ENDFUNC test'using
      8780 //
      8790 passfail("val", test'val)
      8800 FUNC test'val CLOSED

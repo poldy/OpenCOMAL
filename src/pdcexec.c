@@ -1725,7 +1725,7 @@ PRIVATE void print_con(struct print_list *printroot, int pr_sep)
 }
 
 
-PRIVATE void format_using(char *u, char *p)
+PRIVATE char *format_using(char *u, char *p)
 {
 	int err = 0;
 	char *s;
@@ -1740,11 +1740,11 @@ PRIVATE void format_using(char *u, char *p)
 				prec++;
 		} else if (*s == '.')
 			if (decpoint)
-				err = 1;
+				break;
 			else
 				decpoint = 1;
 		else
-			err = 1;
+			break;
 
 		if (err)
 			run_error(USING_ERR,
@@ -1752,6 +1752,25 @@ PRIVATE void format_using(char *u, char *p)
 	}
 
 	sprintf(p, "%%%d.%dlf", width, prec);
+	return s;
+}
+
+
+PRIVATE char *put_using(char *s)
+{
+	char str[MAX_LINELEN];
+	char *from, *to;
+
+	from = s;
+	to = str;
+	while (*from != '\0' && *from != '#' && to < &str[MAX_LINELEN - 1]) {
+		*to = *from;
+		from++;
+		to++;
+	}
+	*to = '\0';
+	my_put(MSG_PROGRAM, str, -1L);
+	return from;
 }
 
 
@@ -1764,10 +1783,10 @@ PRIVATE void print_using(struct expression *str,
 	double d;
 	enum VAL_TYPE type;
 	struct print_list *work = printroot;
+	char *formatptr;
 
 	calc_exp(str, (void **) &usingstr, &type);
-	format_using(usingstr->s, floatusing);
-	mem_free(usingstr);
+	formatptr = put_using(usingstr->s);
 
 	while (work) {
 		calc_exp(work->exp, &result, &type);
@@ -1778,10 +1797,15 @@ PRIVATE void print_using(struct expression *str,
 			d = *(double *) result;
 
 		val_free(result, type);
+		formatptr = format_using(formatptr, floatusing);
 		my_printf(MSG_PROGRAM, 0, floatusing, d);
+		if (*formatptr != '\0') {
+			formatptr = put_using(formatptr);
+		}
 
 		work = work->next;
 	}
+	mem_free(usingstr);
 
 	if (!pr_sep)
 		my_nl(MSG_PROGRAM);
