@@ -1694,6 +1694,15 @@ PUBLIC void print_file(struct two_exp *twoexp,
 }
 
 
+PRIVATE static inline void process_pr_sep(int pr_sep)
+{
+	assert(pr_sep == 0 || pr_sep == commaSYM || pr_sep == semicolonSYM);
+	if (pr_sep == semicolonSYM) {
+		my_ht(MSG_PROGRAM);
+	}
+}
+
+
 PRIVATE void print_con(struct print_list *printroot, int pr_sep)
 {
 	void *result;
@@ -1701,26 +1710,18 @@ PRIVATE void print_con(struct print_list *printroot, int pr_sep)
 	struct print_list *work = printroot;
 
 	while (work) {
-		assert(work->pr_sep == 0 || work->pr_sep == commaSYM || work->pr_sep == semicolonSYM);
-		switch (work->pr_sep) {
-		case 0:
-			break;
-		case commaSYM:
-			break;
-		case semicolonSYM:
-			my_ht(MSG_PROGRAM);
-			break;
-		default:
-			break;
-		}
+		process_pr_sep(work->pr_sep);
 		calc_exp(work->exp, &result, &type);
 		val_print(MSG_PROGRAM, result, type);
 		val_free(result, type);
 		work = work->next;
 	}
 
-	if (!pr_sep)
+	if (pr_sep == 0) {
 		my_nl(MSG_PROGRAM);
+	} else {
+		process_pr_sep(pr_sep);
+	}
 }
 
 
