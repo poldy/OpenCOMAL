@@ -1,9 +1,9 @@
        10 drawbox(60, 5)
        20 //
        30 PROC drawbox(x#, y#) CLOSED
-       40   PRINT "+";"-"*(x#-2);"+"
+       40   PRINT "+","-"*(x#-2),"+"
        50   FOR i#:=1 TO y#-2 DO
-       60     PRINT "|";" "*(x#-2);"|"
+       60     PRINT "|"," "*(x#-2),"|"
        70   ENDFOR i#
-       80   PRINT "+";"-"*(x#-2);"+"
+       80   PRINT "+","-"*(x#-2),"+"
        90 ENDPROC drawbox

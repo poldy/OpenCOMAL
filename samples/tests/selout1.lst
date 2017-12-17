@@ -6,7 +6,7 @@
        60 //
        70 SELECT OUTPUT "ofile"
        80 FOR f:=1 TO 10 DO
-       90   PRINT "Output line ";f
+       90   PRINT "Output line ",f
       100 ENDFOR
       110 SELECT OUTPUT ""
       120 //

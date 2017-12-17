@@ -15,7 +15,7 @@
       150     CURSOR n#+11,1
       160     PRINT USING "######": a#(n#);
       170     PRINT "  ";
-      180     FOR k#:=1 TO a#(n#) DIV 250 DO PRINT "*";
+      180     FOR k#:=1 TO a#(n#) DIV 250 DO PRINT "*",
       190   ENDFOR n#
       200   CURSOR 22,1
       210   PRINT "Samples so far: ";f#;

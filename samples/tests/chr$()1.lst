@@ -1,7 +1,7 @@
        10 // CHR$() sample program
        20 //
        30 FOR f#:=ORD("A") TO ORD("Z") DO
-       40   PRINT CHR$(f#);" ";
+       40   PRINT CHR$(f#)," ",
        50 ENDFOR
        60 PRINT 
        70 PRINT "If the above reads the upper case alphabet, all is ok"
