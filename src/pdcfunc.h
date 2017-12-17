@@ -62,5 +62,6 @@
 #define _FREEFILE		4042
 #define _GET			4043
 #define _ZONE			4044
+#define _TAB			4045
 
 #endif

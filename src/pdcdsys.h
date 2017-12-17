@@ -38,6 +38,7 @@ extern int sys_edit(int stream, char *line, int maxlen, int cursor);
 extern char *sys_dir_string();
 extern void sys_dir(const char *pattern);
 extern const char *sys_unit_string();
+extern const char *sys_tab_string(long col);
 extern void sys_unit(char *unit);
 extern void sys_chdir(char *dir);
 extern void sys_rmdir(char *dir);

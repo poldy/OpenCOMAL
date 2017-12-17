@@ -193,6 +193,7 @@ PRIVATE struct {
 	stepSYM, 0, "STEP"}, {
 	stopSYM, 0, "STOP"}, {
 	tnrsSYM, _STR, "STR$"}, {
+	tnrsSYM, _TAB, "TAB"}, {
 	tnrnSYM, _TAN, "TAN"}, {
 	thenSYM, 0, "THEN"}, {
 	toSYM, 0, "TO"}, {

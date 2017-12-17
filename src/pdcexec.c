@@ -1694,7 +1694,7 @@ PUBLIC void print_file(struct two_exp *twoexp,
 }
 
 
-PRIVATE static inline void process_pr_sep(int pr_sep)
+static inline void process_pr_sep(int pr_sep)
 {
 	assert(pr_sep == 0 || pr_sep == commaSYM || pr_sep == semicolonSYM);
 	if (pr_sep == semicolonSYM) {

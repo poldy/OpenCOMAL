@@ -654,6 +654,22 @@ PUBLIC void sys_unit(char *unit)
 {
 }
 
+PUBLIC const char *sys_tab_string(long col)
+{
+	int curcol, num_spaces;
+	static char result[MAX_LINELEN * 2];
+
+	curcol = sys_curcol();
+	if (col > curcol) {
+		num_spaces = col - curcol;
+	} else {
+		num_spaces = COLS - (curcol - col);
+	}
+	memset(result, ' ', num_spaces);
+	result[num_spaces] = '\0';
+	return result;
+}
+
 PUBLIC void sys_chdir(char *dir)
 {
 	if (chdir(dir)<0)

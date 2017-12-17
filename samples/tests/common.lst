@@ -796,13 +796,13 @@
      7960   RETURN TRUE
      7970 ENDFUNC
      7980 //
-     7990 // passfail("tab", test'tab)
-     8000 // FUNC test'tab CLOSED
-     8010 //   PRINT TAB(25),"",
-     8020 //   IF CURCOL<>25 THEN RETURN FALSE
-     8030 //   CURSOR 0,1
-     8040 //   RETURN TRUE
-     8050 // ENDFUNC test'tab
+     7990 passfail("tab", test'tab)
+     8000 FUNC test'tab CLOSED
+     8010   PRINT TAB(25),"",
+     8020   IF CURCOL<>25 THEN RETURN FALSE
+     8030   CURSOR 0,1
+     8040   RETURN TRUE
+     8050 ENDFUNC test'tab
      8060 //
      8070 passfail("tan", test'tan)
      8080 FUNC test'tan CLOSED

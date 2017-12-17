@@ -184,7 +184,7 @@ PRIVATE void exp_const(struct expression *exp, void **result,
 		*result = str_make(RUN_POOL, sys_unit_string());
 		*type = V_STRING;
 		break;
-
+	
 	case _KEY:
 		*result=str_make(RUN_POOL, sys_key(0));
 		*type = V_STRING;
@@ -225,7 +225,7 @@ PRIVATE void exp_const(struct expression *exp, void **result,
 	case _ZONE:
 		*result = val_int(sys_zone_num(), NULL, type);
 		break;
-
+	
 	default:
 		fatal("exp_const default action");
 	}
@@ -407,6 +407,22 @@ PRIVATE struct string *my_spc(void **result, enum VAL_TYPE *type)
 	return s;
 }
 
+PRIVATE void *my_tab(void **result, enum VAL_TYPE *type)
+{
+	long num;
+	struct string *s;
+
+	if (*type == V_INT) {
+		num = **(long **)result;
+	} else  {
+		num = d2int(**(double **)result, 1);
+	}
+	s = str_make(RUN_POOL, sys_tab_string(num));
+	*type = V_STRING;
+	cell_free(*result);
+	return s;
+}
+
 
 PRIVATE struct string *my_str(void **result, enum VAL_TYPE *type)
 {
@@ -567,6 +583,9 @@ PRIVATE void exp_unary(struct expression *expr, void **result,
 		break;
 	case _TAN:
 		dfunc = tan;
+		break;
+	case _TAB:
+		mfunc = my_tab;
 		break;
 
 	default:

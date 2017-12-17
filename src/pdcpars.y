@@ -188,7 +188,6 @@ extern int yylex();
 %token	whenSYM 
 %token	whileSYM 
 %token	writeSYM
-%token	zoneSYM
 
 %token	<inum>		rnSYM rsSYM tnrnSYM tnrsSYM tsrnSYM tonrsSYM tsrsSYM escSYM zoneSYM
 %token	<dubbel>	floatnumSYM
