@@ -1812,19 +1812,31 @@ PRIVATE void print_using(struct expression *str,
 }
 
 
+PRIVATE void print_at(struct two_exp *twoexp, struct print_list *printroot, int pr_sep)
+{
+	sys_cursor(sel_outfile, calc_intexp(twoexp->exp1),
+		   calc_intexp(twoexp->exp2));
+	print_con(printroot, pr_sep);
+}
+
+
 PRIVATE void exec_print(struct comal_line *line)
 {
 	struct print_rec *p = &line->lc.printrec;
 
-	if (p->modifier)
-		if (p->modifier->type == usingSYM)
+	if (p->modifier) {
+		if (p->modifier->type == usingSYM) {
 			print_using(p->modifier->data.str, p->printroot,
 				    p->pr_sep);
-		else
+		} else if (p->modifier->type == atSYM) {
+			print_at(&p->modifier->data.twoexp, p->printroot, p->pr_sep);
+		} else {
 			print_file(&p->modifier->data.twoexp,
 				   p->printroot);
-	else
+		}
+	} else {
 		print_con(p->printroot, p->pr_sep);
+	}
 }
 
 

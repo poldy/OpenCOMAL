@@ -66,6 +66,7 @@ extern int yylex();
 %token	andSYM 
 %token	andthenSYM
 %token	appendSYM 
+%token	atSYM
 %token	autoSYM
 %token	becomesSYM 
 %token	becplusSYM
@@ -214,7 +215,7 @@ extern int yylex();
 %type	<exp>		string_factor strlvalue2 optnumlvalue opt_arg
 %type	<exp>		opt_numexp
 %type	<extptr>	opt_external
-%type	<twoexp>	file_designator substr_spec substr_spec2
+%type	<twoexp>	file_designator substr_spec substr_spec2 at_designator
 %type	<twoexpp>	optfile
 %type	<inum>		optclosed optread_only relop pr_sep optpr_sep 
 %type	<inum>		todownto nassign sassign assign1 assign2 plusorminus
@@ -1045,6 +1046,15 @@ print_stat	:	printi
 				$$.lc.printrec.printroot=(struct print_list *)my_reverse($5);
 				$$.lc.printrec.pr_sep=$6;
 			}
+		|	printi at_designator print_list optpr_sep
+			{
+				$$.cmd=printSYM;
+				$$.lc.printrec.modifier=(struct print_modifier *)mem_alloc(PARSE_POOL,sizeof(struct print_modifier));
+				$$.lc.printrec.modifier->type=atSYM;
+				$$.lc.printrec.modifier->data.twoexp=$2;
+				$$.lc.printrec.printroot=(struct print_list *)my_reverse($3);
+				$$.lc.printrec.pr_sep=$4;
+			}
 		|	printi file_designator print_list
 			{
 				$$.cmd=printSYM;
@@ -1807,6 +1817,13 @@ file_designator	:	fileSYM numexp colonSYM
 			}
 		|	fileSYM numexp commaSYM numexp colonSYM
 			{
+				$$.exp1=$2;
+				$$.exp2=$4;
+			}
+		;
+
+at_designator	:	atSYM numexp commaSYM numexp colonSYM
+	      		{
 				$$.exp1=$2;
 				$$.exp2=$4;
 			}

@@ -337,6 +337,10 @@ PRIVATE void sqash_print(struct comal_line *line)
 			sqash_exp(p->modifier->data.str);
 			break;
 
+		case atSYM:
+			sqash_twoexp(&p->modifier->data.twoexp);
+			break;
+
 		default:
 			fatal("Print modifier incorrect (sqash)");
 		}
@@ -1034,6 +1038,10 @@ PRIVATE void expand_print(struct comal_line *line)
 
 		case usingSYM:
 			p->modifier->data.str = expand_exp();
+			break;
+
+		case atSYM:
+			expand_twoexp(&p->modifier->data.twoexp);
 			break;
 
 		default:

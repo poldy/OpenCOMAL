@@ -201,6 +201,10 @@ PRIVATE void free_print(struct comal_line *line)
 			free_exp(p->modifier->data.str);
 			break;
 
+		case atSYM:
+			free_twoexp(&p->modifier->data.twoexp);
+			break;
+
 		default:
 			fatal("Print modifier incorrect (free)");
 		}

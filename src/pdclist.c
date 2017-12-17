@@ -382,6 +382,14 @@ PRIVATE void list_file(char **buf, struct two_exp *twoexp)
 }
 
 
+PRIVATE void list_at(char **buf, struct two_exp *twoexp)
+{
+	list_symsp(buf, atSYM);
+	list_twoexp(buf, twoexp, ",", 0);
+	list_text(buf, ": ");
+}
+
+
 PRIVATE void list_for(char **buf, struct comal_line *line)
 {
 	struct for_rec *f = &line->lc.forrec;
@@ -460,6 +468,10 @@ PRIVATE void list_print(char **buf, struct comal_line *line)
 			list_symsp(buf, usingSYM);
 			list_exp(buf, p->modifier->data.str);
 			list_text(buf, ": ");
+			break;
+
+		case atSYM:
+			list_at(buf, &p->modifier->data.twoexp);
 			break;
 
 		default:

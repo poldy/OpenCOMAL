@@ -62,6 +62,7 @@ PRIVATE struct {
 	andthenSYM, 0, "AND THEN"}, {
 	appendSYM, 0, "APPEND"}, {
 	tnrnSYM, _ASN, "ASN"}, {
+	atSYM, 0, "AT"}, {
 	tnrnSYM, _ATN, "ATN"}, {
 	autoSYM, 0, "AUTO"}, {
 	bitandSYM, 0, "BITAND"}, {
