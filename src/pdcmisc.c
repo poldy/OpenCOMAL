@@ -420,6 +420,8 @@ PRIVATE struct {
 	, {
 	pageSYM, 0}
 	, {
+	clrtoeolSYM, 0}
+	, {
 	printSYM, sizeof(c_line.lc.printrec)}
 	, {
 	procSYM, sizeof(c_line.lc.pfrec)}

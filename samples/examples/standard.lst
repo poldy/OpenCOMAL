@@ -63,6 +63,13 @@
       630   PROC clearkeys CLOSED  // clear keyboard buffer
       640     WHILE KEY$>"" DO NULL
       650   ENDPROC
+      651   
+      652   PROC clearlines(row1, row2) CLOSED
+      653     FOR x#:=row1 TO row2 DO
+      654       CURSOR x#,1
+      655       CLRTOEOL
+      656     ENDFOR
+      657   ENDPROC
       660   
       670   FUNC getkey$ CLOSED  //like KEY$ but no blinking cursor
       680     clearkeys
@@ -150,4 +157,18 @@
      1500     ENDIF
      1510     RETURN reply$ IN "Yy"
      1520   ENDFUNC
-     1530 ENDMODULE
+     1530   
+     1540   PROC center(text$) CLOSED
+     1550     center'at(CURROW, text$)
+     1560     IF LEN(text$)<=79 THEN PRINT   // new line
+     1570   ENDPROC
+     1580   
+     1590   PROC center'at(row, text$) CLOSED
+     1600     CURSOR row,1
+     1610     IF LEN(text$)>79 THEN
+     1620       PRINT text$
+     1630     ELSE
+     1640       PRINT TAB(1+((80-LEN(text$)) DIV 2)),text$,
+     1650     ENDIF
+     1660   ENDPROC
+     1670 ENDMODULE

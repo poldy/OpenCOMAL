@@ -78,6 +78,7 @@ extern int yylex();
 %token	chdirSYM
 %token	closedSYM 
 %token	closeSYM 
+%token	clrtoeolSYM
 %token	colonSYM
 %token	commaSYM 
 %token	contSYM 
@@ -605,6 +606,10 @@ simple_1word	:	nullSYM
 		|	pageSYM
 			{
 				$$.cmd=pageSYM;
+			}
+		|	clrtoeolSYM
+	      		{
+				$$.cmd=clrtoeolSYM;
 			}
 		|	retrySYM
 			{

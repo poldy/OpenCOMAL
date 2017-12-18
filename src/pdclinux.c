@@ -453,6 +453,13 @@ PUBLIC void sys_page(FILE * f)
 }
 
 
+PUBLIC void sys_clrtoeol(FILE * f)
+{
+	ext_clrtoeol();
+	CHECK(clrtoeol);
+}
+
+
 PUBLIC void sys_cursor(FILE * f, long y, long x)
 {
         if (y > LINES || x > COLS) {

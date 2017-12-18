@@ -261,6 +261,7 @@ PRIVATE void free_horse(struct comal_line *line)
 	case retrySYM:
 	case trapSYM:
 	case pageSYM:
+	case clrtoeolSYM:
 	case handlerSYM:
 	case restoreSYM:
 	case idSYM:

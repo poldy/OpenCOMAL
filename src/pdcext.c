@@ -360,6 +360,11 @@ PUBLIC void ext_page(void)
 }
 
 
+PUBLIC void ext_clrtoeol(void)
+{
+}
+
+
 PUBLIC void ext_cursor(int y, int x)
 {
 }
