@@ -22,34 +22,33 @@
       220 ENDPROC
       230 PROC begging'steward
       240   PAGE
-      250   PRINT "Hammurabi, your humble steward begs to report that in Year ";year;" of your reign:"
+      250   PRINT "Hammurabi, your humble steward begs to report that in Year";year;"of your reign:"
       290   PRINT 
       300   IF num'dead=0 THEN
-      310     PRINT "None of your loyal subjects perished,"
+      310     PRINT "None of your loyal subjects perished,";
       330   ELSE
-      340     PRINT num'dead;" of your loyal subjects perished,";
+      340     PRINT num'dead;"of your loyal subjects perished,";
       360   ENDIF
-      370   PRINT " and ";settlers;" newcomers settled in the city."
+      370   PRINT "and";settlers;"newcomers settled in the city."
       390   PRINT 
       400   pop:+settlers
       410 ENDPROC
       420 //
       430 PROC report'update
-      440   PRINT "Your subjects now number ";pop,"."
+      440   PRINT "Your subjects now number";pop,"."
       450   PRINT 
-      460   PRINT "The city owns ";acres;" acres of land."
-      470   PRINT "The harvest yielded ";harvest;" bushels, or ";
-      480   PRINT USING "#.#": harvest/acres;
-      485   PRINT " bushels harvested per acre"
+      460   PRINT "The city owns";acres;"acres of land."
+      470   PRINT "The harvest yielded";harvest;"bushels,";
+      480   PRINT USING "or #.# bushels harvested per acre": harvest/acres
       490   IF rat'food=0 THEN
       500     PRINT "Rodents ate none of the grain."
       510   ELSE
-      520     PRINT "Rodents ate ";rat'food;" bushels of grain."
+      520     PRINT "Rodents ate";rat'food;"bushels of grain."
       540   ENDIF
-      550   PRINT "The granaries now hold ";stored;" bushels."
+      550   PRINT "The granaries now hold";stored;"bushels."
       570   PRINT 
       580   price:=RND(17,26)
-      590   PRINT "Land is trading at ";price;" bushels per acre."
+      590   PRINT "Land is trading at";price;"bushels per acre."
       610 ENDPROC
       620 //
       630 PROC buy'land
@@ -89,7 +88,7 @@
       990     ELIF plant/2>stored
      1000       wrong'grain
      1010     ELIF plant>10*pop
-     1020       PRINT "But you have only ";pop;" subjects to tend the fields! Now then,"
+     1020       PRINT "But you have only";pop;"subjects to tend the fields! Now then,"
      1040     ELSE
      1050       ok:=TRUE
      1060     ENDIF
@@ -138,7 +137,7 @@
      1500 //
      1510 PROC starved
      1520   PRINT 
-     1530   PRINT "You starved ";num'dead;" people in one year!!"
+     1530   PRINT "You starved";num'dead;"people in one year!!"
      1550   mismanagement
      1560 ENDPROC
      1570 //
@@ -150,13 +149,13 @@
      1670 PROC wrong'grain
      1680   PRINT 
      1690   PRINT "Hammurabi, think again.";
-     1700   PRINT "You have only ";stored;" bushels of grain. Now then,"
+     1700   PRINT "You have only";stored;"bushels of grain. Now then,"
      1720 ENDPROC
      1730 //
      1740 PROC wrong'acres
      1750   PRINT 
      1760   PRINT "Hammurabi, think again.";
-     1770   PRINT "You only own ";acres;" acres. Now then,"
+     1770   PRINT "You only own";acres;"acres. Now then,"
      1790 ENDPROC
      1800 //
      1810 PROC steward'quits
@@ -167,10 +166,10 @@
      1870 ENDPROC
      1880 //
      1890 PROC final'report
-     1900   PRINT "In your 10-year term of office, ";INT(pop'pcnt),"% of the population starved per year, on the average, I.E. a total of ";INT(pcnt'dead);" people died!!"
+     1900   PRINT "In your 10-year term of office,";INT(pop'pcnt),"% of the population starved per year, on the average, I.E. a total of";INT(pcnt'dead);"people died!!"
      1960   land:=acres/pop
      1970   PRINT 
-     1980   PRINT "You started with 10 acres per person and ended with ";land;" per person."
+     1980   PRINT "You started with 10 acres per person and ended with";land;"per person."
      2000   PRINT 
      2010   FOR t:=l TO 1000 DO NULL
      2020   IF pop'pcnt>33 OR land<7 THEN
@@ -196,7 +195,7 @@
      2290 //
      2300 PROC fair
      2310   PRINT "Your performance cquld have been somewhat better, but really wasn't too bad."
-     2340   PRINT RND(1,pop*0.8);" people would dearly like to see you assassinated, but we all have our trivial little problems."
+     2340   PRINT RND(1,pop*0.8);"people would dearly like to see you assassinated, but we all have our trivial little problems."
      2380 ENDPROC
      2390 //
      2400 PROC end'game
