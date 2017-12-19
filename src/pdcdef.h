@@ -269,15 +269,15 @@ struct ifwhile_rec {
 
 struct input_modifier {
 	int type;
-	union {
-		struct two_exp twoexp;
-		struct string *str;
-	} data;
+	struct two_exp twoexp;
+	struct expression *len;
+	struct string *str;
 };
 
 struct input_rec {
 	struct input_modifier *modifier;
 	struct exp_list *lvalroot;
+	int pr_sep;
 };
 
 struct open_rec {

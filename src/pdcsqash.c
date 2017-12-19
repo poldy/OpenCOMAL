@@ -295,11 +295,17 @@ PRIVATE void sqash_input(struct comal_line *line)
 
 		switch (i->modifier->type) {
 		case fileSYM:
-			sqash_twoexp(&i->modifier->data.twoexp);
+			sqash_twoexp(&i->modifier->twoexp);
 			break;
 
 		case stringSYM:
-			sqash_putstr(SQ_STRING, i->modifier->data.str);
+			sqash_putstr(SQ_STRING, i->modifier->str);
+			break;
+
+		case atSYM:
+			sqash_twoexp(&i->modifier->twoexp);
+			sqash_exp(i->modifier->len);
+			sqash_putstr(SQ_STRING, i->modifier->str);
 			break;
 
 		default:
@@ -986,11 +992,17 @@ PRIVATE void expand_input(struct comal_line *line)
 
 		switch (i->modifier->type) {
 		case fileSYM:
-			expand_twoexp(&i->modifier->data.twoexp);
+			expand_twoexp(&i->modifier->twoexp);
 			break;
 
 		case stringSYM:
-			i->modifier->data.str = expand_getstr(SQ_STRING);
+			i->modifier->str = expand_getstr(SQ_STRING);
+			break;
+
+		case atSYM:
+			expand_twoexp(&i->modifier->twoexp);
+			i->modifier->len = expand_exp();
+			i->modifier->str = expand_getstr(SQ_STRING);
 			break;
 
 		default:

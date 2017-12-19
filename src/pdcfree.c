@@ -160,11 +160,21 @@ PRIVATE void free_input(struct comal_line *line)
 	if (i->modifier) {
 		switch (i->modifier->type) {
 		case fileSYM:
-			free_twoexp(&i->modifier->data.twoexp);
+			free_twoexp(&i->modifier->twoexp);
 			break;
 
 		case stringSYM:
-			mem_free(i->modifier->data.str);
+			mem_free(i->modifier->str);
+			break;
+
+		case atSYM:
+			free_twoexp(&i->modifier->twoexp);
+			if (i->modifier->len != NULL) {
+				free_exp(i->modifier->len);
+			}
+			if (i->modifier->str != NULL) {
+				mem_free(i->modifier->str);
+			}
 			break;
 
 		default:

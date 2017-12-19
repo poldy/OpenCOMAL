@@ -2,18 +2,24 @@
        20   EXPORT file'exists
        30   EXPORT type
        40   EXPORT clearkeys
+       45   EXPORT clearlines
        50   EXPORT number
        60   EXPORT getkey$
        70   EXPORT getvalidkey$
        80   EXPORT stripchar$
+       82   EXPORT getinfile
+       85   EXPORT getoutfile
+       87   EXPORT getfiles
        90   EXPORT quicksort
       100   EXPORT quicksortnum
+      103   EXPORT center
+      106   EXPORT center'at
       110   EXPORT yes
       120   EXPORT version'standard$
       130   
       140   FUNC version'standard$ CLOSED
       150     RETURN " 1.17 Standard package by Lindsay & Warman"
-      160   ENDFUNC
+      160   ENDFUNC version'standard$
       170   
       180   FUNC file'exists(filename$) CLOSED
       190     TRAP
@@ -29,7 +35,7 @@
       290       ENDTRAP
       300       RETURN FALSE
       310     ENDTRAP
-      320   ENDFUNC
+      320   ENDFUNC file'exists
       330   
       340   PROC type(filename$) CLOSED
       350     IF file'exists(filename$) THEN
@@ -58,18 +64,18 @@
       580     ELSE
       590       PRINT "File not found."
       600     ENDIF
-      610   ENDPROC
+      610   ENDPROC type
       620   
       630   PROC clearkeys CLOSED  // clear keyboard buffer
       640     WHILE KEY$>"" DO NULL
-      650   ENDPROC
+      650   ENDPROC clearkeys
       651   
       652   PROC clearlines(row1, row2) CLOSED
       653     FOR x#:=row1 TO row2 DO
       654       CURSOR x#,1
       655       CLRTOEOL
-      656     ENDFOR
-      657   ENDPROC
+      656     ENDFOR x#
+      657   ENDPROC clearlines
       660   
       670   FUNC getkey$ CLOSED  //like KEY$ but no blinking cursor
       680     clearkeys
@@ -77,7 +83,7 @@
       700       reply$:=KEY$
       710     UNTIL reply$>CHR$(0)
       720     RETURN reply$
-      730   ENDFUNC
+      730   ENDFUNC getkey$
       740   
       750   FUNC getvalidkey$(valid$) CLOSED
       760     clearkeys
@@ -85,7 +91,7 @@
       780       reply$:=KEY$
       790     UNTIL reply$ IN valid$
       800     RETURN reply$
-      810   ENDFUNC
+      810   ENDFUNC getvalidkey$
       820   
       830   FUNC stripchar$(text$, char$) CLOSED
       840     length:=LEN(text$)
@@ -96,7 +102,7 @@
       890     ELSE
       900       RETURN text$
       910     ENDIF
-      920   ENDFUNC
+      920   ENDFUNC stripchar$
       930   
       940   FUNC number(text$) CLOSED  //returns TRUE if text$ is a number
       950     TRAP
@@ -105,7 +111,7 @@
       980     HANDLER
       990       RETURN FALSE
      1000     ENDTRAP
-     1010   ENDFUNC
+     1010   ENDFUNC number
      1020   
      1030   PROC quicksort(REF a$(), m, n) CLOSED
      1040     part(m, n, m, n)
@@ -121,11 +127,11 @@
      1140       UNTIL i>j
      1150       IF l<j THEN part(l, j, l, j)
      1160       IF i<r THEN part(i, r, i, r)
-     1170     ENDPROC
+     1170     ENDPROC part
      1180     PROC swap(REF a$, REF b$) CLOSED
      1190       buff$:=a$; a$:=b$; b$:=buff$
-     1200     ENDPROC
-     1210   ENDPROC
+     1200     ENDPROC swap
+     1210   ENDPROC quicksort
      1220   
      1230   PROC quicksortnum(REF a(), m, n) CLOSED
      1240     part'num(m, n, m, n)
@@ -141,11 +147,11 @@
      1340       UNTIL i>j
      1350       IF l<j THEN part'num(l, j, l, j)
      1360       IF i<r THEN part'num(i, r, i, r)
-     1370     ENDPROC
+     1370     ENDPROC part'num
      1380     PROC swap'num(REF a, REF b) CLOSED
      1390       buff:=a; a:=b; b:=buff
-     1400     ENDPROC
-     1410   ENDPROC
+     1400     ENDPROC swap'num
+     1410   ENDPROC quicksortnum
      1420   
      1430   FUNC yes(prompt$) CLOSED
      1440     PRINT prompt$
@@ -156,12 +162,12 @@
      1490       PRINT "NO"
      1500     ENDIF
      1510     RETURN reply$ IN "Yy"
-     1520   ENDFUNC
+     1520   ENDFUNC yes
      1530   
      1540   PROC center(text$) CLOSED
      1550     center'at(CURROW, text$)
      1560     IF LEN(text$)<=79 THEN PRINT   // new line
-     1570   ENDPROC
+     1570   ENDPROC center
      1580   
      1590   PROC center'at(row, text$) CLOSED
      1600     CURSOR row,1
@@ -170,5 +176,63 @@
      1630     ELSE
      1640       PRINT TAB(1+((80-LEN(text$)) DIV 2)),text$,
      1650     ENDIF
-     1660   ENDPROC
-     1670 ENDMODULE
+     1660   ENDPROC center'at
+     1670   
+     1680   PROC getinfile(REF infile$) CLOSED
+     1690     r:=CURROW
+     1700     REPEAT
+     1710       REPEAT
+     1720         INPUT AT r,1: "Please enter the INPUT filename: ": infile$
+     1730       UNTIL LEN(infile$)>0  //must have some name
+     1740       clearlines(r, r)  // erase input line
+     1750       IF file'exists(infile$) THEN
+     1760         ok:=TRUE
+     1770       ELSE
+     1780         ok:=FALSE
+     1790         PRINT AT r,1: "FILE NOT FOUND in directory! Press a key to retry...",
+     1800         pause
+     1810         clearlines(r, r)  // clear err msg
+     1820       ENDIF
+     1830     UNTIL ok
+     1840     PRINT AT r,1: "INPUT  filename is:";infile$
+     1850   ENDPROC
+     1860   
+     1870   PROC getoutfile(REF outfile$) CLOSED
+     1880     r:=CURROW
+     1890     REPEAT
+     1900       REPEAT
+     1910         INPUT AT r,1: "Please enter the OUTPUT filename: ": outfile$
+     1920       UNTIL LEN(outfile$)>0  //must have some name
+     1930       clearlines(r, r)
+     1940       IF file'exists(outfile$) THEN
+     1950         ok:=FALSE
+     1960         PRINT AT r,1: outfile$;"EXIST!  Replace it?",
+     1970         reply$:=getvalidkey$("YyNn")
+     1980         clearlines(r, r)  //erase msg
+     1990         IF reply$ IN "yY" THEN ok:=TRUE
+     2000         clearkeys
+     2010       ELSE
+     2020         ok:=TRUE
+     2030       ENDIF
+     2040     UNTIL ok
+     2050     PRINT AT r,1: "OUTPUT filename is:";outfile$
+     2060   ENDPROC
+     2070   
+     2080   PROC getfiles(REF infile$, REF outfile$) CLOSED
+     2090     row:=CURROW
+     2100     REPEAT
+     2110       CURSOR row,1
+     2120       getinfile(infile$)
+     2130       getoutfile(outfile$)
+     2140       IF UPPER$(infile$)<>UPPER$(outfile$) THEN
+     2150         ok:=TRUE
+     2160       ELSE
+     2170         ok:=FALSE
+     2180         clearlines(row, row+1)  //erase in & out lines
+     2190         PRINT AT row,1: "Filenames must be different! Press a key to retry ...",
+     2200         pause
+     2210         clearlines(row, row)
+     2220       ENDIF
+     2230     UNTIL ok
+     2240   ENDPROC
+     2250 ENDMODULE

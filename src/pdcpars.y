@@ -966,11 +966,12 @@ import_list	:	import_list commaSYM oneparm
 			}
 		;
 
-input_stat	:	inputSYM input_modifier lval_list
+input_stat	:	inputSYM input_modifier lval_list optpr_sep
 			{
 				$$.cmd=inputSYM;
 				$$.lc.inputrec.modifier=$2;
 				$$.lc.inputrec.lvalroot=(struct exp_list *)my_reverse($3);
+				$$.lc.inputrec.pr_sep=$4;
 			}
 		;
 		
@@ -978,13 +979,38 @@ input_modifier	:	file_designator
 			{
 				$$=(struct input_modifier *)mem_alloc(PARSE_POOL,sizeof(struct input_modifier));
 				$$->type=fileSYM;
-				$$->data.twoexp=$1;
+				$$->twoexp=$1;
 			}
 		|	stringSYM colonSYM
 			{
 				$$=(struct input_modifier *)mem_alloc(PARSE_POOL,sizeof(struct input_modifier));
 				$$->type=stringSYM;
-				$$->data.str=$1;
+				$$->str=$1;
+			}
+		|	atSYM numexp commaSYM numexp commaSYM numexp colonSYM stringSYM colonSYM
+			{
+				$$=(struct input_modifier *)mem_alloc(PARSE_POOL,sizeof(struct input_modifier));
+				$$->type=atSYM;
+				$$->twoexp.exp1=$2;
+				$$->twoexp.exp2=$4;
+				$$->len=$6;
+				$$->str=$8;
+			}
+		|	at_designator stringSYM colonSYM
+			{
+				$$=(struct input_modifier *)mem_alloc(PARSE_POOL,sizeof(struct input_modifier));
+				$$->type=atSYM;
+				$$->twoexp=$1;
+				$$->len=NULL;
+				$$->str=$2;
+			}
+		|	at_designator
+			{
+				$$=(struct input_modifier *)mem_alloc(PARSE_POOL,sizeof(struct input_modifier));
+				$$->type=atSYM;
+				$$->twoexp=$1;
+				$$->len=NULL;
+				$$->str=NULL;
 			}
 		|	/* epsilon */
 			{

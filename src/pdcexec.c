@@ -1951,12 +1951,12 @@ PUBLIC void input_file(struct two_exp *twoexp, struct exp_list *lvalroot)
 }
 
 
-PRIVATE int input_line(char *s, const char *p)
+PRIVATE int input_line(char *s, long len, const char *p)
 {
 	int esc;
 
 	if (sel_infile) {
-		if (!fgets(s, MAX_LINELEN - 1, sel_infile)) {
+		if (!fgets(s, len - 1, sel_infile)) {
 			if (feof(sel_infile)) {
 				fclose(sel_infile);
 				sel_infile = NULL;
@@ -1972,13 +1972,13 @@ PRIVATE int input_line(char *s, const char *p)
 		}
 	}
 
-	esc = sys_get(MSG_PROGRAM, s, MAX_LINELEN, p);
+	esc = sys_get(MSG_PROGRAM, s, len, p);
 
 	return esc;
 }
 
 
-PRIVATE void input_con(struct string *prompt, struct exp_list *lvalroot)
+PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp_list *lvalroot, int pr_sep)
 {
 	struct exp_list *work = lvalroot;
 	enum VAL_TYPE type;
@@ -1991,13 +1991,22 @@ PRIVATE void input_con(struct string *prompt, struct exp_list *lvalroot)
 	int quote;
 	int esc = 0;
 	const char *p;
+	long l;
 
-	if (prompt)
+	if (prompt) {
 		p = prompt->s;
-	else
+	} else {
 		p = "? ";
+	}
 
-	esc = input_line(line, p);
+	if (len) {
+		l = calc_intexp(len) + 1;
+		assert(2 <= l && l <= MAX_LINELEN);
+	} else {
+		l = MAX_LINELEN;
+	}
+
+	esc = input_line(line, l, p);
 	i = line;
 
 	while (work) {
@@ -2012,7 +2021,7 @@ PRIVATE void input_con(struct string *prompt, struct exp_list *lvalroot)
 				my_printf(MSG_DIALOG, 1,
 					  "Please re-INPUT from start");
 				work = lvalroot;
-				esc = input_line(line, p);
+				esc = input_line(line, l, p);
 				i = line;
 			} else
 				run_error(ESCAPE_ERR, "Escape");
@@ -2027,7 +2036,7 @@ PRIVATE void input_con(struct string *prompt, struct exp_list *lvalroot)
 			if (*i)
 				break;
 			else {
-				esc = input_line(line, "?? ");
+				esc = input_line(line, l, "?? ");
 				i = line;
 			}
 		}
@@ -2102,6 +2111,20 @@ PRIVATE void input_con(struct string *prompt, struct exp_list *lvalroot)
 
 	if (*i)
 		my_printf(MSG_DIALOG, 1, "Extra input ignored");
+	
+	if (pr_sep == 0) {
+		my_nl(MSG_PROGRAM);
+	} else {
+		process_pr_sep(pr_sep);
+	}
+}
+
+
+PRIVATE void input_at(struct two_exp *twoexp, struct expression *len, string *prompt, struct exp_list *lvalroot, int pr_sep)
+{
+	sys_cursor(sel_outfile, calc_intexp(twoexp->exp1),
+			calc_intexp(twoexp->exp2));
+	input_con(len, prompt, lvalroot, pr_sep);
 }
 
 
@@ -2109,12 +2132,15 @@ PRIVATE void exec_input(struct comal_line *line)
 {
 	struct input_rec *i = &line->lc.inputrec;
 
-	if (!i->modifier)
-		input_con(NULL, i->lvalroot);
-	else if (i->modifier->type == fileSYM)
-		input_file(&i->modifier->data.twoexp, i->lvalroot);
-	else
-		input_con(i->modifier->data.str, i->lvalroot);
+	if (!i->modifier) {
+		input_con(NULL, NULL, i->lvalroot, i->pr_sep);
+	} else if (i->modifier->type == fileSYM) {
+		input_file(&i->modifier->twoexp, i->lvalroot);
+	} else if (i->modifier->type == atSYM) {
+		input_at(&i->modifier->twoexp, i->modifier->len, i->modifier->str, i->lvalroot, i->pr_sep);
+	} else {
+		input_con(NULL, i->modifier->str, i->lvalroot, i->pr_sep);
+	}
 }
 
 

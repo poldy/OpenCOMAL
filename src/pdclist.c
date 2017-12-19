@@ -424,12 +424,26 @@ PRIVATE void list_input(char **buf, struct comal_line *line)
 	if (i->modifier)
 		switch (i->modifier->type) {
 		case fileSYM:
-			list_file(buf, &i->modifier->data.twoexp);
+			list_file(buf, &i->modifier->twoexp);
 			break;
 
 		case stringSYM:
-			list_string(buf, i->modifier->data.str->s);
+			list_string(buf, i->modifier->str->s);
 			list_text(buf, ": ");
+			break;
+
+		case atSYM:
+			list_symsp(buf, atSYM);
+			list_twoexp(buf, &i->modifier->twoexp, ",", 1);
+			if (i->modifier->len != NULL) {
+				list_char(buf, ',');
+				list_exp(buf, i->modifier->len);
+			}
+			list_text(buf, ": ");
+			if (i->modifier->str != NULL) {
+				list_string(buf, i->modifier->str->s);
+				list_text(buf, ": ");
+			}
 			break;
 
 		default:

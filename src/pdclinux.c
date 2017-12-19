@@ -555,7 +555,6 @@ PRIVATE int do_get(int stream, char *line, int maxlen, const char *prompt,
 	strncpy(line,readline(""),maxlen-1);
 	line[maxlen-1] = '\0';
 	CHECK(move,gety+rl_end/COLS,getx+rl_end%COLS);
-	CHECK(addch, '\n');
 
 	escape=sys_escape();
 
