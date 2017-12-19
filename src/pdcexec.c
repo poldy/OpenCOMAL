@@ -2120,7 +2120,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 }
 
 
-PRIVATE void input_at(struct two_exp *twoexp, struct expression *len, string *prompt, struct exp_list *lvalroot, int pr_sep)
+PRIVATE void input_at(struct two_exp *twoexp, struct expression *len, struct string *prompt, struct exp_list *lvalroot, int pr_sep)
 {
 	sys_cursor(sel_outfile, calc_intexp(twoexp->exp1),
 			calc_intexp(twoexp->exp2));
