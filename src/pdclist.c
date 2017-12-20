@@ -669,7 +669,6 @@ PRIVATE void list_horse(char **buf, struct comal_line *line)
 	case nullSYM:
 	case retrySYM:
 	case pageSYM:
-	case clrtoeolSYM:
 	case handlerSYM:
 	case endtrapSYM:
 		list_sym(buf, line->cmd);

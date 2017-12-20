@@ -2317,10 +2317,6 @@ PUBLIC int exec_line(struct comal_line *line)
 		sys_page(sel_outfile);
 		break;
 
-	case clrtoeolSYM:
-		sys_clrtoeol(sel_outfile);
-		break;
-
 	case cursorSYM:
 		sys_cursor(sel_outfile, calc_intexp(line->lc.twoexp.exp1),
 			   calc_intexp(line->lc.twoexp.exp2));

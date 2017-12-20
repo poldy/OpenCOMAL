@@ -432,7 +432,6 @@ PRIVATE void sqash_horse(struct comal_line *line)
 	case nullSYM:
 	case retrySYM:
 	case pageSYM:
-	case clrtoeolSYM:
 	case handlerSYM:
 	case loopSYM:
 	case endtrapSYM:
@@ -1192,7 +1191,6 @@ PRIVATE struct comal_line *expand_horse()
 	case nullSYM:
 	case retrySYM:
 	case pageSYM:
-	case clrtoeolSYM:
 	case handlerSYM:
 	case loopSYM:
 	case endtrapSYM:

@@ -73,7 +73,7 @@
       652   PROC clearlines(row1, row2) CLOSED
       653     FOR x#:=row1 TO row2 DO
       654       CURSOR x#,1
-      655       CLRTOEOL
+      655       SYS CLRTOEOL
       656     ENDFOR x#
       657   ENDPROC clearlines
       660   

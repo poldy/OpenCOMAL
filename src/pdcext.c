@@ -310,6 +310,14 @@ PUBLIC int ext_sys_stat(struct exp_list *exproot)
 		sym_list(curenv->curenv,1);
 
 		return 0;
+	} else if (strcmp(cmd,"clrtoeol") == 0) {
+		if (exproot->next) {
+			run_error(SYS_ERR,"No parameters allowed for SYS clrtoeol");
+		}
+
+		sys_clrtoeol(sel_outfile);
+
+		return 0;
 	}
 
 	return -1;

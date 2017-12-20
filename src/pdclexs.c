@@ -73,7 +73,6 @@ PRIVATE struct {
 	tnrsSYM, _CHR, "CHR$"}, {
 	closeSYM, 0, "CLOSE"}, {
 	closedSYM, 0, "CLOSED"}, {
-	clrtoeolSYM, 0, "CLRTOEOL"}, {
 	contSYM, 0, "CON"}, {
 	rnSYM, _CURCOL, "CURCOL"}, {
 	rnSYM, _CURROW, "CURROW"}, {
