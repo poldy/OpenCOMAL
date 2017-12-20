@@ -1,28 +1,33 @@
 # OpenCOMAL
 
-This is a slightly patched version of [Jos Visser](http://www.josvisser.nl/)'s
+This is a patched version of [Jos Visser](http://www.josvisser.nl/)'s
 [OpenComal](http://www.josvisser.nl/opencomal/)
-[0.2.6](http://www.josvisser.nl/opencomal/opencomal-0.2.6.tar.gz) (stable branch).
+[0.2.7](http://www.josvisser.nl/opencomal/opencomal-0.2.7-pre1-work.tar.gz) (unstable branch).
 
 
 ## FAQ
 
 ### Why this fork?
 
-When trying to run the latest stable or instable OpenComal on more or
-less recent versions of Linux (Ubuntu 8.04 and Ubuntu 10.04), the
-included Linux binaries `opencomal` and `opencomalrun` immediately
-crashed on startup. For me, they only worked on ancient Ubuntu
-6.06. Simply re-compiling the sources did not help, so I tracked down
-the problem and fixed it in the C sources.
+The previous maintainer, pietsch <https://github.com/pietsch>, fixed
+bugs so that OpenComal could run on then-current versions of Linux.
 
-So after 3 or 5 years of being unavailable on new Linux distributions,
-the year 2012 starts with the return of COMAL, the much improved,
-PASCAL-flavoured dialect of the (in)famous BASIC programming language.
+I took over the project because I am interested in practical
+methods for improving the quality of old projects (similar to the
+[ntpsec](https://www.ntpsec.org/) project, although I am still
+some way behind them). OpenComal is a nice size to run experiments
+on. One of the things about the COMAL language itself is
+that it has a vendor-neutral standard with several implementions.
+Lately I've also been trying to bring OpenComal closer to compliance
+with those standards:
+* [COMAL Kernel spec](http://datamuseum.dk/wiki/COMAL/standardization#TeleNova.2C_Nyn.C3.A4shamn.2C_Sweden._March_13_to_16.2C_1985)
+* [Common COMAL](https://computerarchive.org/files/computer/newsletters/comal-today/COMAL_Today_Issue_24.pdf), pages 21-46
+* [The "STANDARD" package](https://computerarchive.org/files/computer/newsletters/comal-today/COMAL_Today_Issue_27.pdf), pages 47-52
 
 ### Does Jos Visser, the original author, endorse this fork?
 
-I don't know. He did not answer my e-mail. Legally there should not
+I don't know. He did not answer the previous maintainer's e-mail
+and I never sent him one. Legally there should not
 be any problem because OpenComal is licensed under the GPL.
 
 ### I do not see a new line number after entering `auto`. Is this wrong?
@@ -32,19 +37,17 @@ backspace key first (kudos to Harald Arnesen for this hint).
 
 ### When will you implement feature X?
 
-I will not. As far as I am concerned, OpenCOMAL is just a fun
-retrocomputing project that allows you to run old COMAL code on Linux
-systems without requiring an emulator, and to find out how programming
-felt like in the seventies or eighties of the previous century. Having
-said that, I will consider pull requests that come with a nice
-description and readable code.
-
+I'm reluctant to do this, unless the feature is in one of the above
+standards. I *am* interested in bug reports and pull requests
+though. I think OpenCOMAL definitely has a niche in retrocomputing
+and may possibly have one in education, e.g. for other domain experts
+that don't have time to learn Computer Science.
 
 ## Further Reading
 
 ### included:
 * [original README](README.orig)
-* [original TODO](doc/TODO)
+* [original TODO](doc/TODO.md)
 * [original documentation](doc/)
 
 ### external:

@@ -65,4 +65,5 @@ Building for macOS
 
 Install the "readline" package from Homebrew.
 Then run "make OPSYS=macos".
+Then run "make install PREFIX=$HOME" (or wherever).
 This was tested on "High Sierra".

@@ -14,9 +14,7 @@ ALSO SEE
 TODO
 ----
 - Document the array rvalue stuff that changed in 0.2.5-pre3
-- Document CHDIR, MKDIR, RMDIR, KEY$ and INKEY$
-- Document UPPER$ and LOWER$
-- Document CURROW, CURCOL, BITAND, BITOR, BITXOR, RANDOMIZE, REPORT, ESC
+- Document CHDIR, MKDIR, RMDIR, and INKEY$
 
 
 1. Intro Info
@@ -229,6 +227,11 @@ Used on numeric, returns numeric:
 	x AND y		: x and y
 	x AND THEN y	: x and y, y is not evaluated if x is false
 	x OR THEN y	: x or y, y is not evaluated if x is true
+	x BITAND y	: the bitwise AND of x and y
+	x BITOR y	: the bitwise OR of x and y
+	x BITXOR y	: the bitwise exclusive OR of x and y, the
+			  operation is performed bit by bit on the
+			  two arguments
 
 Used on strings and numerics, returns strings and numeric:
 
@@ -325,27 +328,56 @@ Takes string argument, returns numeric:
 	LEN	: length of argument string
 
 
-Takes numeric argument, returns string:
+Takes numeric argument(s), returns string:
 
 	CHR$	: returns string containing of 1 character, the character
 		  whose position in the systems collating sequence is
 		  specified by the numeric argument.
+	GET$	: the number of characters specified by the second argument
+		  from the file specified by the first argument. The file
+		  must previously have been opened as a read type file. If
+		  the end of file is reached before the specified number
+		  of characters are retrieved, only those retrieved prior
+		  to EOF will be returned (there is no padding of spaces
+		  and no error occurs unless you attempt to read from the
+		  file again).
 	STR$	: Returns string representation of numeric argument
+
+
+Takes string argument, returns string:
+
+	LOWER$	: converts the string argument to lowercase Latin-9
+		  characters
+	UPPER$	: converts the string argument to uppercase Latin-9
+		  characters
 
 
 Takes no argument, returns numeric:
 
+	CURCOL	: the current column position of the cursor on the
+		  text screen, columns are counted from left to right
+		  and the leftmost column is 1.
+	CURROW	: the current row of the text screen that the cursor
+		  is on, rows are counted top to bottom and the top
+		  row is 1.
 	EOD	: end of data reached (all DATA statements processed)
 	ERR	: last error
 	ERRLINE	: line number of line where last error occurred
+	ESC	: TRUE if the escape key (^C) has been pressed,
+		  this is only useful if the escape key is disabled
+		  (see TRAP).
 	FALSE	: 0=1
 	TRUE	: 0=0
 	PI	: ACS(-1)
+	ZONE	: the current zone setting (see ZONE statement)
 
 
 Takes no argument, returns string:
 
 	ERRTEXT$: text of last error
+	KEY$	: first character in the keyboard buffer,
+		  if no key has been pressed the null string ("") is
+		  returned.
 
 
 An overview of all OpenComal keywords:
@@ -488,7 +520,14 @@ Example: 		10 b:=7
 			50 ENDWHILE 
 			60 // 
 			70 DATA 1,2,b+8,"Jos Visser"
-		
+
+
+6.11.1 DELAY
+
+Suspend process execution for an interval measured in seconds.
+
+General Syntax:		DELAY <seconds>
+
 
 6.12 DELETE
 
@@ -853,7 +892,7 @@ With the INPUT statement data is read from a file or from the
 keyboard and assigned to program variables.
 
 General syntax:		INPUT FILE <exp>[,<exp>]: <lvallist>
-			INPUT [<string>:]<lvallist>
+			INPUT [AT <row>,<col>[,<len>]:] [<string>:]<lvallist>[<mark>]
 			
 INPUT FILE reads data from the specified file. If the file has
 been opened for RANDOM a record number must be specified. The
@@ -872,11 +911,18 @@ INPUT reads data from the keyboard. Multiple values must be
 separated by a comma. If a comma must be input as a part of a
 string variable, enclose the keyboard input with ".
 
+A 0 for the row or column means not to change it (stay in the same
+row or column). If the <mark> is a comma, the cursor remains where
+it is after the reply. If it is a semicolon, spaces are printed to
+the next zone (one space by default if ZONE is not specified),
+then the cursor remains at that position.
+
 Example:		INPUT "Enter your choice :":c
 			INPUT FILE 5,recno#:a,b,c
 			INPUT name,number
-			
-			
+			INPUT AT 5,2,10: "Post Code: ": post'code$
+
+
 6.43 LIST
 
 The LIST command is used to list program lines.
@@ -1089,8 +1135,8 @@ With the PRINT statement data can be printed on the output
 screen or to an external file.
 
 General syntax:		PRINT FILE <exp>[,<exp>]:<exp list>
-			PRINT <exp list>
-			PRINT USING <stringexp>:<num exp list>
+			PRINT [AT <row>,<col>:] <exp list>
+			PRINT [AT <row>,<col>:] USING <stringexp>:<num exp list>
 
 Basic PRINT evaluates the expressions in the expression list and
 prints their values on the screen or onto the current SELECT
@@ -1112,6 +1158,7 @@ variables (incl. arrays) and PRINT FILE writes expressions.
 Example:		PRINT "Output value = ";oval;" Kbytes"
 			PRINT USING "##.####": angle;
 			PRINT FILE 4,recno: name$,number,78
+			PRINT AT 9,1: USING "$###.##": amount
 			
 
 6.56 PROC (and FUNC)
@@ -1336,6 +1383,26 @@ is to be treated as a random record file. File actions (WRITE,
 READ etc.) must specify which record number in the file is to be
 processed. See OPEN.
 
+
+6.58.1 RANDOMIZE
+
+Randomizes the random number generator.
+
+General syntax:		RANDOMIZE [<seed>]
+
+This generates a series of pseudo random numbers. You only need
+to use the RANDOMIZE command once in your program (such as right
+the the very beginning).
+
+Specify a "seed" number after RANDOMIZE and you cause a specific
+series of random numbers to be generated, The series of numbers
+will be the same each time that specific seed is used. This is
+helpful while testing a program that uses random numbers.
+
+Example:		RANDOMIZE
+			RANDOMIZE num
+
+
 6.59 READ
 
 lines or from external files.
@@ -1403,6 +1470,23 @@ statement after the UNTIL.
 Example:			REPEAT
 				  INPUT "Enter number neq 0: ":a
 				UNTIL a<>0
+
+
+6.64.1 REPORT
+
+REPORT causes an error (optionally you can specify what error
+number to generate).
+
+General syntax:		REPORT [<error code>]
+
+Part of the error handler structure. This is useful when using
+multiple nested handlers. REPORT puts you into the next outer
+handler. If REPORT is issued while not in a handler section,
+the error is reported to the system. REPORT is very system
+dependent.
+
+Example:		REPORT
+			REPORT 256
 				
 
 6.65 RESTORE
@@ -1472,8 +1556,12 @@ is redirected to it. If the file exists the program output is
 appended at the end of the file. Output is directed to the
 screen again by specifying an empty string as filename.
 
+A standard destination location is "ds:", Data Screen, which
+returns to the default.
+
 Example:			SELECT OUTPUT ""
 				SELECT OUTPUT "filenout"
+				SELECT OUTPUT "ds:"
 				
 
 6.70 SELECT INPUT
@@ -1581,6 +1669,18 @@ TRAP/ENDTRAP construct. If the optional string expression is present, it
 is evaluated and printed when the program stops. Come to think of it,
 you can get the OpenComal interpreter to loop in infinite recursion when
 using "STOP f" in a FUNCtion 'f'. You don't want to do this...
+
+
+6.75.1 TAB
+
+Prints spaces up to the column specified.
+
+General syntax:		TAB(<column number>)
+
+If that position is already exceeded, it goes to the specified position
+on the next line. TAB is always part of a PRINT statement.
+
+Example:		PRINT TAB(col),name$
 
 
 6.76 THEN
@@ -1720,6 +1820,24 @@ that WRITE FILE can be used to write complete arrays to a file.
 
 Example:			WRITE FILE t: a, b$, c#
 				WRITE FILE 1,1: root#
+
+
+6.84.1 ZONE
+
+Sets the zone to the number specified.
+
+General syntax:			ZONE <tab interval>
+
+The zone determines the interval in tab positions on an output line.
+The default zone is 1 (a zone at each column). The semicolon is the
+zone separator (for PRINT statements and at the end of INPUT
+statements). By default, a semicolon outputs one space (if a ZONE
+statement is previously used, it outputs spaces to the next zone).
+When a comma is used as a separator in a PRINT statement (or at
+the end of an INPUT statement) no spaces are printed, and the
+cursor remains where it is (null separator).
+
+Example:			ZONE 5
 			
 
 6.85 <id>:

@@ -142,3 +142,7 @@
         - Changed CURSOR arguments from (x, y) to (row, column).
         - Changed DIV, MOD to be floored rather than symmetric
         - Renamed LN to LOG and LOG to LOG10.
+	- Added GET$, ZONE, DELAY, TAB keywords.
+	- Extended PRINT and INPUT to take optional AT modifier.
+	- Added support for Latin-9 charset in strings, comments & identifiers.
+	- Added samples/examples/standard.lst
