@@ -48,6 +48,6 @@
       480 
       490 PROC show(p#)
       500   IF left#(p#)<>0 THEN show(left#(p#))
-      510   PRINT g_name$(p#);" ";g_value#(p#)
+      510   PRINT g_name$(p#),TAB(20),g_value#(p#)
       520   IF right#(p#)<>0 THEN show(right#(p#))
       530 ENDPROC
