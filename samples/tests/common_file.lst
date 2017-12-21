@@ -18,27 +18,118 @@
       180 DELETE filename$
       190 DELETE filename2$
       200 PRINT "OK"
-      210 PRINT "==> creating";filename$;"as random file..."
+      210 // PRINT "==> creating";filename$;"as random file..."
       220 // create filename$,10,40
-      230 PRINT "==> opening";filename$;"as random file..."
-      240 OPEN FILE 7, filename$, RANDOM 40
-      250 PRINT "==> writing 10 records to";filename$;"...";
-      260 FOR x:=10 TO 1 STEP -1 DO
-      270   PRINT x;
-      280   WRITE FILE 7,x: "line", x
-      290 ENDFOR
-      300 PRINT "OK"
-      310 PRINT "==> Reading the 10 lines back..."
-      320 FOR x:=1 TO 10 DO
-      330   READ FILE 7,x: temp$, line
-      340   PRINT temp$;line$
-      350   IF temp$<>"line" OR line<>x THEN
-      360     CLOSE
-      370     END
-      380   ENDIF
-      390 ENDFOR
-      400 PRINT "OK"
-      410 PRINT "==> closing the file..."
-      420 CLOSE
-      430 PRINT "==> deleting file";filename$
-      440 DELETE filename$
+      230 // PRINT "==> opening";filename$;"as random file..."
+      240 // OPEN FILE 7, filename$, RANDOM 40
+      250 // PRINT "==> writing 10 records to";filename$;"...";
+      260 // FOR x:=10 TO 1 STEP -1 DO
+      270 // PRINT x;
+      280 // WRITE FILE 7,x: "line", x
+      290 // ENDFOR
+      300 // PRINT "OK"
+      310 // PRINT "==> Reading the 10 lines back..."
+      320 // FOR x:=1 TO 10 DO
+      330 // READ FILE 7,x: temp$, line
+      340 // PRINT temp$;line$
+      350 // IF temp$<>"line" OR line<>x THEN
+      360 // CLOSE
+      370 // END
+      380 // ENDIF
+      390 // ENDFOR
+      400 // PRINT "OK"
+      410 // PRINT "==> closing the file..."
+      420 // CLOSE
+      430 // PRINT "==> deleting file";filename$
+      440 // DELETE filename$
+      450 PRINT "==> redirecting output to file";filename$
+      460 SELECT OUTPUT filename$  // ***
+      470 WHILE NOT(EOD) DO
+      480   READ temp$  //from data statements
+      490   PRINT temp$  //goes to the file now  ***
+      500 ENDWHILE
+      510 PAGE  //should be chr$(12) for form feed now ***
+      520 SELECT OUTPUT screen$  //    ***
+      530 PRINT "==> output back to screen"
+      540 PRINT "==> opening file";filename$;"for append..."
+      550 OPEN FILE 4, filename$, APPEND 
+      560 PRINT "==> writing to file..."
+      570 number#:=7
+      580 PRINT FILE 4: number#
+      590 PRINT "==> closing file..."
+      600 CLOSE FILE 4
+      610 RESTORE
+      620 PRINT "==> opening file";filename$;"to read..."
+      630 OPEN FILE 2, filename$, READ 
+      640 PRINT "==> reading from file..."
+      650 WHILE NOT(EOD) DO
+      660   READ temp$  //from data statements
+      670   INPUT FILE 2: temp2$
+      680   PRINT temp2$;"...";
+      690   IF temp$<>temp2$ THEN
+      700     CLOSE
+      710     PRINT "PRINT to file or INPUT FILE failed"
+      720     END
+      730   ENDIF
+      740 ENDWHILE
+      750 PRINT   //cr at line end
+      760 PRINT "==> GET$ checking Form Feed from PAGE...";
+      770 IF GET$(2,1)<>CHR$(12) THEN  //form feed
+      780   CLOSE
+      790   PRINT "PAGE or GET$ failed."
+      800   END
+      810 ENDIF
+      820 PRINT "OK"
+      830 PRINT "==> reading back integer as a string...";
+      840 INPUT FILE 2: temp2$
+      850 PRINT temp2$
+      860 IF temp2$<>"7" THEN
+      870   CLOSE
+      880   PRINT "PRINT number#/INPUT FILE as string failed"
+      890   END
+      900 ENDIF
+      910 PRINT "==> checking for EOF flag set...";
+      920 IF NOT(EOF(2)) THEN
+      930   CLOSE
+      940   PRINT "End Of File not found"
+      950   END
+      960 ENDIF
+      970 PRINT "OK"
+      980 CLOSE FILE 2
+      990 RESTORE
+     1000 PRINT "==> checking GET$...";
+     1010 OPEN FILE 2, filename$, READ 
+     1020 READ temp$  //from data statements again
+     1030 temp2$:=GET$(2,10)
+     1040 CLOSE
+     1050 IF temp2$<>temp$(1:10) THEN
+     1060   PRINT "GET$ failed"
+     1070   END
+     1080 ENDIF
+     1090 PRINT "OK"
+     1100 PRINT "==> Open 2 files at once:";
+     1110 PRINT "One READ - One WRITE - (file copy)"
+     1120 OPEN FILE 1, filename$, READ 
+     1130 OPEN FILE 2, filename2$, WRITE 
+     1140 PRINT FILE 2: GET$(1,999)  //copy whole file
+     1150 CLOSE
+     1160 PRINT "==> checking if file copy worked...";
+     1170 OPEN FILE 1, filename$, READ 
+     1180 OPEN FILE 2, filename2$, READ 
+     1190 text$:=GET$(1,999); text2$:=GET$(2,999)
+     1200 CLOSE
+     1210 IF text$<>text2$ THEN
+     1220   PRINT "Failed."
+     1230   END
+     1240 ENDIF
+     1250 PRINT "OK"
+     1260 DELETE filename$  //done with it
+     1270 DELETE filename2$  //done with it
+     1280 PRINT "APPEND, READ, WRITE, RANDOM,";
+     1290 PRINT "OPEN, CLOSE, SELECT, CREATE,"
+     1300 PRINT "PRINT FILE, INPUT FILE, GET$,";
+     1310 PRINT "WRITE FILE, READ FILE, EOF"
+     1320 INPUT "==> all tests passed. press <return>:": reply$
+     1330 DATA "Mary had a little lamb"
+     1340 DATA "Jack and Jill"
+     1350 DATA "Happily ever after"

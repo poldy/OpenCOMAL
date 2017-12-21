@@ -1,0 +1,55 @@
+    10	DIM filename1$ OF 20, filename2$ OF 20
+    20	DIM reply$ OF 1
+    30	DIM text1$ OF 40, text2$ OF 40
+    40	filename1$:="uqtestzp.dat"; filename2$:="uqtestzu.dat"
+    60	PRINT "PRINT USING TEST"
+    70	PRINT "This program uses two disk files"
+    80	PRINT "that it creates, uses, then deletes."
+    90	PRINT filename1$;"and";filename2$
+   100	PRINT "place blank formatted disk into"
+   110	INPUT "current drive. Hit return when ready:": reply$
+   120	//
+   130	DELETE filename1$
+   140	DELETE filename2$
+   150	//
+   160	OPEN FILE 1,filename1$,WRITE // correct answer goes here
+   170	OPEN FILE 2,filename2$,WRITE // print usings go here
+   180	//
+   190	PRINT FILE 1: "test 120.0 test"
+   200	PRINT FILE 2: USING "test ###.# test": 120
+   210	//
+   220	PRINT FILE 1: "test   5.47 test"
+   230	PRINT FILE 2: "using "test -##.## test": 5.467
+   240	//
+   250	PRINT FILE 1: "test  -5.47 test"
+   260	PRINT FILE 2: "using "test -##.## test": -5.467
+   270	//
+   280	PRINT FILE 1: "test ******* test"
+   290	PRINT FILE 2: USING "test ###.### test": 12345
+   300	//
+   310	PRINT FILE 1: "test   3  $ 55.00 test"
+   320	PRINT FILE 2: USING "test ###  $###.## test": 3,55
+   330	//
+   340	CLOSE
+   350	//
+   360	PRINT "comparing the files now"
+   370	PRINT
+   380	OPEN FILE 1,filename1$,READ
+   390	OPEN FILE 2,filename2$,READ
+   400	passed:=TRUE //init
+   410	WHILE NOT (EOF(1) OR EOF(2)) DO
+   420	INPUT FILE 1: text1$
+   430	INPUT FILE 2: text2$
+   440	PRINT text1$
+   450	PRINT text2$
+   460	PRINT "=========="
+   470	IF text1$<>text2$ THEN passed:=FALSE
+   480	ENDWHILE
+   490	CLOSE
+   500	DELETE filename1$
+   510	DELETE filename2$
+   520	IF passed THEN
+   530	PRINT "====> All passed"
+   540	ELSE
+   550	PRINT "====> Failed"
+   560	ENDIF
