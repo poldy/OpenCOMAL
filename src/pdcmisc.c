@@ -416,6 +416,8 @@ PRIVATE struct {
 	, {
 	openSYM, sizeof(c_line.lc.openrec)}
 	, {
+	createSYM, sizeof(c_line.lc.createrec)}
+	, {
 	osSYM, sizeof(c_line.lc.exp)}
 	, {
 	pageSYM, 0}

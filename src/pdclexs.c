@@ -74,6 +74,7 @@ PRIVATE struct {
 	closeSYM, 0, "CLOSE"}, {
 	closedSYM, 0, "CLOSED"}, {
 	contSYM, 0, "CON"}, {
+	createSYM, 0, "CREATE"}, {
 	rnSYM, _CURCOL, "CURCOL"}, {
 	rnSYM, _CURROW, "CURROW"}, {
 	cursorSYM, 0, "CURSOR"}, {

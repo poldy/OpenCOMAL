@@ -371,6 +371,12 @@ PRIVATE void free_horse(struct comal_line *line)
 		free_exp(line->lc.openrec.filename);
 		free_exp(line->lc.openrec.reclen);
 		break;
+	
+	case createSYM:
+		free_exp(line->lc.createrec.filename);
+		free_exp(line->lc.createrec.top);
+		free_exp(line->lc.createrec.reclen);
+		break;
 
 	case printSYM:
 		free_print(line);

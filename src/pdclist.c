@@ -778,6 +778,15 @@ PRIVATE void list_horse(char **buf, struct comal_line *line)
 		}
 
 		break;
+	
+	case createSYM:
+		list_symsp(buf, line->cmd);
+		list_exp(buf, line->lc.createrec.filename);
+		list_text(buf, ", ");
+		list_exp(buf, line->lc.createrec.top);
+		list_text(buf, ", ");
+		list_exp(buf, line->lc.createrec.reclen);
+		break;
 
 	case printSYM:
 		list_print(buf, line);

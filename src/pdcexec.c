@@ -1316,6 +1316,26 @@ PRIVATE void exec_open(struct comal_line *line)
 }
 
 
+PRIVATE void exec_create(struct comal_line *line)
+{
+	struct create_rec *c = &line->lc.createrec;
+	struct string *name;
+	enum VAL_TYPE type;
+	char *fname;
+	FILE *f;
+
+	calc_exp(c->filename, (void **)&name, &type);
+	fname = str_ltou(name->s);
+	f = fopen(fname, "wbx");
+	if (f == NULL) {
+		run_error(OPEN_ERR, "OPEN error: %s", strerror(errno));
+	}
+	fseek(f, calc_intexp(c->top) * calc_intexp(c->reclen) - 1, SEEK_SET);
+	fputc(0, f);
+	fclose(f);
+}
+
+
 PRIVATE void exec_close(struct comal_line *line)
 {
 	struct exp_list *work = line->lc.exproot;
@@ -2376,6 +2396,10 @@ PUBLIC int exec_line(struct comal_line *line)
 
 	case openSYM:
 		exec_open(line);
+		break;
+	
+	case createSYM:
+		exec_create(line);
 		break;
 
 	case closeSYM:

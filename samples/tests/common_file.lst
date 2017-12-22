@@ -18,8 +18,8 @@
       180 DELETE filename$
       190 DELETE filename2$
       200 PRINT "OK"
-      210 // PRINT "==> creating";filename$;"as random file..."
-      220 // create filename$,10,40
+      210 PRINT "==> creating";filename$;"as random file..."
+      220 create filename$,10,40
       230 // PRINT "==> opening";filename$;"as random file..."
       240 // OPEN FILE 7, filename$, RANDOM 40
       250 // PRINT "==> writing 10 records to";filename$;"...";
@@ -40,8 +40,8 @@
       400 // PRINT "OK"
       410 // PRINT "==> closing the file..."
       420 // CLOSE
-      430 // PRINT "==> deleting file";filename$
-      440 // DELETE filename$
+      430 PRINT "==> deleting file";filename$
+      440 DELETE filename$
       450 PRINT "==> redirecting output to file";filename$
       460 SELECT OUTPUT filename$  // ***
       470 WHILE NOT(EOD) DO

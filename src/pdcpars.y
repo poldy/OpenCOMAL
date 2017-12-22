@@ -61,6 +61,7 @@ extern int yylex();
 		struct when_list *whenptr;
 		struct assign_list *assignptr;
 		struct open_rec openrec;
+
 	}
 
 %token	andSYM 
@@ -81,6 +82,7 @@ extern int yylex();
 %token	colonSYM
 %token	commaSYM 
 %token	contSYM 
+%token	createSYM
 %token	cursorSYM
 %token	dataSYM 
 %token	delSYM 
@@ -242,7 +244,7 @@ extern int yylex();
 %type	<cl>		rmdir_stat mkdir_stat repeat_stat
 %type	<cl>		local_stat trap_stat dir_stat unit_stat static_stat
 %type	<cl>		module_stat export_stat use_stat
-%type	<cl>		randomize_stat report_stat delay_stat zone_stat
+%type	<cl>		randomize_stat report_stat delay_stat zone_stat create_stat
 
 %type	<pcl>		optsimple_stat 
 
@@ -483,6 +485,7 @@ complex_stat	:	case_stat
 		
 simple_stat	:	close_stat
 		|	chdir_stat
+		|	create_stat
 		|	cursor_stat
 		|	del_stat
 		|	delay_stat
@@ -652,6 +655,15 @@ close_stat	:	closeSYM
 			{
 				$$.cmd=closeSYM;
 				$$.lc.exproot=(struct exp_list *)my_reverse($3);
+			}
+		;
+
+create_stat	:	createSYM stringexp commaSYM numexp commaSYM numexp
+	    		{
+				$$.cmd=createSYM;
+				$$.lc.createrec.filename=$2;
+				$$.lc.createrec.top=$4;
+				$$.lc.createrec.reclen=$6;
 			}
 		;
 

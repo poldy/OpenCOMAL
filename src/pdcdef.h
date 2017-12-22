@@ -288,6 +288,12 @@ struct open_rec {
 	int read_only;
 };
 
+struct create_rec {
+	struct expression *filename;
+	struct expression *top;
+	struct expression *reclen;
+};
+
 struct print_list {
 	struct print_list *next;
 	int pr_sep;
@@ -358,6 +364,7 @@ union line_contents {
 	struct import_rec importrec;
 	struct input_rec inputrec;
 	struct open_rec openrec;
+	struct create_rec createrec;
 	struct print_rec printrec;
 	struct proc_func_rec pfrec;
 	struct trap_rec traprec;

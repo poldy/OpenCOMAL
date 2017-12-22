@@ -531,6 +531,12 @@ PRIVATE void sqash_horse(struct comal_line *line)
 		sqash_putint(0, line->lc.openrec.read_only);
 		sqash_putint(0, line->lc.openrec.type);
 		break;
+	
+	case createSYM:
+		sqash_exp(line->lc.createrec.filename);
+		sqash_exp(line->lc.createrec.top);
+		sqash_exp(line->lc.createrec.reclen);
+		break;
 
 	case printSYM:
 		sqash_print(line);
@@ -1296,6 +1302,12 @@ PRIVATE struct comal_line *expand_horse()
 		line->lc.openrec.reclen = expand_exp();
 		line->lc.openrec.read_only = expand_getint();
 		line->lc.openrec.type = expand_getint();
+		break;
+	
+	case createSYM:
+		line->lc.createrec.filename = expand_exp();
+		line->lc.createrec.top = expand_exp();
+		line->lc.createrec.reclen = expand_exp();
 		break;
 
 	case printSYM:
