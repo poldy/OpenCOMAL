@@ -8,6 +8,10 @@
  * License. See doc/LICENSE for more information.
  */
 
+/** @file
+ * Processing of the interpreters direct commands
+ */
+
 #ifndef PDCCMD_H
 #define PDCCMD_H
 

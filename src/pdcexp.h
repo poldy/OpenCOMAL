@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal expression evaluation header file */
+/** @file
+ * OpenComal expression evaluation header file
+ */
 
 #ifndef PDCEXP_H
 #define PDCEXP_H

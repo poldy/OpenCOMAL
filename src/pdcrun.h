@@ -8,6 +8,10 @@
  * License. See doc/LICENSE for more information.
  */
 
+/** @file
+ * Main file of OpenComal Command loop -- runtime only version
+ */
+
 #ifndef PDCRUN_H
 #define PDCRUN_H
 

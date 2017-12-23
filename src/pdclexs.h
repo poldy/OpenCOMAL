@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* Header file for lex support routines */
+/** @file
+ * Header file for lex support routines
+ */
 
 #ifndef PDCLEXS_H
 #define PDCLEXS_H

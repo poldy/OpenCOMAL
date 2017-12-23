@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal memory management header file */
+/** @file
+ * OpenComal memory management header file
+ */
 
 #ifndef PDCMEM_H
 #define PDCMEM_H

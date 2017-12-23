@@ -8,6 +8,10 @@
  * License. See doc/LICENSE for more information.
  */
 
+/** @file
+ * OpenComal routines to list program lines
+ */
+
 #ifndef PDCLIST_H
 #define PDCLIST_H
 

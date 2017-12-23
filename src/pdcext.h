@@ -8,6 +8,10 @@
  * License. See doc/LICENSE for more information.
  */
 
+/** @file
+ * OpenComal 'default' extensions
+ */
+
 #ifndef PDCEXT_H
 #define PDCEXT_H
 
@@ -24,9 +28,15 @@ extern int ext_syss_exp(struct exp_list *exproot, struct string **result,
 extern int ext_sys_stat(struct exp_list *exproot);
 extern int ext_get(int stream, char *line, int maxlen, const char *prompt);
 extern void ext_nl(void);
+
+/** Handle writing a tab to a redirected output file */
 extern void ext_ht(void);
+
 extern void ext_page(void);
+
+/** Handle clearing to EOL in a redirected output file */
 extern void ext_clrtoeol(void);
+
 extern void ext_cursor(int y, int x);
 extern void ext_put(int stream, const char *buf, long len);
 

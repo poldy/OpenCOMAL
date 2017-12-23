@@ -8,16 +8,22 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* Misc routines header file */
+/** @file
+ * Misc routines header file
+ */
 
 #ifndef PDCMISC_H
 #define PDCMISC_H
 
 extern void my_nl(int stream);
+
+/** Write a tab to the specified stream */
 extern void my_ht(int stream);
+
 extern void my_put(int stream, const char *buf, long len);
 extern void my_printf(int stream, int newline, const char *s, ...);
 
+/** Optionally print a debug message */
 #ifdef NDEBUG
 #define DBG_PRINTF(...)
 #else

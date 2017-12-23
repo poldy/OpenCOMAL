@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal environment handling header file */
+/** @file
+ * OpenComal environment handling header file
+ */
 
 #ifndef PDCENV_H
 #define PDCENV_H

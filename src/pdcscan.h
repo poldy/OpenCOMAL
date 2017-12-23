@@ -8,6 +8,10 @@
  * License. See doc/LICENSE for more information.
  */
 
+/** @file
+ * OpenComal program management
+ */
+
 #ifndef PDCSCAN_H
 #define PDCSCAN_H
 

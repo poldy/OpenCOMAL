@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal line squashing functions for save/load purposes header file */
+/** @file
+ * OpenComal line squashing functions for save/load purposes header file
+ */
 
 #ifndef PDCSQASH_H
 #define PDCSQASH_H

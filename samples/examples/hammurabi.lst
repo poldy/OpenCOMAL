@@ -171,7 +171,7 @@
      1970   PRINT 
      1980   PRINT "You started with 10 acres per person and ended with";land;"per person."
      2000   PRINT 
-     2010   FOR t:=l TO 1000 DO NULL
+     2010   FOR t:=1 TO 1000 DO NULL
      2020   IF pop'pcnt>33 OR land<7 THEN
      2030     mismanagement
      2040   ELIF pop'pcnt>10 OR land<9

@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* Definitions of the OpenComal message streams */
+/** @file
+ * Definitions of the OpenComal message streams
+ */
 
 #ifndef PDCMSG_H
 #define PDCMSG_H

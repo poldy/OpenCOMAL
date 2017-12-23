@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal Comal error codes */
+/** @file
+ * OpenComal Comal error codes
+ */
 
 #ifndef PDCERR_H
 #define PDCERR_H

@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal header file for OS dependent routines */
+/** @file
+ * OpenComal header file for OS dependent routines
+ */
 
 #ifndef PDCSYS_H
 #define PDCSYS_H

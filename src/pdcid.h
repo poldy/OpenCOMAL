@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal id routines header file */
+/** @file
+ * OpenComal id routines header file
+ */
 
 #ifndef PDCID_H
 #define PDCID_H

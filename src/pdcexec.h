@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* Line execution routines header file */
+/** @file
+ * Line execution routines header file
+ */
 
 #ifndef PDCEXEC_H
 #define PDCEXEC_H

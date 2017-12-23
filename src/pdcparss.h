@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* Parse Support Routines header file */
+/** @file
+ * Parse Support Routines header file
+ */
 
 #ifndef PDCPARSS_H
 #define PDCPARSS_H

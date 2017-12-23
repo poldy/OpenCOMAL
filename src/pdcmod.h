@@ -8,6 +8,10 @@
  * License. See doc/LICENSE for more information.
  */
 
+/** @file
+ * OpenComal Routines for external OpenComal modules
+ */
+
 #ifndef PDCMOD_H
 #define PDCMOD_H
 

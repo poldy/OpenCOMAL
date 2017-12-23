@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal symbol table and related stuff header file */
+/** @file
+ * OpenComal symbol table and related stuff header file
+ */
 
 #ifndef PDCSYM_H
 #define PDCSYM_H

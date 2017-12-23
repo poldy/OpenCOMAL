@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* String routines header file */
+/** @file
+ * String routines header file
+ */
 
 #ifndef PDCSTR_H
 #define PDCSTR_H
@@ -25,6 +27,8 @@ extern struct string *str_partcpy2(struct string *s1, struct string *s2, long fr
 extern struct string *str_dup(int pool, struct string *s);
 extern struct string *str_maxdup(int pool, struct string *s, long n);
 extern void str_extend(int pool, struct string **s, long newlen);
+
+/** Convert a string from Latin-9 to UTF8 encoding */
 extern char *str_ltou(const char *lstr);
 
 #endif

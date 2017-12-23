@@ -8,6 +8,10 @@
  * License. See doc/LICENSE for more information.
  */
 
+/** @file
+ * OpenComal routines to free lines
+ */
+
 #ifndef PDCFREE_H
 #define PDCFREE_H
 

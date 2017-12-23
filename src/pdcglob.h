@@ -8,12 +8,8 @@
  * License. See doc/LICENSE for more information.
  */
 
-/*
- * GLOB.H
- *
- * This header file contains declarations global to the entire
- * OpenComal interpreter.
- *
+/** @file
+ * This header file contains declarations global to the entire OpenComal interpreter.
  */
 
 #ifndef PDCGLOB_H

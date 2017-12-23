@@ -8,8 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-
-/* OpenComal header file for Linux */
+/** @file
+ * OpenComal header file for Linux
+ */
 
 #ifndef PDCLINUX_H
 #define PDCLINUX_H

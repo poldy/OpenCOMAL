@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal line routines header file */
+/** @file
+ * OpenComal line routines header file
+ */
 
 #ifndef PDCLINE_H
 #define PDCLINE_H

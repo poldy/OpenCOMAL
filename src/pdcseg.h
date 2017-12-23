@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal external segment routines header file */
+/** @file
+ * OpenComal external segment routines header file
+ */
 
 #ifndef PDCSEG_H
 #define PDCSEG_H

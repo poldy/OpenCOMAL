@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal, various not-implementation defined constants */
+/** @file
+ * OpenComal, various not-implementation defined constants
+ */
 
 #ifndef PDCCONST_H
 #define PDCCONST_H

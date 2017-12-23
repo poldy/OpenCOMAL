@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal Command & data structure definitions */
+/** @file
+ * OpenComal Command & data structure definitions
+ */
 
 #ifndef PDCDEF_H
 #define PDCDEF_H
@@ -288,6 +290,7 @@ struct open_rec {
 	int read_only;
 };
 
+/** Parameters to the CREATE statement */
 struct create_rec {
 	struct expression *filename;
 	struct expression *top;

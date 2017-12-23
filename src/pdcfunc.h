@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* Codes for OpenComal functions & constants */
+/** @file
+ * Codes for OpenComal functions & constants
+ */
 
 #ifndef PDCFUNC_H
 #define PDCFUNC_H

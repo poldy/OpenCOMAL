@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal MAIN command loop header file */
+/** @file
+ * OpenComal MAIN command loop header file
+ */
 
 #ifndef PDCCLOOP_H
 #define PDCCLOOP_H

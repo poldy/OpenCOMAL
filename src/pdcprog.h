@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal program control header file */
+/** @file
+ * OpenComal program control header file
+ */
 
 #ifndef PDCPROG_H
 #define PDCPROG_H

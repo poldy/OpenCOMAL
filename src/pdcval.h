@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal internal data value manipulation header file */
+/** @file
+ * OpenComal internal data value manipulation header file
+ */
 
 #ifndef PDCVAL_H
 #define PDCVAL_H
