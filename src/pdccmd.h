@@ -15,7 +15,10 @@
 #ifndef PDCCMD_H
 #define PDCCMD_H
 
+/** Scan all of the entered program */
 extern int cmd_scan(struct comal_line *line);
+
+/** Execute a command */
 extern int cmd_exec(struct comal_line *line, int *result);
 
 #endif

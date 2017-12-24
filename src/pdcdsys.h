@@ -37,7 +37,7 @@ extern int sys_system(char *cmd);
 extern void sys_setpaged(int flag);
 extern void sys_cursor(FILE * f, long y, long x);
 
-/** Returns the curernt column position of the cursor on the text screen */
+/** Returns the current column position of the cursor on the text screen */
 extern int sys_curcol(void);
 
 /** Returns the current row of the text screen that the cursor is on */

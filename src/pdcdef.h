@@ -19,26 +19,37 @@
 
 #include <stdio.h>
 
+/** Base class for anything that is a member of a list */
 struct my_list {
 	struct my_list *next;
 	/* variable part here */
 };
 
+/**
+ * List of environments
+ * @extends my_list
+ */
 struct env_list {
 	struct env_list *next;
 	struct comal_env *env;
 };
 
+/**
+ * A COMAL string
+ * @todo Remove internal reliance on chr$(0) as end-of-string
+ */
 struct string {
 	long len;
 	char s[1];
 };
 
+/** Allocate memory for a string */
 static inline struct string *
 STR_ALLOC(unsigned int p, long x)
 {
 	return (struct string *)mem_alloc(p, sizeof(struct string) + x);
 }
+
 static inline struct string *
 STR_ALLOC_PRIVATE(struct mem_pool *p, long x)
 {
@@ -61,6 +72,10 @@ struct id_rec {
 	char name[1];
 };
 
+/**
+ * List of identifiers
+ * @extends my_list
+ */
 struct id_list {
 	struct id_list *next;
 	struct id_rec *id;
@@ -200,6 +215,10 @@ struct list_cmd {
 	struct id_rec *id;
 };
 
+/**
+ * List of expressions
+ * @extends my_list
+ */
 struct exp_list {
 	struct exp_list *next;
 	struct expression *exp;
@@ -211,6 +230,10 @@ struct dim_ension {
 	struct expression *top;
 };
 
+/**
+ * List of array dimensions
+ * @extends id_list
+ */
 struct dim_list {
 	struct dim_list *next;
 	struct id_rec *id;
@@ -227,6 +250,10 @@ struct for_rec {
 	struct comal_line *stat;
 };
 
+/**
+ * List of parameters
+ * @extends id_list
+ */
 struct parm_list {
 	struct parm_list *next;
 	struct id_rec *id;
@@ -234,6 +261,10 @@ struct parm_list {
 	int array;
 };
 
+/**
+ * List of imports
+ * @extends id_list
+ */
 struct import_list {
 	struct import_list *next;
 	struct id_rec *id;
@@ -276,12 +307,14 @@ struct input_modifier {
 	struct string *str;
 };
 
+/** Parameters to INPUT */
 struct input_rec {
 	struct input_modifier *modifier;
 	struct exp_list *lvalroot;
 	int pr_sep;
 };
 
+/** Parameters to OPEN */
 struct open_rec {
 	struct expression *filenum;
 	struct expression *filename;
@@ -297,6 +330,10 @@ struct create_rec {
 	struct expression *reclen;
 };
 
+/**
+ * List of arguments to PRINT
+ * @extends my_list
+ */
 struct print_list {
 	struct print_list *next;
 	int pr_sep;
@@ -311,6 +348,7 @@ struct print_modifier {
 	} data;
 };
 
+/** Parameters to the PRINT statement */
 struct print_rec {
 	struct print_modifier *modifier;
 	struct print_list *printroot;
@@ -377,6 +415,7 @@ union line_contents {
 	struct assign_list *assignroot;
 };
 
+/** One line of a COMAL program */
 struct comal_line {
 	struct comal_line_data *ld;
 	struct comal_line *lineptr;
@@ -403,9 +442,7 @@ struct seg_des {
 	struct comal_line *save_localproc;
 };
 
-/*
- * Element of the exported function table
- */
+/** Element of the exported function table */
 struct mod_func_entry {
 	struct mod_func_entry	*next;
 	struct id_rec		*id;
@@ -413,9 +450,7 @@ struct mod_func_entry {
 	struct mod_entry	*module;
 };
 
-/*
- * Element of the module table
- */
+/** Element of the module table */
 struct mod_entry {
 	struct mod_entry	*next;
         struct id_rec           *id;
