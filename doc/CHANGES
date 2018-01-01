@@ -146,3 +146,7 @@
 	- Extended PRINT and INPUT to take optional AT modifier.
 	- Added support for Latin-9 charset in strings, comments & identifiers.
 	- Added samples/examples/standard.lst
+	- Temporarily removed support for MS-DOS and Win32, because I can't
+	  build or test them. I'd love if someone updated the support and
+	  sent in a pull request (git tag "last_dos_w32_version" is the
+	  last version containing the files).

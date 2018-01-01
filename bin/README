@@ -1,17 +1,13 @@
-Here thou findst pre-built OpenComal executables for the following
+Here thou will hopefully sometime in the future once again findst pre-built OpenComal executables for the following
 platforms:
 
-- MsDos
-  - OCOMAL.EXE
-  - OCOMRUN.EXE
-
-- Win32 (Windows 95, 98, ME, XP, NT, 2000)
-  - opencomal.exe
-  - opencomalrun.exe
-
-- Linux
+- Linux (including the subsystem on Windows)
   - opencomal
   - opencomalrun
+
+- macOS
+  - opencomal.macos
+  - opencomalrun.macos
 
 Share and enjoy!
 

@@ -1,15 +1,12 @@
---------------------------
-OpenComal Platform support
---------------------------
+# OpenComal Platform support
 
 I am:	Jos Visser <josv@osp.nl>
 Date: 	Wed Sep 18 17:39:19 CEST 2002
 
-As of version 0.2.4 the following platforms are supported:
+As of version 0.3.0 the following platforms are supported:
 
-- Linux
-- MsDos
-- Win32 (Windows 95, 98, ME, XP, NT, 2000)
+- Linux (including the subsystem on Windows)
+- macOS
 
 OpenComal has been carefully constructed to abstract all system
 dependent routines in a separate module/file, with clear entry points.

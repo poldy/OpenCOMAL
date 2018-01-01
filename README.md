@@ -4,7 +4,6 @@ This is a patched version of [Jos Visser](http://www.josvisser.nl/)'s
 [OpenComal](http://www.josvisser.nl/opencomal/)
 [0.2.7](http://www.josvisser.nl/opencomal/opencomal-0.2.7-pre1-work.tar.gz) (unstable branch).
 
-
 ## FAQ
 
 ### Why this fork?
@@ -16,13 +15,18 @@ I took over the project because I am interested in practical
 methods for improving the quality of old projects (similar to the
 [ntpsec](https://www.ntpsec.org/) project, although I am still
 some way behind them). OpenComal is a nice size to run experiments
-on. One of the things about the COMAL language itself is
+on. One of the nice things about the COMAL language itself is
 that it has a vendor-neutral standard with several implementions.
 Lately I've also been trying to bring OpenComal closer to compliance
 with those standards:
 * [COMAL Kernel spec](http://datamuseum.dk/wiki/COMAL/standardization#TeleNova.2C_Nyn.C3.A4shamn.2C_Sweden._March_13_to_16.2C_1985)
 * [Common COMAL](https://computerarchive.org/files/computer/newsletters/comal-today/COMAL_Today_Issue_24.pdf), pages 21-46
 * [The "STANDARD" package](https://computerarchive.org/files/computer/newsletters/comal-today/COMAL_Today_Issue_27.pdf), pages 47-52
+
+One regression is that I removed support for platforms that I don't
+build and test, MS-DOS and Win32.
+I'd love to get a pull request re-enabling these.
+The last version containing the needed files is tagged as `last_dos_w32_version`.
 
 ### Does Jos Visser, the original author, endorse this fork?
 
