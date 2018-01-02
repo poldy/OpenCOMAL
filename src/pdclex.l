@@ -174,7 +174,8 @@ PUBLIC void lex_setinput(char *line)
 			yyrestart(NULL);
 		#endif
 
-		strcpy(curline,line);
+		strncpy(curline,line,MAX_LINELEN - 1);
+                curline[MAX_LINELEN] = '\0';
 		lineptr=0;
 	}
 		

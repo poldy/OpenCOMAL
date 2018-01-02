@@ -48,7 +48,8 @@ Date: Sun Sep  8 10:17:20 CEST 2002
        20 print f
        30 next
        40 print "OpenComal rules!"
-       50 ^C
+       50 delay 5
+       60 ^C
 
    You quit program enter mode using Ctrl+C.
 

@@ -71,7 +71,7 @@ PRIVATE int mod_register(struct comal_line *line, struct seg_des *seg, char *err
 				fun=find_func(line,idwalk->id);
 
 				if (!fun) {
-					sprintf(errtext,"Can not find PROC/FUNC %s in MODULE %s",
+					snprintf(errtext,MAX_LINELEN,"Can not find PROC/FUNC %s in MODULE %s",
 						idwalk->id->name,line->lc.pfrec.id->name);
 					*errline=walk;
 					return 0;
@@ -150,7 +150,7 @@ PUBLIC int mod_use(struct seg_des *seg, struct id_rec *id, char *errtxt, struct 
 		modseg=mod_load(id);
 		assert(modseg == NULL);
 		if (!modseg) {
-			sprintf(errtxt,"Module %s can not be found",id->name);
+			snprintf(errtxt,MAX_LINELEN,"Module %s can not be found",id->name);
 			return 0;
 		}
 	}

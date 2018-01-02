@@ -590,7 +590,7 @@ PUBLIC int sys_call_scan(struct id_rec *id, struct exp_list *exproot,
 	int rc = ext_call_scan(id, exproot, errtext);
 
 	if (rc == -1) {
-		sprintf(errtext, "PROCedure %s not found", id->name);
+		snprintf(errtext, MAX_LINELEN, "PROCedure %s not found", id->name);
 		return 0;
 	}
 

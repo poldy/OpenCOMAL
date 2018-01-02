@@ -39,6 +39,7 @@
 #include <io.h>
 #endif
 
+#define FLOATUSING_MAX 32
 
 PRIVATE void *return_result;	/* For comms of FUNC results */
 PRIVATE enum VAL_TYPE return_type;
@@ -1771,7 +1772,7 @@ PRIVATE char *format_using(char *u, char *p)
 				  "USING string format error @ %s", s);
 	}
 
-	sprintf(p, "%%%d.%dlf", width, prec);
+	snprintf(p, FLOATUSING_MAX, "%%%d.%dlf", width, prec);
 	return s;
 }
 
@@ -1798,7 +1799,7 @@ PRIVATE void print_using(struct expression *str,
 			 struct print_list *printroot, int pr_sep)
 {
 	struct string *usingstr;
-	char floatusing[32];
+	char floatusing[FLOATUSING_MAX];
 	void *result;
 	double d;
 	enum VAL_TYPE type;
