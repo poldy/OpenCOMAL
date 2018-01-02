@@ -24,12 +24,70 @@
 #include <locale.h>
 
 #define LOCNAME_MAX 32
+#define ENVVAL_MAX 32
 
 extern int yydebug;
 
 #ifdef TURBOC
 unsigned _stklen = 32768;
 #endif
+
+PRIVATE const char *safe_getenv(const char *name)
+{
+        const char *value;
+        static char result[ENVVAL_MAX];
+
+        if ((value = getenv(name)) == NULL) {
+                return "(unset)";
+        } else {
+                snprintf(result, ENVVAL_MAX, "\"%s\"", value);
+                return result;
+        }
+}
+
+PRIVATE const char *safe_setlocale(void)
+{
+        const char *result;
+
+        if ((result = setlocale(LC_ALL, "")) == NULL) {
+		perror("setlocale");
+                printf("warning: Setting locale failed.\n"
+                       "warning: Please check that your locale settings:\n"
+                       "\tLC_ALL = %s,\n"
+                       "\tLANG = \"%s\"\n"
+                       "    are supported and installed on your system.\n"
+                       "warning: Falling back to the standard locale (\"C\").\n",
+                       safe_getenv("LC_ALL"),
+                       safe_getenv("LANG"));
+                if (setlocale(LC_ALL, "C") == NULL) {
+                        perror("setlocale");
+                        exit(EXIT_FAILURE);
+                }
+                result = NULL;
+	}
+        return result;
+}
+
+PRIVATE locale_t safe_newlocale(const char *nlocname, const char *fallback)
+{
+        locale_t loc, result;
+
+        loc = duplocale(LC_GLOBAL_LOCALE);
+        if (loc == (locale_t)0) {
+                perror("duplocale");
+                exit(EXIT_FAILURE);
+        }
+        result = newlocale(LC_ALL_MASK, nlocname, loc);
+        if (result == (locale_t)0) {
+                perror("newlocale");
+                printf("warning: Setting locale failed.\n"
+                       "warning: Please check that the locale \"%s\" is supported and installed on your system.\n"
+                       "warning: Falling back to the global locale (\"%s\").\n",
+                       nlocname, fallback);
+                result = loc;
+        }
+        return result;
+}
 
 PUBLIC int main(int argc, char *argv[])
 {
@@ -42,27 +100,21 @@ PUBLIC int main(int argc, char *argv[])
 #else
         const char *utf8_suffix = ".utf8", *latin_suffix = "@euro";
 #endif
-        locale_t loc;
 
-        if ((locname = setlocale(LC_ALL, "")) == NULL) {
-		perror("setlocale");
-		return EXIT_FAILURE;
-	}
-        utf8_suffixlen = strlen(utf8_suffix);
-        lang_countrylen = strlen(locname) - utf8_suffixlen;
-        if (strncmp(locname + lang_countrylen, utf8_suffix, utf8_suffixlen) == 0) {
-                strncpy(nlocname, locname, lang_countrylen);
-                nlocname[lang_countrylen] = '\0';
-                strncat(nlocname, latin_suffix, LOCNAME_MAX - lang_countrylen - 1);
-                loc = duplocale(LC_GLOBAL_LOCALE);
-                if (loc == (locale_t)0) {
+        locname = safe_setlocale();
+        if (locname == NULL) {
+                latin_loc = duplocale(LC_GLOBAL_LOCALE);
+                if (latin_loc == (locale_t)0) {
                         perror("duplocale");
                         return EXIT_FAILURE;
                 }
-                latin_loc = newlocale(LC_ALL_MASK, nlocname, loc);
-                if (latin_loc == (locale_t)0) {
-                        perror("newlocale");
-			latin_loc = loc;	// Fallback
+        } else {
+                utf8_suffixlen = strlen(utf8_suffix);
+                lang_countrylen = strlen(locname) - utf8_suffixlen;
+                if (strncmp(locname + lang_countrylen, utf8_suffix, utf8_suffixlen) == 0) {
+                        term_strncpy(nlocname, locname, lang_countrylen + 1);
+                        strncat(nlocname, latin_suffix, LOCNAME_MAX - lang_countrylen - 1);
+                        latin_loc = safe_newlocale(nlocname, locname);
                 }
         }
 
