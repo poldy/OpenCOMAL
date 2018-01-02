@@ -24,11 +24,7 @@
 #include "pdcfunc.h"
 
 #ifndef PDCPARS
-#ifdef OS_MSDOS
-#include "pdcpars.h"
-#else
 #include "pdcpars.tab.h"
-#endif
 #endif
 
 #include <stdlib.h>

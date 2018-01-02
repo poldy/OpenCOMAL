@@ -19,11 +19,7 @@
 #include "pdcstr.h"
 #include "pdcparss.h"
 
-#ifdef OS_MSDOS
-#include "pdcpars.h"
-#else
 #include "pdcpars.tab.h"
-#endif
 
 #include <stdlib.h>
 #include <string.h>

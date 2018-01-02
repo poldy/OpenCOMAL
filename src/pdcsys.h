@@ -21,16 +21,6 @@
 
 #include "pdcdsys.h"
 
-#ifdef OS_LINUX
 #include "pdclinux.h"
-#endif
-
-#ifdef OS_WIN32
-#include "pdcwin32.h"
-#endif
-
-#ifdef OS_MSDOS
-#include "pdcmsdos.h"
-#endif
 
 #endif

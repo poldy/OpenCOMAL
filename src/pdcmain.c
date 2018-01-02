@@ -144,15 +144,9 @@ PUBLIC int main(int argc, char *argv[])
 	sys_init();
 	copyright = "(c) Copyright 1992-2002  Jos Visser <josv@osp.nl>";
 
-#if defined(OS_WIN32) || defined(OS_MSDOS)
-	my_printf(MSG_DIALOG, 1,
-		  "OpenComal -- A free Comal implementation (version %s; %s)",
-		  OPENCOMAL_VERSION,HOST_OS);
-#else
 	my_printf(MSG_DIALOG, 1,
 		  "OpenComal -- A free Comal implementation (version %s; %s; build %s)",
 		  OPENCOMAL_VERSION,HOST_OS,OPENCOMAL_BUILD);
-#endif
 
 	my_printf(MSG_DIALOG, 1, "             %s", copyright);
 	my_printf(MSG_DIALOG, 1, "             Built on %s at approximately %s", __DATE__, __TIME__);
