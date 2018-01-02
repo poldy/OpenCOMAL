@@ -16,6 +16,7 @@
 #include "pdclexs.h"
 #include "pdcparss.h"
 #include "pdcmisc.h"
+#include "pdcstr.h"
 
 /* #define PDCLEX_DEBUG 1 */
 

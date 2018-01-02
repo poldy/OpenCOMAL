@@ -17,6 +17,7 @@
 #include "pdccloop.h"
 #include "pdcexp.h"
 #include "pdcmisc.h"
+#include "pdcstr.h"
 #include "version.h"
 
 #include <string.h>
@@ -54,7 +55,7 @@ PRIVATE const char *safe_setlocale(void)
                 printf("warning: Setting locale failed.\n"
                        "warning: Please check that your locale settings:\n"
                        "\tLC_ALL = %s,\n"
-                       "\tLANG = \"%s\"\n"
+                       "\tLANG = %s\n"
                        "    are supported and installed on your system.\n"
                        "warning: Falling back to the standard locale (\"C\").\n",
                        safe_getenv("LC_ALL"),
@@ -93,7 +94,8 @@ PUBLIC int main(int argc, char *argv[])
 {
         int c;
         int errflg = 0;
-        char *locname, nlocname[LOCNAME_MAX];
+        const char *locname;
+        char nlocname[LOCNAME_MAX];
         int utf8_suffixlen, lang_countrylen;
 #if defined(__APPLE__) && defined(__MACH__)
         const char *utf8_suffix = ".UTF-8", *latin_suffix = ".ISO8859-15";

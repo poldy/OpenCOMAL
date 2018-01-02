@@ -18,6 +18,7 @@
 #include "pdcmod.h"
 #include "pdcseg.h"
 #include "pdcscan.h"
+#include "pdcstr.h"
 
 #include <string.h>
 

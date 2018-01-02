@@ -15,6 +15,8 @@
 #ifndef PDCSTR_H
 #define PDCSTR_H
 
+#include <string.h>
+
 extern char *my_strdup(int pool, const char *s);
 extern int str_cmp(struct string *s1, struct string *s2);
 extern struct string *str_make(int pool, const char *s);
