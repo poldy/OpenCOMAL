@@ -33,6 +33,12 @@ extern void str_extend(int pool, struct string **s, long newlen);
 /** Convert a string from Latin-9 to UTF8 encoding */
 extern char *str_ltou(const char *lstr);
 
+/**
+ * Like strncpy, but guarantees that @c dest will be NUL-terminated.
+ * @param[in,out] dest destination string
+ * @param[in] src source string
+ * @param[in] n size of @c dest
+ */
 static inline char *term_strncpy(char *dest, const char *src, size_t n)
 {
         strncpy(dest, src, n - 1);
