@@ -686,7 +686,7 @@ PUBLIC void remove_trailing(char *s, const char *trailer, const char *subst)
 	if (m>l) return;
 
 	if (strcmp(s+l-m,trailer)==0) {
-		strncpy(s+l-m,subst,m);
+		term_strncpy(s+l-m,subst,m+1);
         }
 
 	return;

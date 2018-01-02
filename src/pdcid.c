@@ -40,8 +40,7 @@ PRIVATE struct id_rec *install(char *idname)
 
 	work = (struct id_rec *)mem_alloc(MISC_POOL, sizeof(struct id_rec) + l);
 	work->left = work->right = NULL;
-	strncpy(work->name, idname, l);
-	work->name[l] = '\0';
+	term_strncpy(work->name, idname, l + 1);
 
 	switch (work->name[l - 1]) {
 	case '#':
@@ -108,9 +107,7 @@ PUBLIC struct id_rec *id_search(char *id)
 	char idname[MAX_IDLEN];
 	int i;
 
-	for (i = 0; i < MAX_IDLEN; idname[i++] = '\0');
-
-	strncpy(idname, id, MAX_IDLEN - 1);
+	term_strncpy(idname, id, MAX_IDLEN);
 	strlwr(idname);
 	return (struct id_rec *) id_horse(idname);
 }

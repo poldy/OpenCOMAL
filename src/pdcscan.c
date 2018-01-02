@@ -241,9 +241,8 @@ PRIVATE int scan_pass4(struct seg_des *seg, char *errtxt,
 			   || theline->cmd == endfuncSYM || theline->cmd==endmoduleSYM)
 			scan_stack_pop(&dummy, &procline);
 		else if (seg && !procline && theline->cmd != 0) {
-			strncpy(errtxt,
-			       "Non-// program lines in external segment outside PROC/FUNC def", MAX_LINELEN - 1);
-                        errtxt[MAX_LINELEN] = '\0';
+			term_strncpy(errtxt,
+			       "Non-// program lines in external segment outside PROC/FUNC def", MAX_LINELEN);
 			*errline = curline;
 			return 0;
 		} else if (theline->cmd == importSYM) {
@@ -363,8 +362,7 @@ PRIVATE int scan_pass4(struct seg_des *seg, char *errtxt,
 		}
 
 		if (err) {
-			strncpy(errtxt, err, MAX_LINELEN - 1);
-                        errtxt[MAX_LINELEN] = '\0';
+			term_strncpy(errtxt, err, MAX_LINELEN);
 			*errline = curline;
 			return 0;
 		}
@@ -385,8 +383,7 @@ PRIVATE int check_case(struct comal_line *fromline, char *errtxt,
 
 	if (fromline->cmd != whenSYM) {
 		*errline = fromline;
-		strncpy(errtxt, "CASE should be followed by WHEN", MAX_LINELEN - 1);
-                errtxt[MAX_LINELEN] = '\0';
+		term_strncpy(errtxt, "CASE should be followed by WHEN", MAX_LINELEN);
 		return 0;
 	}
 
@@ -410,9 +407,8 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 
 	case DATA_STAT:
 		if (seg) {
-			strncpy(errtxt,
-			       "DATA not allowed in external segment", MAX_LINELEN - 1);
-                        errtxt[MAX_LINELEN] = '\0';
+			term_strncpy(errtxt,
+			       "DATA not allowed in external segment", MAX_LINELEN);
 			return 0;
 		}
 
@@ -428,8 +424,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 		scan_stack_search(endloopSYM, -1, -1, &sym, &lineptr);
 
 		if (sym == 0) {
-			strncpy(errtxt, "Can only EXIT from within a loop", MAX_LINELEN - 1);
-                        errtxt[MAX_LINELEN] = '\0';
+			term_strncpy(errtxt, "Can only EXIT from within a loop", MAX_LINELEN);
 			*errline = curline;
 			return 0;
 		}
@@ -441,8 +436,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 	 */
 	case EXPORT:
 		if (scan_sp !=1 || scan_stack[scan_sp-1].sym != endmoduleSYM) {
-			strncpy(errtxt, "Can not have EXPORT here", MAX_LINELEN - 1);
-                        errtxt[MAX_LINELEN] = '\0';
+			term_strncpy(errtxt, "Can not have EXPORT here", MAX_LINELEN);
 			*errline = curline;
 			return 0;
 		}
@@ -458,8 +452,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 			sym=scan_stack[scan_sp-1].sym;
 
 			if (sym!=endprocSYM && sym!=endfuncSYM && sym!=endmoduleSYM) {
-				strncpy(errtxt, "Can not have USE here", MAX_LINELEN - 1);
-                                errtxt[MAX_LINELEN] = '\0';
+				term_strncpy(errtxt, "Can not have USE here", MAX_LINELEN);
 				*errline = curline;
 				return 0;
 			}
@@ -471,8 +464,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 		scan_stack_search(endtrapSYM, -1, -1, &sym, &lineptr);
 
 		if (sym == 0) {
-			strncpy(errtxt, "Can only RETRY from within the HANDLER part of a TRAP/ENDTRAP", MAX_LINELEN - 1);
-                        errtxt[MAX_LINELEN] = '\0';
+			term_strncpy(errtxt, "Can only RETRY from within the HANDLER part of a TRAP/ENDTRAP", MAX_LINELEN);
 			*errline = curline;
 			return 0;
 		}
@@ -504,8 +496,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 			 * that, but it's probably for a good cause, so better check it here
 			 */
 			if (sym!=0 && sym!=endprocSYM && sym!=endfuncSYM && sym!=endmoduleSYM) {
-				strncpy(errtxt, "PROC/FUNC may not be defined here", MAX_LINELEN - 1);
-                                errtxt[MAX_LINELEN] = '\0';
+				term_strncpy(errtxt, "PROC/FUNC may not be defined here", MAX_LINELEN);
 				*errline = curline;
 				return 0;
 			}
@@ -669,9 +660,8 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 		seg->procdef = procroot;
 
 		if (procroot->lc.pfrec.proclink) {
-			strncpy(errtxt,
-			       "More than 1 PROC/FUNC/MODULE in external segment", MAX_LINELEN - 1);
-                        errtxt[MAX_LINELEN] = '\0';
+			term_strncpy(errtxt,
+			       "More than 1 PROC/FUNC/MODULE in external segment", MAX_LINELEN);
 			return 0;
 		}
 	} else

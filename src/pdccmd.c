@@ -393,8 +393,7 @@ PRIVATE void cmd_env_list()
 			buf2 = buf;
 			line_list(&buf2, walk->env->progroot);
 		} else {
-			strncpy(buf, "       <No program>", MAX_LINELEN - 1);
-			buf[MAX_LINELEN - 1] = '\0';
+			term_strncpy(buf, "       <No program>", MAX_LINELEN);
 		}
 
 		my_printf(MSG_DIALOG, 1, "Environment %s%s:",

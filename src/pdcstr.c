@@ -21,8 +21,7 @@ PUBLIC char *my_strdup(int pool, const char *s)
 	char *t = (char *)mem_alloc(pool, l + 1);
 	char *result;
 
-	result = strncpy(t, s, l);
-	t[l] = '\0';
+	result = term_strncpy(t, s, l + 1);
 	return result;
 }
 
@@ -42,8 +41,7 @@ PUBLIC struct string *str_make(int pool, const char *s)
 	struct string *work = STR_ALLOC(pool, l);
 
 	work->len = l;
-	strncpy(work->s, s, l);
-	work->s[l] = '\0';
+	term_strncpy(work->s, s, l + 1);
 
 	return work;
 }
@@ -85,8 +83,7 @@ PUBLIC long str_search(struct string *needle, struct string *haystack)
 PUBLIC struct string *str_cpy(struct string *s1, struct string *s2)
 {
 	s1->len = s2->len;
-	strncpy(s1->s, s2->s, s2->len);
-	s1->s[s2->len] = '\0';
+	term_strncpy(s1->s, s2->s, s2->len + 1);
 
 	return s1;
 }
@@ -94,8 +91,7 @@ PUBLIC struct string *str_cpy(struct string *s1, struct string *s2)
 PUBLIC struct string *str_ncpy(struct string *s1, struct string *s2, long n)
 {
 	s1->len = n;
-	strncpy(s1->s, s2->s,n);
-	s1->s[n] = '\0';
+	term_strncpy(s1->s, s2->s,n + 1);
 
 	return s1;
 }
@@ -112,9 +108,7 @@ PUBLIC struct string *str_partcpy(struct string *s1, struct string *s2,
 	s1->len = to - from + 1;
 	w2 = w2 + from - 1;
 
-        strncpy(w1, w2, to - from + 1);
-
-        w1[to - from + 1] = '\0';
+        term_strncpy(w1, w2, to - from + 2);
 
 	return s1;
 }

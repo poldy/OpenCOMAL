@@ -31,4 +31,11 @@ extern void str_extend(int pool, struct string **s, long newlen);
 /** Convert a string from Latin-9 to UTF8 encoding */
 extern char *str_ltou(const char *lstr);
 
+static inline char *term_strncpy(char *dest, const char *src, size_t n)
+{
+        strncpy(dest, src, n - 1);
+        dest[n - 1] = '\0';
+        return dest;
+}
+
 #endif

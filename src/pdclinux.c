@@ -552,8 +552,7 @@ PRIVATE int do_get(int stream, char *line, int maxlen, const char *prompt,
 	getyx(stdscr,gety,getx);
 	addlstr(line);
 	CHECK(refresh);
-	strncpy(line,readline(""),maxlen-1);
-	line[maxlen-1] = '\0';
+	term_strncpy(line,readline(""),maxlen);
 	CHECK(move,gety+rl_end/COLS,getx+rl_end%COLS);
 	if (stream != MSG_PROGRAM) {
 		CHECK(addch, '\n');
@@ -631,8 +630,7 @@ PUBLIC void sys_dir(const char *pattern) {
 	upattern = str_ltou(pattern);
 	l=strlen(upattern);
 	buf=(char *)malloc(8+l);
-	strncpy(buf,"ls -l ",7);
-	buf[7] = '\0';
+	term_strncpy(buf,"ls -l ",8);
 	strncat(buf,upattern,l);
 	f=popen(buf,"r");
 
