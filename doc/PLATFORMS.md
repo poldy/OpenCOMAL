@@ -1,6 +1,6 @@
 # OpenComal Platform support
 
-I am:	Jos Visser <josv@osp.nl>
+I am:	Jos Visser <josv@osp.nl>  
 Date: 	Wed Sep 18 17:39:19 CEST 2002
 
 As of version 0.3.0 the following platforms are supported:

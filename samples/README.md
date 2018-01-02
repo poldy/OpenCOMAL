@@ -1,13 +1,11 @@
------------------
-OpenComal Samples
------------------
+# OpenComal Samples
 
 This directory contains a bunch of OpenComal samples. They are all in 
 "LIST" format (ASCII file format), which means that they must be ENTERed
 instead of LOADed. E.g.:
 
-	$ NEW
-	$ ENTER "verbaal.lst"
+    $ NEW
+    $ ENTER "verbaal.lst"
 
 (That particular program generates the Dutch textual representation of 
 a number). There are also a lot of programs that test specific OpenComal
@@ -23,14 +21,13 @@ the program's output as a guideline!!!!!!!
 The tests/ directory contains programs that test all OpenComal's statements
 and functions. To do a quick test of everything, follow this procedure:
 
-	- enter "lst2sq.lst"
-        - save "lst2sq.sq"
-	- run
-	(this enters and saves each program)
-	- new
-	- load "gentest.sq"
-	- run
-
+- enter "lst2sq.lst"
+- save "lst2sq.sq"
+- run
+  (this enters and saves each program)
+- new
+- load "gentest.sq"
+- run
 
 The autorep and truefalse programs in the examples directory appears
 courtesy of Dick Klingens.
