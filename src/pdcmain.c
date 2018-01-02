@@ -69,15 +69,10 @@ PRIVATE const char *safe_setlocale(void)
         return result;
 }
 
-PRIVATE locale_t safe_newlocale(const char *nlocname, const char *fallback)
+PRIVATE locale_t safe_newlocale(const char *nlocname, locale_t loc, const char *fallback)
 {
-        locale_t loc, result;
+        locale_t result;
 
-        loc = duplocale(LC_GLOBAL_LOCALE);
-        if (loc == (locale_t)0) {
-                perror("duplocale");
-                exit(EXIT_FAILURE);
-        }
         result = newlocale(LC_ALL_MASK, nlocname, loc);
         if (result == (locale_t)0) {
                 perror("newlocale");
@@ -104,19 +99,18 @@ PUBLIC int main(int argc, char *argv[])
 #endif
 
         locname = safe_setlocale();
-        if (locname == NULL) {
-                latin_loc = duplocale(LC_GLOBAL_LOCALE);
-                if (latin_loc == (locale_t)0) {
-                        perror("duplocale");
-                        return EXIT_FAILURE;
-                }
-        } else {
+        latin_loc = duplocale(LC_GLOBAL_LOCALE);
+        if (latin_loc == (locale_t)0) {
+                perror("duplocale");
+                return EXIT_FAILURE;
+        }
+        if (locname != NULL) {
                 utf8_suffixlen = strlen(utf8_suffix);
                 lang_countrylen = strlen(locname) - utf8_suffixlen;
                 if (strncmp(locname + lang_countrylen, utf8_suffix, utf8_suffixlen) == 0) {
                         term_strncpy(nlocname, locname, lang_countrylen + 1);
                         strncat(nlocname, latin_suffix, LOCNAME_MAX - lang_countrylen - 1);
-                        latin_loc = safe_newlocale(nlocname, locname);
+                        latin_loc = safe_newlocale(nlocname, latin_loc, locname);
                 }
         }
 
