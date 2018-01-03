@@ -51,6 +51,9 @@
 *.h++ text
 *.hh text
 
+# X/Open Message Catalogs
+*.msg encoding=latin-9
+
 # Compiled Object files
 *.slo binary
 *.lo binary
