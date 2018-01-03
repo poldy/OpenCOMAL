@@ -260,7 +260,7 @@ mkcatdefs(char *fname)
   register int n;
   int contin = 0;
   int len;		/* # bytes in a character */
-  
+  char setname [MAXIDLEN];
   
   /* put out header for include file */
   if (inclfile)
@@ -313,8 +313,6 @@ mkcatdefs(char *fname)
       if ((strncmp (cp, "set", 3) == 0) && 
 	  ((len = mblen(&(cp[3]), MB_CUR_MAX)) == 1) && 
 	  (isspace(cp[3]) != 0)) {
-	char setname [MAXIDLEN];
-	
 	sscanf (cp+3+len, "%s", setname);
 	if (inclfile) 
 	  fprintf (outfp, "\n/* definitions for set %s */\n", setname, "");
@@ -362,7 +360,7 @@ mkcatdefs(char *fname)
 	    }
 	  } while (*(cpt += len));
 	  if (inclfile)
-	    fprintf (outfp, "#define %s %d\n\n", setname, setno);
+	    fprintf (outfp, "#define %sSet %d\n\n", setname, setno);
 	  symbflg = 1;
 	}
 #ifdef aix
@@ -414,7 +412,7 @@ mkcatdefs(char *fname)
 	    cp += strlen(msgname);
 	    fprintf (msgfp,"%d%s", msgno,cp);
 	    if (inclfile)
-	      fprintf (outfp, "#define %s %d\n", msgname, msgno);
+	      fprintf (outfp, "#define %s%s %d\n", setname, msgname, msgno);
 	    symbflg = 1;
 	    if (chkcontin(line))
 	      contin = 1;
