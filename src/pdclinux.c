@@ -18,6 +18,7 @@
 #include "pdcexec.h"
 #include "pdcsys.h"
 #include "pdcstr.h"
+#include "msgnrs.h"
 
 #include <signal.h>
 #include <string.h>
@@ -531,10 +532,10 @@ PUBLIC int sys_yn(int stream, const char *prompt)
 		c = my_getch();
 
 		if (sys_escape() || c == 'n' || c == 'N') {
-			CHECK(addstr, "No\n");
+			CHECK(addstr, catgets(catdesc, LinuxSet, LinuxNo, "No\n"));
 			return 0;
 		} else if (c == 'y' || c == 'Y') {
-			CHECK(addstr, "Yes\n");
+			CHECK(addstr, catgets(catdesc, LinuxSet, LinuxYes, "Yes\n"));
 			return 1;
 		}
 	}

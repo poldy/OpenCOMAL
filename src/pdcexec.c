@@ -25,6 +25,7 @@
 #include "pdcexec.h"
 #include "pdcdsys.h"
 #include "pdcmod.h"
+#include "msgnrs.h"
 
 #include <string.h>
 #include <stdarg.h>
@@ -99,11 +100,11 @@ PRIVATE void exec_stop(struct comal_line *line)
 		calc_exp(line->lc.exp, (void **) &result, &type);
 		reason = my_strdup(MISC_POOL, result->s);
 		mem_free(result);
-	} else
+	} else {
 		reason =
 		    my_strdup(MISC_POOL,
-			      "OpenComal's warp engines answered full stop");
-
+			      catgets(catdesc, ExecSet, ExecStopped, "OpenComal's warp engines answered full stop"));
+        }
 	exec_temphalt(reason);
 }
 
@@ -903,10 +904,9 @@ PRIVATE void exec_assign(struct comal_line *line)
 
 PRIVATE void exec_end()
 {
-	if (curenv->running != RUNNING) 
-		if (!sys_yn(MSG_DIALOG,"Are you sure? "))
-			return;
-
+	if (curenv->running != RUNNING && !sys_yn(MSG_DIALOG, catgets(catdesc, ExecSet, ExecSure, "Are you sure? "))) {
+		return;
+        }
 	longjmp(RESTART, PROG_END);
 }
 

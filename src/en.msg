@@ -10,3 +10,20 @@ Banner "OpenComal -- A free Comal implementation (version %s; %s; build %s)"
 Built "             Built on %s at approximately %s"
 Lic1 "OpenComal is licensed under the GNU General Public License (GPL) version 2"
 Lic2 "(The GPL contains a very nice statement on WARRANTY; you might want to read it)"
+
+$set CLoop
+Escape "Escape"
+HaltedPrompt "(halted)$ "
+
+$set Exec
+Stopped "OpenComal's warp engines answered full stop"
+Sure "Are you sure? "
+
+$set Misc
+NotSaved "Latest changes have not yet been saved! Proceed? "
+EnvUnsaved "Environment %s contains unsaved changes!"
+Proceed "Proceed? "
+
+$set Linux
+No "No\n"
+Yes "Yes\n"

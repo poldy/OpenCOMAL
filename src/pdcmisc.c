@@ -17,6 +17,7 @@
 #include "pdcsys.h"
 #include "pdcexec.h"
 #include "pdclist.h"
+#include "msgnrs.h"
 #include "pdcmisc.h"
 
 #include <math.h>
@@ -147,18 +148,21 @@ PUBLIC int check_changed()
 		return 1;
 
 	return sys_yn(MSG_DIALOG,
-		      "Latest changes have not yet been saved! Proceed? ");
+		      catgets(catdesc, MiscSet, MiscNotSaved, "Latest changes have not yet been saved! Proceed? "));
 }
 
 PUBLIC int check_changed_any()
 {
 	struct env_list *walk = env_root;
 	int any_changes = 0;
+        int result;
 
+        result = 1;
+        sys_setutf8(true);
 	while (walk) {
 		if (walk->env->changed) {
 			my_printf(MSG_DIALOG, 1,
-				  "Environment %s contains unsaved changes!",
+				  catgets(catdesc, MiscSet, MiscEnvUnsaved, "Environment %s contains unsaved changes!"),
 				  walk->env->envname);
 			any_changes = 1;
 		}
@@ -166,10 +170,11 @@ PUBLIC int check_changed_any()
 		walk = walk->next;
 	}
 
-	if (any_changes)
-		return sys_yn(MSG_DIALOG, "Proceed? ");
-
-	return 1;
+	if (any_changes) {
+		result = sys_yn(MSG_DIALOG, catgets(catdesc, MiscSet, MiscProceed, "Proceed? "));
+        }
+        sys_setutf8(false);
+	return result;
 }
 
 

@@ -176,16 +176,12 @@ PUBLIC int main(int argc, char *argv[])
 	pdc_go(argc - optind + 1, &(argv[optind - 1]));
 
 	if (setjmp(RESTART) == 0) {
-		if (sel_infile)
-			if (fclose(sel_infile))
-				perror
-				    ("Error when closing SELECT INPUT file");
-
-		if (sel_outfile)
-			if (fclose(sel_outfile))
-				perror
-				    ("Error when closing SELECT OUTPUT file");
-
+		if (sel_infile != NULL && fclose(sel_infile) == EOF) {
+			perror("fclose");
+                }
+		if (sel_outfile != NULL && fclose(sel_outfile) == EOF) {
+			perror("fclose");
+                }
 		clear_env(curenv);
 		mem_tini();
 	}

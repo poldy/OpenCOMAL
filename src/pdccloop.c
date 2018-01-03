@@ -21,8 +21,8 @@
 #include "pdcexec.h"
 #include "pdclexs.h"
 #include "pdcenv.h"
+#include "msgnrs.h"
 #include "pdccloop.h"
-
 
 PUBLIC const char *sys_interpreter()
 {
@@ -87,7 +87,7 @@ PUBLIC struct comal_line *crunch_line(char *line)
 		remove_trailing(line,"\r","");
 
 		if (sys_edit(MSG_DIALOG, line, MAX_LINELEN, errpos)) {
-			my_printf(MSG_DIALOG, 1, "Escape");
+			my_printf(MSG_DIALOG, 1, catgets(catdesc, CLoopSet, CLoopEscape, "Escape"));
 			return NULL;
 		}
 	}
@@ -107,7 +107,7 @@ PUBLIC void comal_loop(int newstate)
 
 	do {
 		if (curenv->running==HALTED) 
-			prompt="(halted)$ ";
+			prompt=catgets(catdesc, CLoopSet, CLoopHaltedPrompt, "(halted)$ ");
 
 		if (!sys_get(MSG_DIALOG, line, MAX_LINELEN, prompt)) {
 			aline = crunch_line(line);
@@ -118,7 +118,7 @@ PUBLIC void comal_loop(int newstate)
 				longjmp(RESTART, JUST_RESTART);
 			}
 		} else
-			my_printf(MSG_DIALOG, 1, "Escape");
+			my_printf(MSG_DIALOG, 1, catgets(catdesc, CLoopSet, CLoopEscape, "Escape"));
 	}
 	while (ret == 0);
 
