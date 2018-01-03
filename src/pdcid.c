@@ -106,7 +106,6 @@ PRIVATE struct id_rec *id_horse(char *idname)
 PUBLIC struct id_rec *id_search(char *id)
 {
 	char idname[MAX_IDLEN];
-	int i;
 
 	term_strncpy(idname, id, MAX_IDLEN);
 	strlwr(idname);

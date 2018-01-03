@@ -1249,9 +1249,6 @@ PRIVATE void exec_open(struct comal_line *line)
 	struct file_rec *frec;
 	struct open_rec *o = &line->lc.openrec;
 	const char *flags;
-        const char *inbuf;
-        char *outbuf;
-        size_t inbytesleft, outbytesleft;
         char *fname;
 
 	calc_exp(o->filename, (void **) &name, &type);
