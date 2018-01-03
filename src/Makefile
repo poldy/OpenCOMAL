@@ -32,6 +32,7 @@ OS:=pdclinux.o
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
 CC:=../build/ccd-gcc
 CFLAGS+=-Wall -Wextra -DOS_LINUX -D_FORTIFY_SOURCE=2
+MKCATDEFS:=../tools/mkcatdefs
 ifdef DEBUG
 	CFLAGS+=-O0 -ggdb
 else
@@ -43,26 +44,28 @@ ifeq ($(REALCC),c++)
 else
 	CFLAGS+=-std=gnu11
 endif
-ifeq ($(OPSYS),macos)
-	CFLAGS+=-I/usr/local/opt/readline/include
-	LDFLAGS+=-L/usr/local/opt/readline/lib -lreadline -lncurses -liconv
-else
-	CFLAGS+=$(shell ncursesw5-config --cflags)
-	LDFLAGS+=-lreadline -lm $(shell ncursesw5-config --libs)
-
+ifneq ($(OPSYS),macos)
 	-include /usr/share/hardening-includes/hardening.make
 	CFLAGS += $(HARDENING_CFLAGS)
 	LDFLAGS += $(HARDENING_LDFLAGS)
+endif
+MIN_CFLAGS:=$(CFLAGS)
+ifeq ($(OPSYS),macos)
+	CFLAGS+=-I/usr/local/opt/readline/include
+	TARG_LDFLAGS:=-L/usr/local/opt/readline/lib -lreadline -lncurses -liconv
+else
+	CFLAGS+=$(shell ncursesw5-config --cflags)
+	TARG_LDFLAGS:=-lreadline -lm $(shell ncursesw5-config --libs)
 endif
 
 .PHONY: all
 all: build $(TARG1) $(TARG2) ../bin/en.cat ../bin/ga.cat
 
 $(TARG1):  $(OBJ1) $(OS)
-	$(CC) -o $(TARG1) $(OBJ1) $(OS) $(LDFLAGS)
+	$(CC) -o $(TARG1) $(OBJ1) $(OS) $(LDFLAGS) $(TARG_LDFLAGS)
 
 $(TARG2):  $(OBJ2) $(OS)
-	$(CC) -o $(TARG2) $(OBJ2) $(OS) $(LDFLAGS)
+	$(CC) -o $(TARG2) $(OBJ2) $(OS) $(LDFLAGS) $(TARG_LDFLAGS)
 
 .PHONY: build
 build:		
@@ -75,10 +78,29 @@ pdcpars.tab.c: pdcpars.y
 lex.yy.c: pdclex.l
 	flex pdclex.l
 
+ifeq ($(OPSYS),macos)
+../bin/%.cat: %.tmp
+	LANG=en_GB.ISO8859-15 gencat $@ $^
+
+%.tmp: %.msg
+	LANG=en_GB.ISO8859-15 $(MKCATDEFS) msgnrs.h $(filter-out $(MKCATDEFS),$^) > $@
+
+mkcatdefs.o: ../tools/mkcatdefs.c
+	$(CC) $(MIN_CFLAGS) -c $^
+
+$(MKCATDEFS): mkcatdefs.o
+	$(CC) $(LDFLAGS) -o $@ $^
+	strip $@
+
+msgnrs.h: en.tmp
+
+en.tmp: $(MKCATDEFS)
+else
 ../bin/%.cat: %.msg
 	LANG=ga_IE@euro gencat -H msgnrs.h -o $@ $^
 
 msgnrs.h: ../bin/en.cat
+endif
 
 pdcmain.o: msgnrs.h
 
@@ -92,6 +114,7 @@ almostclean:
 clean: almostclean
 	$(RM) $(TARG1) $(TARG2)
 	$(RM) ../bin/*.exe ../bin/*.EXE
+	$(RM) $(MKCATDEFS)
 
 DEPS		:= $(SOURCES:%.c=%.o.d)
 -include	$(DEPS)

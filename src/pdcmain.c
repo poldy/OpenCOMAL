@@ -103,8 +103,47 @@ PUBLIC int main(int argc, char *argv[])
         locname = safe_setlocale();
 
         catdesc = catopen("opencomal.cat", NL_CAT_LOCALE);
-        if (catdesc == (nl_catd)-1) {
-                perror("catopen");
+
+#ifdef NDEBUG
+        while ((c = getopt(argc, argv, ":ym:")) != -1) {
+                switch (c) {
+#else
+        while ((c = getopt(argc, argv, ":dym:")) != -1) {
+                switch (c) {
+                case 'd':
+                        comal_debug++;
+                        break;
+#endif
+                case 'y':
+                        yydebug++;
+                        break;
+		case 'm':
+			catclose(catdesc);
+			catdesc = catopen(optarg, NL_CAT_LOCALE);
+			if (catdesc == (nl_catd)-1) {
+				perror("catopen");
+			}
+			break;
+		case ':':	/* -m without operand */
+			fprintf(stderr, "Option -%c requires an operand\n", optopt);
+			errflg++;
+			break;
+                case '?':
+                        fprintf(stderr, catgets(catdesc, MainSet, MainBadOpt, "Unrecognised option: '-%c'\n"), optopt);
+                        errflg++;
+			break;
+		default:
+			errflg++;
+			break;
+                }
+        }
+        if (errflg) {
+#ifdef NDEBUG
+                fprintf(stderr, catgets(catdesc, MainSet, MainUsage, "usage: %s [-y] [-m <locale>] ...\n"), argv[0]);
+#else
+                fprintf(stderr, "usage: %s [-dy] [-m <locale>] ...\n", argv[0]);
+#endif
+                return EXIT_FAILURE;
         }
 
         latin_loc = duplocale(LC_GLOBAL_LOCALE);
@@ -120,33 +159,6 @@ PUBLIC int main(int argc, char *argv[])
                         strncat(nlocname, latin_suffix, LOCNAME_MAX - lang_countrylen - 1);
                         latin_loc = safe_newlocale(nlocname, latin_loc, locname);
                 }
-        }
-
-#ifdef NDEBUG
-        while ((c = getopt(argc, argv, "y")) != -1) {
-                switch (c) {
-#else
-        while ((c = getopt(argc, argv, "dy")) != -1) {
-                switch (c) {
-                case 'd':
-                        comal_debug++;
-                        break;
-#endif
-                case 'y':
-                        yydebug++;
-                        break;
-                case '?':
-                        fprintf(stderr, catgets(catdesc, MainSet, MainBadOpt, "Unrecognised option: '-%c'\n"), optopt);
-                        errflg++;
-                }
-        }
-        if (errflg) {
-#ifdef NDEBUG
-                fprintf(stderr, catgets(catdesc, MainSet, MainUsage, "usage: %s [-y] ...\n"), argv[0]);
-#else
-                fprintf(stderr, "usage: %s [-dy] ...\n", argv[0]);
-#endif
-                return EXIT_FAILURE;
         }
 
 	sys_init();

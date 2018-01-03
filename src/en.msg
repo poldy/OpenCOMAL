@@ -4,7 +4,7 @@ $quote "
 $set Main
 NewlocaleFailed "warning: Setting locale failed.\nwarning: Please check that the locale \"%s\" is supported and installed on your system.\nwarning: Falling back to the global locale (\"%s\").\n"
 BadOpt "Unrecognised option: '-%c'\n"
-Usage "usage: %s [-y] ...\n"
+Usage "usage: %s [-y] [-m <locale>] ...\n"
 Copyright "(c) Copyright 1992-2002  Jos Visser <josv@osp.nl>"
 Banner "OpenComal -- A free Comal implementation (version %s; %s; build %s)"
 Built "             Built on %s at approximately %s"

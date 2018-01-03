@@ -61,6 +61,7 @@
 
 #include <limits.h>
 #include <string.h>
+#include <unistd.h>
 
 #ifndef NL_TEXTMAX
 #define NL_TEXTMAX 8192
@@ -89,7 +90,6 @@ static FILE *msgfp;
 static FILE *descfile;
 static char inname [PATH_MAX];
 static char outname [PATH_MAX];
-static char catname [PATH_MAX];
 static char *mname;
 static void mkcatdefs(char *);
 static int chkcontin(char *);
@@ -315,7 +315,7 @@ mkcatdefs(char *fname)
 	  (isspace(cp[3]) != 0)) {
 	sscanf (cp+3+len, "%s", setname);
 	if (inclfile) 
-	  fprintf (outfp, "\n/* definitions for set %s */\n", setname, "");
+	  fprintf (outfp, "\n/* definitions for set %s */\n", setname);
 	if (isdigit(setname[0])) {
 	  cpt = setname;
 	  do  {
@@ -541,7 +541,7 @@ insert(char *tname,
      
 {
   register struct name *ptr,*optr;
-  int rslt = -1,i,hashval;
+  int rslt = -1,hashval;
   
   hashval = hash(tname);
   ptr = symtab[hashval];
@@ -600,7 +600,7 @@ nsearch (char *tname)
      
 {
   register struct name *ptr,*optr;
-  int rslt = -1,i,hashval;
+  int rslt = -1,hashval;
   
   hashval = hash(tname);
   ptr = symtab[hashval];
