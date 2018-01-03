@@ -56,7 +56,7 @@ else
 endif
 
 .PHONY: all
-all: build $(TARG1) $(TARG2)
+all: build $(TARG1) $(TARG2) ../bin/en.cat ../bin/ga.cat
 
 $(TARG1):  $(OBJ1) $(OS)
 	$(CC) -o $(TARG1) $(OBJ1) $(OS) $(LDFLAGS)
@@ -74,6 +74,13 @@ pdcpars.tab.c: pdcpars.y
 
 lex.yy.c: pdclex.l
 	flex pdclex.l
+
+../bin/%.cat: %.msg
+	gencat -H msgnrs.h -o $@ $^
+
+msgnrs.h: ../bin/en.cat
+
+pdcmain.o: msgnrs.h
 
 .PHONY: almostclean
 almostclean:	

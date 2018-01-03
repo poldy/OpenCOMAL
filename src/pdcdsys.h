@@ -19,6 +19,7 @@
 #include "pdcdef.h"
 
 #include <stdio.h>
+#include <stdbool.h>
 
 /** Initialise the OS support layer */
 extern void sys_init(void);
@@ -37,6 +38,9 @@ extern int sys_escape(void);
 
 /** Output a string to a stream */
 extern void sys_put(int stream, const char *buf, long len);
+
+/** Switch on or off direct UTF-8 output passthrough */
+extern void sys_setutf8(bool is_utf8);
 
 /** Clear the screen */
 extern void sys_page(FILE * f);

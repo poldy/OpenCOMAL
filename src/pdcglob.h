@@ -36,6 +36,7 @@
 #include <locale.h>
 #endif
 #include <iconv.h>
+#include <nl_types.h>
 
 #define PRIVATE static
 #define PUBLIC
@@ -77,5 +78,6 @@ EXTERN struct env_list *env_root;
 
 EXTERN locale_t latin_loc;
 EXTERN iconv_t latin_to_utf8;
+EXTERN nl_catd catdesc;
 
 #endif
