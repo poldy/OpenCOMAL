@@ -1,29 +1,31 @@
 $ Messages for the OpenCOMAL interpreter.
+$ This file must use the Latin-9 encoding,
+$ even though the generated catalog will be installed in a utf8 locale.
 $quote "
 
 $set Main
-NewlocaleFailed "aire: Theip ar locale a roghadh.\naire: Ba cheart go mbeidÃ­s in ann an locale \"%s\" a ÃºsÃ¡id ar do rÃ­omhaire.\naire: Ag dul ar ais go dtÃ­ an prÃ­omh-locale (\"%s\").\n"
-BadOpt "Modh mÃ­-aithneach: '-%c'\n"
-Usage "ÃºsÃ¡id: %s [y] ...\n"
-Copyright "(c) CÃ³ipcheart 1992-2002  Jos Visser <josv@osp.nl>"
-Banner "OpenComal -- ClÃ¡r Comal saor (eagrÃ¡n %s; %s; dÃ©anamh %s)"
-Built "             DÃ©anta ar an %s timpeall %s"
-Lic1 "TÃ¡ OpenComal ceadaithe faoi an CeadÃºnas PoiblÃ­ GinereÃ¡lta (GPL) eagrÃ¡n a 2"
-Lic2 "(TÃ¡ rÃ¡iteas iontach sa GPL faoi WARRANTY; is dÃ³cha gur ba mhaith leat Ã© a lÃ©amh)"
+NewlocaleFailed "aire: Theip ar locale a roghadh.\naire: Ba cheart go mbeidís in ann an locale \"%s\" a úsáid ar do ríomhaire.\naire: Ag dul ar ais go dtí an príomh-locale (\"%s\").\n"
+BadOpt "Modh mí-aithneach: '-%c'\n"
+Usage "úsáid: %s [y] ...\n"
+Copyright "(c) Cóipcheart 1992-2002  Jos Visser <josv@osp.nl>"
+Banner "OpenComal -- Clár Comal saor (eagrán %s; %s; déanamh %s)"
+Built "             Déanta ar an %s timpeall %s"
+Lic1 "Tá OpenComal ceadaithe faoi an Ceadúnas Poiblí Ginereálta (GPL) eagrán a 2"
+Lic2 "(Tá ráiteas iontach sa GPL faoi WARRANTY; is dócha gur ba mhaith leat é a léamh)"
 
 $set CLoop
-Escape "Ã‰alÃº"
+Escape "Éalú"
 HaltedPrompt "(stadtha)$ "
 
 $set Exec
 Stopped "D'fhreagair innealta warp OpenComal stad go leor"
-Sure "An bhfuil tÃº cinnte? "
+Sure "An bhfuil tú cinnte? "
 
 $set Misc
-NotSaved "NÃ­l na hathraithe is dÃ©anaÃ­ sÃ¡bhÃ¡ilte! Lean ar aghaidh? "
-EnvUnsaved "TÃ¡ athraithe neamh-sÃ¡bhÃ¡ilte i dtimpeallacht %s!"
+NotSaved "Níl na hathraithe is déanaí sábháilte! Lean ar aghaidh? "
+EnvUnsaved "Tá athraithe neamh-sábháilte i dtimpeallacht %s!"
 Proceed "Lean ar aghaidh? "
 
 $set Linux
-No "NÃ­ hea\n"
+No "Ní hea\n"
 Yes "Sea\n"

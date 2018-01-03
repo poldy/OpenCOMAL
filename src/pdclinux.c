@@ -360,7 +360,7 @@ PUBLIC void sys_setpaged(int n)
 	pagern = LINES;
 }
 
-PUBLIC void sys_setutf8(bool u)
+static inline void sys_setutf8(bool u)
 {
 	is_utf8_put = u;
 }

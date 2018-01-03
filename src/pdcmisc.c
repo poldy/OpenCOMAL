@@ -158,7 +158,6 @@ PUBLIC int check_changed_any()
         int result;
 
         result = 1;
-        sys_setutf8(true);
 	while (walk) {
 		if (walk->env->changed) {
 			my_printf(MSG_DIALOG, 1,
@@ -173,7 +172,6 @@ PUBLIC int check_changed_any()
 	if (any_changes) {
 		result = sys_yn(MSG_DIALOG, catgets(catdesc, MiscSet, MiscProceed, "Proceed? "));
         }
-        sys_setutf8(false);
 	return result;
 }
 

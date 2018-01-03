@@ -152,7 +152,6 @@ PUBLIC int main(int argc, char *argv[])
 	sys_init();
 	copyright = catgets(catdesc, MainSet, MainCopyright, "(c) Copyright 1992-2002  Jos Visser <josv@osp.nl>");
 
-        sys_setutf8(true);
 	my_printf(MSG_DIALOG, 1,
 		  catgets(catdesc, MainSet, MainBanner, "OpenComal -- A free Comal implementation (version %s; %s; build %s)"),
 		  OPENCOMAL_VERSION,HOST_OS,OPENCOMAL_BUILD);
@@ -163,7 +162,6 @@ PUBLIC int main(int argc, char *argv[])
 	my_printf(MSG_DIALOG, 1,catgets(catdesc, MainSet, MainLic1, "OpenComal is licensed under the GNU General Public License (GPL) version 2"));
 	my_printf(MSG_DIALOG, 1,catgets(catdesc, MainSet, MainLic2, "(The GPL contains a very nice statement on WARRANTY; you might want to read it)"));
 	my_nl(MSG_DIALOG);
-        sys_setutf8(false);
 
 	mem_init();
 

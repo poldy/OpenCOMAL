@@ -76,7 +76,7 @@ lex.yy.c: pdclex.l
 	flex pdclex.l
 
 ../bin/%.cat: %.msg
-	gencat -H msgnrs.h -o $@ $^
+	LANG=ga_IE@euro gencat -H msgnrs.h -o $@ $^
 
 msgnrs.h: ../bin/en.cat
 
