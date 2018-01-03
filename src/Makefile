@@ -36,7 +36,7 @@ ifdef DEBUG
 	CFLAGS+=-O0 -ggdb
 else
 	CFLAGS+=-DNDEBUG -Os -flto
-	LDFLAGS+=-flto
+	LDFLAGS+=-Os -flto
 endif
 ifeq ($(REALCC),c++)
 	CFLAGS+=-Weffc++ -std=c++14
