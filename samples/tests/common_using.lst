@@ -19,10 +19,10 @@
    200	PRINT FILE 2: USING "test ###.# test": 120
    210	//
    220	PRINT FILE 1: "test   5.47 test"
-   230	PRINT FILE 2: "using "test -##.## test": 5.467
+   230	PRINT FILE 2: USING "test -##.## test": 5.467
    240	//
    250	PRINT FILE 1: "test  -5.47 test"
-   260	PRINT FILE 2: "using "test -##.## test": -5.467
+   260	PRINT FILE 2: USING "test -##.## test": -5.467
    270	//
    280	PRINT FILE 1: "test ******* test"
    290	PRINT FILE 2: USING "test ###.### test": 12345
