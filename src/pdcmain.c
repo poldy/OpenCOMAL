@@ -139,9 +139,9 @@ PUBLIC int main(int argc, char *argv[])
         }
         if (errflg) {
 #ifdef NDEBUG
-                fprintf(stderr, catgets(catdesc, MainSet, MainUsage, "usage: %s [-y] [-m <locale>] ...\n"), argv[0]);
+                fprintf(stderr, catgets(catdesc, MainSet, MainUsage, "usage: %s [-y] [-m <msg-catalog>] ...\n"), argv[0]);
 #else
-                fprintf(stderr, "usage: %s [-dy] [-m <locale>] ...\n", argv[0]);
+                fprintf(stderr, "usage: %s [-dy] [-m <msg-catalog>] ...\n", argv[0]);
 #endif
                 return EXIT_FAILURE;
         }
