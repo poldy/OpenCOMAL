@@ -11,6 +11,9 @@ But, what about:
 - [ ] Internationalisation of messages (X/Open message catalogs?)
 - [x] Fix the dependencies in the Makefile
 - [ ] Heavily recursive Comal programs mess up the interpreter a bit. Maybe 
-  it's a good idea to rewrite a bit of the cental interpreter to not
-  recurse into itself too much. Or keep track of the stack size and
-  pose a limit on the heap size the interpreter can allocate.
+      it's a good idea to rewrite a bit of the cental interpreter to not
+      recurse into itself too much. Or keep track of the stack size and
+      pose a limit on the heap size the interpreter can allocate.
+- [ ] Common COMAL test suite
+- [ ] "STANDARD" module
+- [ ] Migrate most docs to a Wiki?
