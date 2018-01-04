@@ -2034,7 +2034,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 		while (esc) {
 			if (curenv->running == RUNNING) {
 				if (curenv->escallowed)
-					exec_temphalt("Escape from INPUT");
+					exec_temphalt(catgets(catdesc, ExecSet, ExecInputEsc, "Escape from INPUT"));
 
 				my_printf(MSG_DIALOG, 1,
 					  "Please re-INPUT from start");

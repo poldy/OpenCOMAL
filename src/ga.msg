@@ -20,6 +20,7 @@ HaltedPrompt "(stadtha)$ "
 $set Exec
 Stopped "D'fhreagair innealta warp OpenComal stad go leor"
 Sure "An bhfuil tú cinnte? "
+InputEsc "Éalú ó INPUT"
 
 $set Misc
 NotSaved "Níl na hathraithe is déanaí sábháilte! Lean ar aghaidh? "
