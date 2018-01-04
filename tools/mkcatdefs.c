@@ -130,9 +130,7 @@ main (int argc,
       char *argv[]) 
 {
   register int i;
-  register char *cp;
   int count;
-  char *t;
   
   setlocale (LC_ALL,"");
   
@@ -150,6 +148,8 @@ main (int argc,
   
   /* open header output file */
   if (inclfile) {
+    char *t;
+
     mname = argv [1];
     if ((int)strlen((t = strrchr(mname,'/')) ? t + 1 : mname) > MDIRSIZ) {
       fprintf (stderr, "mkcatdefs: header file name too long\n");
@@ -162,6 +162,8 @@ main (int argc,
       fprintf (stderr, "mkcatdefs: Cannot open %s\n", outname);
       exit (1);
     } else  {
+      register char *cp;
+
       /* convert name to upper case */
       for (cp=mname; *cp; cp+=i) {
 	i = mblen(cp, MB_CUR_MAX);
@@ -301,7 +303,7 @@ mkcatdefs(char *fname)
 	  break;
       }
       if (cp != cpt) {
-	sscanf (cp, "%s", msgname);
+	sscanf (cp, "%1023s", msgname);
 	if ((m = nsearch(msgname)) > 0) {
 	  fprintf (msgfp, "$ %d", m);
 	  cp += strlen(msgname);
@@ -313,7 +315,7 @@ mkcatdefs(char *fname)
       if ((strncmp (cp, "set", 3) == 0) && 
 	  ((len = mblen(&(cp[3]), MB_CUR_MAX)) == 1) && 
 	  (isspace(cp[3]) != 0)) {
-	sscanf (cp+3+len, "%s", setname);
+	sscanf (cp+3+len, "%63s", setname);
 	if (inclfile) 
 	  fprintf (outfp, "\n/* definitions for set %s */\n", setname);
 	if (isdigit(setname[0])) {
@@ -382,7 +384,7 @@ mkcatdefs(char *fname)
 	char msgname [MAXIDLEN];
 	
 	msgname [0] = '\0';
-	if (sscanf (cp, "%s", msgname) && msgname[0]) {
+	if (sscanf (cp, "%63s", msgname) && msgname[0]) {
 	  len = mblen(cp, MB_CUR_MAX);
 	  if (len < 0) {
 	    fprintf (stderr, 
@@ -599,7 +601,7 @@ nsearch (char *tname)
        */
      
 {
-  register struct name *ptr,*optr;
+  register struct name *ptr;
   int rslt = -1,hashval;
   
   hashval = hash(tname);
@@ -607,6 +609,8 @@ nsearch (char *tname)
   
   /* search the binary tree for specified symbol */
   while (ptr && (rslt = strcmp(tname,ptr->regname))) {
+    register struct name *optr;
+
     optr=ptr;  
     if (rslt<0)
       ptr = ptr->left;
