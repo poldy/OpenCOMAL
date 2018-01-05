@@ -77,10 +77,10 @@ PRIVATE locale_t safe_newlocale(const char *nlocname, locale_t loc, const char *
         result = newlocale(LC_ALL_MASK, nlocname, loc);
         if (result == (locale_t)0) {
                 perror("newlocale");
-                printf(catgets(catdesc, MainSet, MainNewlocaleFailed,
+                printf(str_ltou(catgets(catdesc, MainSet, MainNewlocaleFailed,
                                "warning: Setting locale failed.\n"
                                "warning: Please check that the locale \"%s\" is supported and installed on your system.\n"
-                               "warning: Falling back to the global locale (\"%s\").\n"),
+                               "warning: Falling back to the global locale (\"%s\").\n")),
                        nlocname, fallback);
                 result = loc;
         }
@@ -104,6 +104,10 @@ PUBLIC int main(int argc, char *argv[])
 
         catdesc = catopen("opencomal.cat", NL_CAT_LOCALE);
 
+        // Need this now, because we'll have to convert error messages before
+        // curses initialisation.
+	latin_to_utf8 = iconv_open("utf8", "latin-9");
+
 #ifdef NDEBUG
         while ((c = getopt(argc, argv, ":ym:")) != -1) {
                 switch (c) {
@@ -125,11 +129,11 @@ PUBLIC int main(int argc, char *argv[])
 			}
 			break;
 		case ':':	/* -m without operand */
-			fprintf(stderr, "Option -%c requires an operand\n", optopt);
+			fprintf(stderr, str_ltou(catgets(catdesc, MainSet, MainReqOp, "Option -%c requires an operand\n")), optopt);
 			errflg++;
 			break;
                 case '?':
-                        fprintf(stderr, catgets(catdesc, MainSet, MainBadOpt, "Unrecognised option: '-%c'\n"), optopt);
+                        fprintf(stderr, str_ltou(catgets(catdesc, MainSet, MainBadOpt, "Unrecognised option: '-%c'\n")), optopt);
                         errflg++;
 			break;
 		default:
@@ -139,7 +143,7 @@ PUBLIC int main(int argc, char *argv[])
         }
         if (errflg) {
 #ifdef NDEBUG
-                fprintf(stderr, catgets(catdesc, MainSet, MainUsage, "usage: %s [-y] [-m <msg-catalog>] ...\n"), argv[0]);
+                fprintf(stderr, str_ltou(catgets(catdesc, MainSet, MainUsage, "usage: %s [-y] [-m <msg-catalog>] ...\n")), argv[0]);
 #else
                 fprintf(stderr, "usage: %s [-dy] [-m <msg-catalog>] ...\n", argv[0]);
 #endif

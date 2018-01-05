@@ -291,7 +291,6 @@ PRIVATE void init_readline(void)
 
 PRIVATE void init_iconv(void)
 {
-	latin_to_utf8 = iconv_open("utf8", "latin-9");
 	utf8_to_latin = iconv_open("latin-9", "utf8");
 }
 

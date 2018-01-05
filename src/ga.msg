@@ -12,6 +12,7 @@ Banner "OpenComal -- Clár Comal saor (eagrán %s; %s; déanamh %s)"
 Built "             Déanta ar an %s timpeall %s"
 Lic1 "Tá OpenComal ceadaithe faoi an Ceadúnas Poiblí Ginereálta (GPL) eagrán a 2"
 Lic2 "(Tá ráiteas iontach sa GPL faoi WARRANTY; is dócha gur ba mhaith leat é a léamh)"
+ReqOp "Tá operand ag teastáil ar option -%c\n"
 
 $set CLoop
 Escape "Éalú"

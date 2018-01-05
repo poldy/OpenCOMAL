@@ -10,6 +10,7 @@ Banner "OpenComal -- A free Comal implementation (version %s; %s; build %s)"
 Built "             Built on %s at approximately %s"
 Lic1 "OpenComal is licensed under the GNU General Public License (GPL) version 2"
 Lic2 "(The GPL contains a very nice statement on WARRANTY; you might want to read it)"
+ReqOp "Option -%c requires an operand\n"
 
 $set CLoop
 Escape "Escape"
