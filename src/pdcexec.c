@@ -49,6 +49,7 @@ PRIVATE int exec_seq3(void);
 PRIVATE int exec_seq2(void);
 PRIVATE void print_con(struct print_list *printroot, int pr_sep);
 PRIVATE void print_using(struct expression *str, struct print_list *printroot, int pr_sep);
+PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp_list *lvalroot, int pr_sep);
 
 PUBLIC void run_error(int error, const char *s, ...)
 {
@@ -1967,16 +1968,12 @@ PRIVATE void exec_import(struct comal_line *line)
 PUBLIC void input_file(struct two_exp *twoexp, struct exp_list *lvalroot)
 {
 	struct file_rec *f = pos_file(twoexp);
-	struct exp_list *work = lvalroot;
-	void *result;
-	enum VAL_TYPE type;
-	long totsize = 0;
+	FILE *prev_sel_infile;
 
-	while (work) {
-		read1(f, work->exp->e.expid.id, &result, &type, &totsize);
-		do_assign2(work->exp, result, type, 1);
-		work = work->next;
-	}
+	prev_sel_infile = sel_infile;
+	sel_infile = f->hfptr;
+	input_con(NULL, NULL, lvalroot, commaSYM);
+	sel_infile = prev_sel_infile;
 }
 
 
