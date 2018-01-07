@@ -1,0 +1,35 @@
+     9000 MODULE gtk_server
+     9010   EXPORT gtk$
+     9020   EXPORT gtk_init
+     9030   EXPORT toplevel$
+     9040   EXPORT connect
+     9050   EXPORT callback$
+     9060   EXPORT gtk_exit
+     9070   _$:=""
+     9080   FUNC gtk$(arg$) CLOSED
+     9090     f#:=FREEFILE
+     9100     OPEN FILE f#, "/tmp/comal", APPEND 
+     9110     PRINT FILE f#: arg$
+     9120     CLOSE FILE f#
+     9130     f#:=FREEFILE
+     9140     OPEN FILE f#, "/tmp/comal", READ 
+     9150     INPUT FILE f#: response$
+     9160     CLOSE FILE f#
+     9170     RETURN response$
+     9180   ENDFUNC
+     9190   PROC gtk_init CLOSED
+     9200     OS "gtk-server -fifo=/tmp/comal -detach"
+     9210   ENDPROC
+     9220   FUNC toplevel$ CLOSED
+     9230     RETURN gtk$("gtk_server_toplevel")
+     9240   ENDFUNC
+     9250   PROC connect(widget$, name$) CLOSED
+     9260     _$:=gtk$("gtk_server_connect "+widget$+" XmNactivateCallback "+name$)
+     9270   ENDPROC
+     9280   FUNC callback$
+     9290     RETURN gtk$("gtk_server_callback wait")
+     9300   ENDFUNC
+     9310   PROC gtk_exit
+     9320     _$:=gtk$("gtk_server_exit")
+     9330   ENDPROC
+     9340 ENDMODULE

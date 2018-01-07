@@ -1,0 +1,50 @@
+       10 USE gtk_server
+       20 gtk_init
+       30 top$:=toplevel$
+       40 _$:=gtk$("XtVaSetValues "+top$+" s:XmNtitle s:Test1 NULL")
+       50 bboard$:=gtk$("XtVaCreateManagedWidget bboard xmBulletinBoardWidgetClass "+top$+" s:XmNresizePolicy e:XmRESIZE_NONE s:XmNheight h:150 s:XmNwidth h:250 s:XmNbackground e:SkyBlue NULL")
+       60 button$:=gtk$(" XtVaCreateManagedWidget 'Push here' xmPushButtonWidgetClass "+bboard$+" s:XmNbackground e:Goldenrod s:XmNforeground e:MidnightBlue s:XmNheight h:30 s:XmNwidth h:100 s:XmNx h:75 s:XmNy h:60 s:XmNshadowThickness h:3 NULL")
+       70 connect(button$, "activateCB")
+       80 event_loop
+       90 PRINT "Pushbutton activated; normal termination."
+      100 gtk_exit
+      110 PROC event_loop CLOSED
+      120   REPEAT
+      130     event$:=callback$
+      140   UNTIL event$="activateCB"
+      150 ENDPROC event_loop
+      160 MODULE gtk_server
+      170   EXPORT gtk$
+      180   EXPORT gtk_init
+      190   EXPORT toplevel$
+      200   EXPORT connect
+      210   EXPORT callback$
+      220   EXPORT gtk_exit
+      230   _$:=""
+      240   FUNC gtk$(arg$) CLOSED
+      250     f#:=FREEFILE
+      260     OPEN FILE f#, "/tmp/comal", APPEND 
+      270     PRINT FILE f#: arg$
+      280     CLOSE FILE f#
+      290     f#:=FREEFILE
+      300     OPEN FILE f#, "/tmp/comal", READ 
+      310     INPUT FILE f#: response$
+      320     CLOSE FILE f#
+      330     RETURN response$
+      340   ENDFUNC gtk$
+      350   PROC gtk_init CLOSED
+      360     OS "gtk-server -fifo=/tmp/comal -detach"
+      370   ENDPROC gtk_init
+      380   FUNC toplevel$ CLOSED
+      390     RETURN gtk$("gtk_server_toplevel")
+      400   ENDFUNC toplevel$
+      410   PROC connect(widget$, name$) CLOSED
+      420     _$:=gtk$("gtk_server_connect "+widget$+" XmNactivateCallback "+name$)
+      430   ENDPROC connect
+      440   FUNC callback$
+      450     RETURN gtk$("gtk_server_callback wait")
+      460   ENDFUNC callback$
+      470   PROC gtk_exit
+      480     _$:=gtk$("gtk_server_exit")
+      490   ENDPROC gtk_exit
+      500 ENDMODULE gtk_server
