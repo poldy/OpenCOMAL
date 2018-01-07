@@ -25,7 +25,7 @@ extern void read_data(struct comal_line *line);
 extern void exec_read(struct comal_line *line);
 extern void exec_write(struct comal_line *line);
 extern void print_file(struct two_exp *twoexp,
-		       struct print_list *printroot);
+		       struct print_list *printroot, int pr_sep, struct expression *using_modifier);
 extern void input_file(struct two_exp *twoexp, struct exp_list *lvalroot);
 extern int exec_line(struct comal_line *line);
 extern void exec_seq(struct comal_line *line);
