@@ -215,10 +215,10 @@ extern int yylex();
 %type	<exp>		optstep optexp lvalue numlvalue numlvalue2 strlvalue
 %type	<exp>		exp numexp stringexp xid numexp2 stringexp2 opt_stringexp
 %type	<exp>		string_factor strlvalue2 optnumlvalue opt_arg
-%type	<exp>		opt_numexp
+%type	<exp>		opt_numexp using_designator
 %type	<extptr>	opt_external
 %type	<twoexp>	file_designator substr_spec substr_spec2 at_designator
-%type	<twoexpp>	optfile
+%type	<twoexpp>	optfile optat
 %type	<inum>		optclosed optread_only relop pr_sep optpr_sep 
 %type	<inum>		todownto nassign sassign assign1 assign2 plusorminus
 %type	<imod>		input_modifier
@@ -1065,42 +1065,51 @@ print_stat	:	printi
 			{
 				$$.cmd=printSYM;
 				$$.lc.printrec.modifier=NULL;
+				$$.lc.printrec.using_modifier=NULL;
 				$$.lc.printrec.printroot=NULL;
 				$$.lc.printrec.pr_sep=0;
 			}
-		|	printi print_list optpr_sep
-			{
-				$$.cmd=printSYM;
-				$$.lc.printrec.modifier=NULL;
-				$$.lc.printrec.printroot=(struct print_list *)my_reverse($2);
-				$$.lc.printrec.pr_sep=$3;
-			}
-		|	printi usingSYM stringexp colonSYM prnum_list optpr_sep
-			{
-				$$.cmd=printSYM;
-				$$.lc.printrec.modifier=(struct print_modifier *)mem_alloc(PARSE_POOL,sizeof(struct print_modifier));
-				$$.lc.printrec.modifier->type=usingSYM;
-				$$.lc.printrec.modifier->data.str=$3;
-				$$.lc.printrec.printroot=(struct print_list *)my_reverse($5);
-				$$.lc.printrec.pr_sep=$6;
-			}
-		|	printi at_designator print_list optpr_sep
+		|	printi optat using_designator prnum_list optpr_sep
 			{
 				$$.cmd=printSYM;
 				$$.lc.printrec.modifier=(struct print_modifier *)mem_alloc(PARSE_POOL,sizeof(struct print_modifier));
 				$$.lc.printrec.modifier->type=atSYM;
 				$$.lc.printrec.modifier->data.twoexp=$2;
+				$$.lc.printrec.using_modifier=$3;
+				$$.lc.printrec.printroot=(struct print_list *)my_reverse($4);
+				$$.lc.printrec.pr_sep=$5;
+			}
+		|	printi optat print_list optpr_sep
+			{
+				$$.cmd=printSYM;
+				$$.lc.printrec.modifier=(struct print_modifier *)mem_alloc(PARSE_POOL,sizeof(struct print_modifier));
+				$$.lc.printrec.modifier->type=atSYM;
+				$$.lc.printrec.modifier->data.twoexp=$2;
+				$$.lc.printrec.using_modifier=NULL;
 				$$.lc.printrec.printroot=(struct print_list *)my_reverse($3);
 				$$.lc.printrec.pr_sep=$4;
 			}
-		|	printi file_designator print_list
+		|	printi file_designator print_list optpr_sep
 			{
 				$$.cmd=printSYM;
 				$$.lc.printrec.modifier=(struct print_modifier *)mem_alloc(PARSE_POOL,sizeof(struct print_modifier));
 				$$.lc.printrec.modifier->type=fileSYM;
-				$$.lc.printrec.modifier->data.twoexp=$2;
+				$$.lc.printrec.modifier->data.twoexp=(struct two_exp *)mem_alloc(PARSE_POOL,sizeof(struct two_exp));
+				*($$.lc.printrec.modifier->data.twoexp)=$2;
+				$$.lc.printrec.using_modifier=NULL;
 				$$.lc.printrec.printroot=(struct print_list *)my_reverse($3);
-				$$.lc.printrec.pr_sep=0;
+				$$.lc.printrec.pr_sep=$4;
+			}
+		|	printi file_designator using_designator prnum_list optpr_sep
+			{
+				$$.cmd=printSYM;
+				$$.lc.printrec.modifier=(struct print_modifier *)mem_alloc(PARSE_POOL,sizeof(struct print_modifier));
+				$$.lc.printrec.modifier->type=fileSYM;
+				$$.lc.printrec.modifier->data.twoexp=(struct two_exp *)mem_alloc(PARSE_POOL,sizeof(struct two_exp));
+				*($$.lc.printrec.modifier->data.twoexp)=$2;
+				$$.lc.printrec.using_modifier=$3;
+				$$.lc.printrec.printroot=(struct print_list *)my_reverse($4);
+				$$.lc.printrec.pr_sep=$5;
 			}
 		;
 		
@@ -1866,6 +1875,22 @@ at_designator	:	atSYM numexp commaSYM numexp colonSYM
 				$$.exp2=$4;
 			}
 		;
+
+optat		:	at_designator
+			{
+				$$=(struct two_exp *)mem_alloc(PARSE_POOL,sizeof(struct two_exp));
+				*($$)=$1;
+			}
+		|	/* epsilon */
+			{
+				$$=NULL;
+			}
+		;
+
+using_designator:	usingSYM stringexp colonSYM
+			{
+				$$=$2;
+			}
 
 opt_external	:	externalSYM stringexp
 			{

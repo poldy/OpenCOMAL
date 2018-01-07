@@ -47,6 +47,8 @@ PRIVATE enum VAL_TYPE return_type;
 
 PRIVATE int exec_seq3(void);
 PRIVATE int exec_seq2(void);
+PRIVATE void print_con(struct print_list *printroot, int pr_sep);
+PRIVATE void print_using(struct expression *str, struct print_list *printroot, int pr_sep);
 
 PUBLIC void run_error(int error, const char *s, ...)
 {
@@ -1692,23 +1694,22 @@ PUBLIC void exec_write(struct comal_line *line)
 
 
 PUBLIC void print_file(struct two_exp *twoexp,
-		       struct print_list *printroot)
+		       struct print_list *printroot, int pr_sep, struct expression *using_modifier)
 {
 	struct file_rec *f = pos_file(twoexp);
-	struct print_list *work = printroot;
-	void *result;
-	enum VAL_TYPE type;
-	long totsize = 0;
+	FILE *prev_sel_outfile;
 
 	if (f->read_only)
 		run_error(WRITE_ERR, "File open for READ (only)");
 
-	while (work) {
-		calc_exp(work->exp, &result, &type);
-		write1(f, result, type, &totsize);
-		val_free(result, type);
-		work = work->next;
+	prev_sel_outfile = sel_outfile;
+	sel_outfile = f->hfptr;
+	if (using_modifier == NULL) {
+		print_con(printroot, pr_sep);
+	} else {
+		print_using(using_modifier, printroot, pr_sep);
 	}
+	sel_outfile = prev_sel_outfile;
 }
 
 
@@ -1829,31 +1830,41 @@ PRIVATE void print_using(struct expression *str,
 		my_nl(MSG_PROGRAM);
 }
 
-
-PRIVATE void print_at(struct two_exp *twoexp, struct print_list *printroot, int pr_sep)
+PRIVATE void print_maybe_using(struct print_rec *p)
 {
-	sys_cursor(sel_outfile, calc_intexp(twoexp->exp1),
-		   calc_intexp(twoexp->exp2));
-	print_con(printroot, pr_sep);
+	if (p->using_modifier == NULL) {
+		print_con(p->printroot, p->pr_sep);
+	} else {
+		print_using(p->using_modifier, p->printroot, p->pr_sep);
+	}
 }
 
+PRIVATE void print_at(struct print_rec *p)
+{
+	sys_cursor(sel_outfile, calc_intexp(p->modifier->data.twoexp->exp1),
+		   calc_intexp(p->modifier->data.twoexp->exp2));
+	print_maybe_using(p);
+}
 
 PRIVATE void exec_print(struct comal_line *line)
 {
 	struct print_rec *p = &line->lc.printrec;
 
-	if (p->modifier) {
-		if (p->modifier->type == usingSYM) {
-			print_using(p->modifier->data.str, p->printroot,
-				    p->pr_sep);
-		} else if (p->modifier->type == atSYM) {
-			print_at(&p->modifier->data.twoexp, p->printroot, p->pr_sep);
+	if (p->modifier != NULL) {
+		if (p->modifier->type == atSYM) {
+			if (p->modifier->data.twoexp != NULL) {
+				print_at(p);
+			} else {
+				print_maybe_using(p);
+			}
+		} else if (p->modifier->type == fileSYM) {
+			print_file(p->modifier->data.twoexp,
+				   p->printroot, p->pr_sep, p->using_modifier);
 		} else {
-			print_file(&p->modifier->data.twoexp,
-				   p->printroot);
+			fatal("Bad print_rec.modifier.type");
 		}
 	} else {
-		print_con(p->printroot, p->pr_sep);
+		print_maybe_using(p);
 	}
 }
 

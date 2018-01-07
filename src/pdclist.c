@@ -465,6 +465,12 @@ PRIVATE void list_printlist(char **buf, struct print_list *printroot)
 	}
 }
 
+PRIVATE void list_using(char **buf, struct expression *using_modifier)
+{
+	list_symsp(buf, usingSYM);
+	list_exp(buf, using_modifier);
+	list_text(buf, ": ");
+}
 
 PRIVATE void list_print(char **buf, struct comal_line *line)
 {
@@ -475,17 +481,19 @@ PRIVATE void list_print(char **buf, struct comal_line *line)
 	if (p->modifier)
 		switch (p->modifier->type) {
 		case fileSYM:
-			list_file(buf, &p->modifier->data.twoexp);
-			break;
-
-		case usingSYM:
-			list_symsp(buf, usingSYM);
-			list_exp(buf, p->modifier->data.str);
-			list_text(buf, ": ");
+			list_file(buf, p->modifier->data.twoexp);
+			if (p->using_modifier != NULL) {
+				list_using(buf, p->using_modifier);
+			}
 			break;
 
 		case atSYM:
-			list_at(buf, &p->modifier->data.twoexp);
+			if (p->modifier->data.twoexp != NULL) {
+				list_at(buf, p->modifier->data.twoexp);
+			}
+			if (p->using_modifier != NULL) {
+				list_using(buf, p->using_modifier);
+			}
 			break;
 
 		default:

@@ -371,18 +371,22 @@ struct print_list {
 	struct expression *exp;
 };
 
-/** Modifiers to the PRINT statement */
+/**
+ * Modifiers to the PRINT statement.
+ * This implements either "AT" or "FILE".
+ */
 struct print_modifier {
 	int type;
 	union {
 		struct expression *str;
-		struct two_exp twoexp;
+		struct two_exp *twoexp;
 	} data;
 };
 
 /** Parameters to the PRINT statement */
 struct print_rec {
 	struct print_modifier *modifier;
+	struct expression *using_modifier;	/**< This can be "stacked" with "AT" or "FILE" */
 	struct print_list *printroot;
 	int pr_sep;
 };

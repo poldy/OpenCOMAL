@@ -336,7 +336,7 @@ PRIVATE void sqash_print(struct comal_line *line)
 
 		switch (p->modifier->type) {
 		case fileSYM:
-			sqash_twoexp(&p->modifier->data.twoexp);
+			sqash_twoexp(p->modifier->data.twoexp);
 			break;
 
 		case usingSYM:
@@ -344,7 +344,7 @@ PRIVATE void sqash_print(struct comal_line *line)
 			break;
 
 		case atSYM:
-			sqash_twoexp(&p->modifier->data.twoexp);
+			sqash_twoexp(p->modifier->data.twoexp);
 			break;
 
 		default:
@@ -1051,7 +1051,7 @@ PRIVATE void expand_print(struct comal_line *line)
 
 		switch (p->modifier->type) {
 		case fileSYM:
-			expand_twoexp(&p->modifier->data.twoexp);
+			expand_twoexp(p->modifier->data.twoexp);
 			break;
 
 		case usingSYM:
@@ -1059,7 +1059,7 @@ PRIVATE void expand_print(struct comal_line *line)
 			break;
 
 		case atSYM:
-			expand_twoexp(&p->modifier->data.twoexp);
+			expand_twoexp(p->modifier->data.twoexp);
 			break;
 
 		default:
