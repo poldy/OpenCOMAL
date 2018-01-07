@@ -27,17 +27,17 @@ extern int ext_syss_exp(struct exp_list *exproot, struct string **result,
 			enum VAL_TYPE *type);
 extern int ext_sys_stat(struct exp_list *exproot);
 extern int ext_get(int stream, char *line, int maxlen, const char *prompt);
-extern void ext_nl(void);
+extern bool ext_nl(void);
 
 /** Handle writing a tab to a redirected output file */
-extern void ext_ht(void);
+extern bool ext_ht(void);
 
-extern void ext_page(void);
+extern void ext_page(FILE *f);
 
 /** Handle clearing to EOL in a redirected output file */
-extern void ext_clrtoeol(void);
+extern void ext_clrtoeol(FILE *f);
 
-extern void ext_cursor(int y, int x);
-extern void ext_put(int stream, const char *buf, long len);
+extern void ext_cursor(FILE *f, int y, int x);
+extern bool ext_put(int stream, const char *buf, long len);
 
 #endif

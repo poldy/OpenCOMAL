@@ -20,6 +20,7 @@
 #include "pdcext.h"
 #include "version.h"
 #include <string.h>
+#include <assert.h>
 
 struct inpfile_stkent {
 	struct inpfile_stkent *next;
@@ -349,37 +350,53 @@ PUBLIC int ext_get(int stream, char *line, int maxlen, const char *prompt)
 }
 
 
-PUBLIC void ext_nl(void)
+PUBLIC bool ext_nl(void)
 {
-	if (sys_outfile)
+	if (sys_outfile != NULL) {
 		fputc('\n', sys_outfile);
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
-PUBLIC void ext_ht(void)
+PUBLIC bool ext_ht(void)
 {
-	if (sys_outfile)
+	if (sys_outfile != NULL) {
 		fputc('\t', sys_outfile);
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
-PUBLIC void ext_page(void)
+PUBLIC void ext_page(FILE *f)
 {
+	assert(f != NULL);
+	fputc('\f', f);
 }
 
 
-PUBLIC void ext_clrtoeol(void)
+PUBLIC void ext_clrtoeol(FILE *f)
 {
+	assert(f != NULL);
 }
 
 
-PUBLIC void ext_cursor(int y, int x)
+PUBLIC void ext_cursor(FILE *f, int y, int x)
 {
+	assert(f != NULL);
 }
 
 
-PUBLIC void ext_put(int stream, const char *buf, long len)
+PUBLIC bool ext_put(int stream, const char *buf, long len)
 {
-	if (sys_outfile)
+	if (sys_outfile != NULL) {
 		fputs(buf, sys_outfile);
+		return true;
+	} else {
+		return false;
+	}
 }

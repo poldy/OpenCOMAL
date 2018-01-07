@@ -411,12 +411,15 @@ PUBLIC void sys_put(int stream, const char *buf, long len)
 	if (len < 0)
 		len = strlen(buf);
 
+	if (ext_put(stream, buf, len)) {
+		return;
+	}
+
 	buf_lines = len / COLS;
 
 	if ((len % COLS) > 0)
 		buf_lines++;
 
-	ext_put(stream, buf, len);
 	do_put(stream, buf, len);
 
 	if (paged) {
@@ -448,24 +451,33 @@ PUBLIC void sys_put(int stream, const char *buf, long len)
 
 PUBLIC void sys_page(FILE * f)
 {
-	ext_page();
-	CHECK(erase);
+	if (f == NULL) {
+		CHECK(erase);
+	} else {
+		ext_page(f);
+	}
 }
 
 
 PUBLIC void sys_clrtoeol(FILE * f)
 {
-	ext_clrtoeol();
-	CHECK(clrtoeol);
+	if (f == NULL) {
+		CHECK(clrtoeol);
+	} else {
+		ext_clrtoeol(f);
+	}
 }
 
 
 PUBLIC void sys_cursor(FILE * f, long y, long x)
 {
+	if (f != NULL) {
+		ext_cursor(f, y, x);
+		return;
+	}
         if (y > LINES || x > COLS) {
                 run_error(CURSOR_ERR, "Coordinates off-screen");
         }
-	ext_cursor(y, x);
 	if (y == 0) {
 		y = sys_currow();
 	}
@@ -496,15 +508,17 @@ PUBLIC int sys_currow(void)
 
 PUBLIC void sys_nl(int stream)
 {
-	ext_nl();
-	CHECK(addch, '\n');
+	if (!ext_nl()) {
+		CHECK(addch, '\n');
+	}
 }
 
 
 PUBLIC void sys_ht(int stream)
 {
-	ext_ht();
-	CHECK(addch, '\t');
+	if (!ext_ht()) {
+		CHECK(addch, '\t');
+	}
 }
 
 

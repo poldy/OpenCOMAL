@@ -111,7 +111,7 @@
      1110 PRINT "One READ - One WRITE - (file copy)"
      1120 OPEN FILE 1, filename$, READ 
      1130 OPEN FILE 2, filename2$, WRITE 
-     1140 PRINT FILE 2: GET$(1,999)  //copy whole file
+     1140 PRINT FILE 2: GET$(1,999),  //copy whole file
      1150 CLOSE
      1160 PRINT "==> checking if file copy worked...";
      1170 OPEN FILE 1, filename$, READ 

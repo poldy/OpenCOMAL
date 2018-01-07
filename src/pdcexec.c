@@ -1747,14 +1747,11 @@ PRIVATE void print_con(struct print_list *printroot, int pr_sep)
 
 PRIVATE char *format_using(char *u, char *p)
 {
-	int err = 0;
 	char *s;
 	int decpoint = 0;
 	int width = 0, prec = 0;
 
 	for (s = u; *s; s++) {
-		width++;
-
 		if (*s == '#') {
 			if (decpoint)
 				prec++;
@@ -1765,10 +1762,7 @@ PRIVATE char *format_using(char *u, char *p)
 				decpoint = 1;
 		else
 			break;
-
-		if (err)
-			run_error(USING_ERR,
-				  "USING string format error @ %s", s);
+		width++;
 	}
 
 	snprintf(p, FLOATUSING_MAX, "%%%d.%dlf", width, prec);
