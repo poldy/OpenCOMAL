@@ -332,23 +332,25 @@ PRIVATE void sqash_print(struct comal_line *line)
 	struct print_rec *p = &line->lc.printrec;
 
 	if (p->modifier) {
-		sqash_putint(SQ_MODIFIER, p->modifier->type);
-
 		switch (p->modifier->type) {
 		case fileSYM:
+			sqash_putint(SQ_MODIFIER, p->modifier->type);
 			sqash_twoexp(p->modifier->data.twoexp);
-			break;
-
-		case usingSYM:
-			sqash_exp(p->modifier->data.str);
 			break;
 
 		case atSYM:
-			sqash_twoexp(p->modifier->data.twoexp);
+			if (p->modifier->data.twoexp != NULL) {
+				sqash_putint(SQ_MODIFIER, p->modifier->type);
+				sqash_twoexp(p->modifier->data.twoexp);
+			}
 			break;
 
 		default:
 			fatal("Print modifier incorrect (sqash)");
+		}
+		if (p->using_modifier != NULL) {
+			sqash_putint(SQ_MODIFIER, usingSYM);
+			sqash_exp(p->using_modifier);
 		}
 	}
 
@@ -1041,6 +1043,7 @@ PRIVATE struct print_list *expand_printlist()
 PRIVATE void expand_print(struct comal_line *line)
 {
 	struct print_rec *p = &line->lc.printrec;
+	int type;
 
 	if (expand_peekc() == SQ_MODIFIER) {
 		expand_getc();
@@ -1051,19 +1054,30 @@ PRIVATE void expand_print(struct comal_line *line)
 
 		switch (p->modifier->type) {
 		case fileSYM:
+			p->modifier->data.twoexp = (struct two_exp *)mem_alloc_private(curenv->program_pool, sizeof(*p->modifier->data.twoexp));
 			expand_twoexp(p->modifier->data.twoexp);
 			break;
 
 		case usingSYM:
-			p->modifier->data.str = expand_exp();
+			p->using_modifier = expand_exp();
 			break;
 
 		case atSYM:
+			p->modifier->data.twoexp = (struct two_exp *)mem_alloc_private(curenv->program_pool, sizeof(*p->modifier->data.twoexp));
 			expand_twoexp(p->modifier->data.twoexp);
 			break;
 
 		default:
 			fatal("Print modifier incorrect (expand)");
+		}
+		if (expand_peekc() == SQ_MODIFIER) {
+			expand_getc();
+			type = expand_getint();
+			if (type == usingSYM) {
+				p->using_modifier = expand_exp();
+			} else {
+				fatal("Print modifier incorrect (expand)");
+			}
 		}
 	}
 

@@ -1,3 +1,4 @@
+        5 // You should add "STR_NAME = XmNtitle, title" to gtk-server.cfg for this
        10 USE gtk_server
        20 gtk_init
        30 top$:=toplevel$
