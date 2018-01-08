@@ -166,13 +166,12 @@ PUBLIC int main(int argc, char *argv[])
         }
 
 	sys_init();
-	copyright = catgets(catdesc, MainSet, MainCopyright, "(c) Copyright 1992-2002  Jos Visser <josv@osp.nl>");
 
 	my_printf(MSG_DIALOG, 1,
 		  catgets(catdesc, MainSet, MainBanner, "OpenComal -- A free Comal implementation (version %s; %s; build %s)"),
 		  OPENCOMAL_VERSION,HOST_OS,OPENCOMAL_BUILD);
 
-	my_printf(MSG_DIALOG, 1, "             %s", copyright);
+	my_printf(MSG_DIALOG, 1, catgets(catdesc, MainSet, MainCopyright, "             (c) Copyright 1992-2002  Jos Visser <josv@osp.nl>"));
 	my_printf(MSG_DIALOG, 1, catgets(catdesc, MainSet, MainBuilt, "             Built on %s at approximately %s"), __DATE__, __TIME__);
 	my_nl(MSG_DIALOG);
 	my_printf(MSG_DIALOG, 1,catgets(catdesc, MainSet, MainLic1, "OpenComal is licensed under the GNU General Public License (GPL) version 2"));

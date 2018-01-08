@@ -559,6 +559,7 @@ PRIVATE int do_get(int stream, char *line, int maxlen, const char *prompt,
 		   int cursor)
 {
 	int escape=0;
+        char *l;
 
 	rl_num_chars_to_read=maxlen-1;
 	edit_line=line;
@@ -566,7 +567,9 @@ PRIVATE int do_get(int stream, char *line, int maxlen, const char *prompt,
 	getyx(stdscr,gety,getx);
 	addlstr(line);
 	CHECK(refresh);
-	term_strncpy(line,readline(""),maxlen);
+        l = readline("");
+	term_strncpy(line,l,maxlen);
+        free(l);
 	CHECK(move,gety+rl_end/COLS,getx+rl_end%COLS);
 	if (stream != MSG_PROGRAM) {
 		CHECK(addch, '\n');
