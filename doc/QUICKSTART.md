@@ -23,6 +23,15 @@ Date: Sun Sep  8 10:17:20 CEST 2002
    editing /etc/locale.gen and running "sudo locale-gen".
    I don't know of anything similar for macOS.
 
+1. OpenComal can optionally use different languages for output messages. Setting
+   the LANG environment variable as above should be all that is required on Linux.
+   On macOS you may also need to specify a command-line argument, e.g. "-m
+   opencomal_ga.cat". You can define an alias for this by adding "alias
+   opencomal='opencomal -l opencomal_ga.cat'" to your $ENV file.
+
+   Note that this feature is completely optional and the fallback is to traditional
+   English messages.
+
 2. Start OpenComal ('opencomal' binary). The screen clears and something like the
    following appears:
 

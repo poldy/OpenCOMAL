@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Changed CURSOR arguments from (x, y) to (row, column).
 - Changed DIV, MOD to be floored rather than symmetric
 - Renamed LN to LOG and LOG to LOG10.
+- Change "PRINT FILE" & "INPUT FILE" to use text format, for compliance with Common COMAL.
 
 ### Removed
 - Temporarily removed support for MS-DOS and Win32, because I can't

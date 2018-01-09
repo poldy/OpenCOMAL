@@ -904,8 +904,8 @@ If a variable is an array, INPUT reads one value and assigns
 that value to every member of the array!!! (as opposed to READ
 which reads and assigns n values)
 
-INPUT FILE processes data from files written by OpenComal programs
-with WRITE FILE or PRINT FILE.
+INPUT FILE can process data from files written by OpenComal programs
+with PRINT FILE.
 
 INPUT reads data from the keyboard. Multiple values must be
 separated by a comma. If a comma must be input as a part of a
@@ -1135,6 +1135,7 @@ With the PRINT statement data can be printed on the output
 screen or to an external file.
 
 General syntax:		PRINT FILE <exp>[,<exp>]:<exp list>
+                        PRINT FILE <exp>[,<exp>]: USING <stringexp>:<num exp list>
 			PRINT [AT <row>,<col>:] <exp list>
 			PRINT [AT <row>,<col>:] USING <stringexp>:<num exp list>
 
@@ -1151,9 +1152,10 @@ hereby signifying how many digits should be placed before and
 after the decimal point.
 
 PRINT FILE writes data to previously opened files. The file
-should be opened for WRITE, APPEND or RANDOM. The difference
-between PRINT FILE and WRITE FILE is that WRITE FILE write
-variables (incl. arrays) and PRINT FILE writes expressions.
+should be opened for WRITE, APPEND or RANDOM. The main difference
+between PRINT FILE and WRITE FILE is that WRITE FILE uses
+binary format and PRINT FILE uses text format. Also, WRITE FILE can
+write variables (incl. arrays) and PRINT FILE writes expressions.
 
 Example:		PRINT "Output value = ";oval;" Kbytes"
 			PRINT USING "##.####": angle;
