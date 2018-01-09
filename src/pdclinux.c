@@ -392,13 +392,13 @@ PUBLIC int sys_escape()
 PRIVATE void do_put(int stream, const char *buf, long len)
 {
 	if (stream == MSG_ERROR) {
-		CHECK(attron, A_REVERSE);
+		CHECK(attron, A_STANDOUT);
         }
 
 	addlstr(buf);
 
 	if (stream == MSG_ERROR) {
-		CHECK(attroff, A_REVERSE);
+		CHECK(attroff, A_STANDOUT);
         }
 
         CHECK(refresh);
