@@ -25,6 +25,9 @@ Date: Sun Sep  8 10:17:20 CEST 2002
 
 1. OpenComal can optionally use different languages for output messages. Setting
    the LANG environment variable as above should be all that is required on Linux.
+   You'll also need to set NLSPATH to something like
+   "/usr/share/locale/%L/%N:/usr/share/locale/%L/LC_MESSAGES/%N:*PREFIX*/locale/%L/%N",
+   replacing *PREFIX* with whatever you supplied to "make install".
    On macOS you may also need to specify a command-line argument, e.g. "-m
    opencomal_ga.cat". You can define an alias for this by adding "alias
    opencomal='opencomal -l opencomal_ga.cat'" to your $ENV file.

@@ -32,15 +32,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   last version containing the files).
 
 ## [0.2.7]:
-- Started implementing the MODULE concept. See "whitepaper1.txt"
-  in the doc/ directory for more information.
+- Started implementing the MODULE concept. See "[whitepaper1.txt](whitepaper1.txt)"
+  in the [doc/](.) directory for more information.
 - Changed the meaning of "END" to remove the complete variable
   environment. Also made "END" executable as a command (so as to
   end an interrupted program".
 - Changed the OpenComal prompt to "(halted)$ " if the
   interpreter is in HALTED state (program was stopped but could
   be continued).
-- Added the STATIC command (also see "whitepaper1.txt".)
+- Added the STATIC command (also see "[whitepaper1.txt](whitepaper1.txt)".)
 
 ## 0.2.6:
 - New sys_edit() for Win32 by Gary Lake.
@@ -55,14 +55,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   a$(:n#:). This resulted in changes to the SAVE format that I
   think are upward compatible from previous releases.
 - There now exists a one line version of REPEAT:
-       100 REPEAT a$:+"x" UNTIL LEN(A$)=20
+
+      100 REPEAT a$:+"x" UNTIL LEN(A$)=20
+
   This changed the SAVE format (again... :-/ )
 - Added UPPER$(<stringexp>) and LOWER$(<stringexp>)
 * Declared 0.2.6-pre1
 - Overhauled the RND function. Now does:
-  RND 
-  RND(10)
-  RND(-10,10)
+
+      RND 
+      RND(10)
+      RND(-10,10)
+
 * Declared 0.2.6-pre2
 - Added RETRY (in HANDLER part of ENDTRAP). This lead to the
   first "goto" statement in the OpenComal source! :-)
@@ -105,7 +109,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   Comal :-)
 - I hacked away extensively at the array handling code. An array
   is now a valid rvalue, so the following is now possible:
-        a$()=b$()
+
+      a$()=b$()
+
   The () brackets are necessary if the array is an rvalue, and
   not when it's an lvalue.
   When confronted with an array rvalue that it does not know
