@@ -87,7 +87,7 @@ PUBLIC struct comal_line *crunch_line(char *line)
 		remove_trailing(line,"\r","");
 
 		if (sys_edit(MSG_DIALOG, line, MAX_LINELEN, errpos)) {
-			my_printf(MSG_DIALOG, 1, catgets(catdesc, CLoopSet, CLoopEscape, "Escape"));
+			my_printf(MSG_DIALOG, 1, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 			return NULL;
 		}
 	}
@@ -118,7 +118,7 @@ PUBLIC void comal_loop(int newstate)
 				longjmp(RESTART, JUST_RESTART);
 			}
 		} else
-			my_printf(MSG_DIALOG, 1, catgets(catdesc, CLoopSet, CLoopEscape, "Escape"));
+			my_printf(MSG_DIALOG, 1, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 	}
 	while (ret == 0);
 

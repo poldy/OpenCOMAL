@@ -15,7 +15,6 @@ Lic2 "(Tá ráiteas iontach sa GPL faoi WARRANTY; is dócha gur ba mhaith leat é a 
 ReqOp "Tá operand ag teastáil ar option -%c\n"
 
 $set CLoop
-Escape "Éalú"
 HaltedPrompt "(stadtha)$ "
 
 $set Exec
@@ -31,3 +30,6 @@ Proceed "Lean ar aghaidh? "
 $set Linux
 No "Ní hea\n"
 Yes "Sea\n"
+
+$set Common
+Escape "Éalú"

@@ -13,7 +13,6 @@ Lic2 "(The GPL contains a very nice statement on WARRANTY; you might want to rea
 ReqOp "Option -%c requires an operand\n"
 
 $set CLoop
-Escape "Escape"
 HaltedPrompt "(halted)$ "
 
 $set Exec
@@ -29,3 +28,6 @@ Proceed "Proceed? "
 $set Linux
 No "No\n"
 Yes "Yes\n"
+
+$set Common
+Escape "Escape"

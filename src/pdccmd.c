@@ -21,6 +21,7 @@
 #include "pdclist.h"
 #include "pdcsqash.h"
 #include "pdcenv.h"
+#include "msgnrs.h"
 #include "pdccmd.h"
 #include <string.h>
 
@@ -50,7 +51,7 @@ PRIVATE void cmd_list_horse(struct string *filename, long from, long to)
 
 	while (work && work->ld->lineno <= to) {
 		if (sys_escape()) {
-			my_printf(MSG_DIALOG, 1, "Escape");
+			my_printf(MSG_DIALOG, 1, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 			break;
 		}
 

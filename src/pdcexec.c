@@ -2044,7 +2044,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 				esc = input_line(line, l, p);
 				i = line;
 			} else
-				run_error(ESCAPE_ERR, "Escape");
+				run_error(ESCAPE_ERR, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 		}
 
 		type = work->exp->e.expid.id->type;
@@ -2232,7 +2232,7 @@ PUBLIC int exec_line(struct comal_line *line)
 	struct string *result;
 
 	if (sys_escape() && curenv->escallowed)
-		exec_temphalt("Escape");
+		exec_temphalt(catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 
 	if (!line)
 		exec_end();

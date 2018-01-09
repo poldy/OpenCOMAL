@@ -30,7 +30,7 @@ Date: Sun Sep  8 10:17:20 CEST 2002
    replacing *PREFIX* with whatever you supplied to "make install".
    On macOS you may also need to specify a command-line argument, e.g. "-m
    opencomal_ga.cat". You can define an alias for this by adding "alias
-   opencomal='opencomal -l opencomal_ga.cat'" to your $ENV file.
+   opencomal='opencomal -m opencomal_ga.cat'" to your $ENV file.
 
    Note that this feature is completely optional and the fallback is to traditional
    English messages.
