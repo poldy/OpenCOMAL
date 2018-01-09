@@ -17,6 +17,7 @@
 #include "pdcsym.h"
 #include "pdcmod.h"
 #include "pdcseg.h"
+#include "msgnrs.h"
 #include "pdcscan.h"
 #include "pdcstr.h"
 
@@ -775,19 +776,19 @@ PUBLIC int assess_scan(struct comal_line *line)
 	if (entering)
 		return 0;
 
-	if (line == curenv->curline)
-		msg = "the current execution line";
-	else if (line == curenv->datalptr)
-		msg = "the current DATA line";
-	else if (scan_nescessary(line))
-		msg = "a program structure line";
-
+	if (line == curenv->curline) {
+		msg = catgets(catdesc, ScanSet, ScanCurExec, "the current execution line");
+        } else if (line == curenv->datalptr) {
+		msg = catgets(catdesc, ScanSet, ScanCurData, "the current DATA line");
+        } else if (scan_nescessary(line)) {
+		msg = catgets(catdesc, ScanSet, ScanStrucLine, "a program structure line");
+        }
 	if (msg) {
 		curenv->scan_ok = 0;
 
 		if (curenv->running == HALTED && !curenv->con_inhibited) {
 			my_printf(MSG_DIALOG, 1,
-				  "Adding/Modifying/Deleting %s has inhibited CONtinuation",
+				  catgets(catdesc, ScanSet, ScanInhibCon, "Adding/Modifying/Deleting %s has inhibited CONtinuation"),
 				  msg);
 			curenv->con_inhibited = 1;
 		}

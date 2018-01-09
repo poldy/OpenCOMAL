@@ -31,5 +31,11 @@ $set Linux
 No "Ní hea\n"
 Yes "Sea\n"
 
+$set Scan
+CurExec "an líne atá ag rith anois"
+CurData "an líne DATA atá á úsáid"
+StrucLine "líne structúir an clár"
+InhibCon "Tar éis %s a athrú ní féidir leanúint"
+
 $set Common
 Escape "Éalú"
