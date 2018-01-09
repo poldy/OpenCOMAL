@@ -3,7 +3,7 @@ Basically, too much to start documenting here.... :-)
 But, what about:
 
 - [ ] ~Remove internal reliance on chr$(0) as end-of-string~
-- [x] A Windowing interface (gtk-server-motif?)
+- [x] A Windowing interface
 - [ ] We could do with some comments in the source tree... :-) (Doxygen?)
 - [ ] A better SAVEd file format that can withstand some changes in the 
   internal format (XDR?)
