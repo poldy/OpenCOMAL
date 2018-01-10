@@ -1060,6 +1060,7 @@ PRIVATE void expand_print(struct comal_line *line)
 
 		case usingSYM:
 			p->using_modifier = expand_exp();
+                        p->modifier->type = atSYM;
 			break;
 
 		case atSYM:
