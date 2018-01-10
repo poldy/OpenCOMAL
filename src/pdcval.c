@@ -26,12 +26,13 @@ PUBLIC void val_print_array(int stream, struct var_item *var)
 	int size=type_size(type);
 	
 	while (n>0) {
-		if (type==V_STRING)
+		if (type==V_STRING) {
 			val_print(stream,*(struct string **)data,V_STRING);
-		else
+		        my_put(stream,"\n",1);
+                } else {
 			val_print(stream,data,type);
-
-		my_put(stream," ",1);
+		        my_put(stream," ",1);
+                }
 		data+=size;
 		n--;
 	}

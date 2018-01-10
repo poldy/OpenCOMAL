@@ -7,14 +7,14 @@
        70 FOR f:=1 TO 10 DO a$(f):="Number "+STR$(f)
        80 //
        90 OPEN FILE 1, "ofile12", WRITE 
-      100 WRITE FILE 1: a$()
+      100 PRINT FILE 1: a$()
       110 CLOSE FILE 1
       120 //
       130 OPEN FILE 1, "ofile12", READ 
       140 FOR f:=1 TO 10 DO
       150   INPUT FILE 1: b$
       160   IF b$<>"Number "+STR$(f) THEN STOP
-      170 ENDFOR
+      170 ENDFOR f
       180 CLOSE FILE 1
       190 //
       200 a$:=""  // Assignment of array
@@ -25,7 +25,7 @@
       250 //
       260 FOR f:=1 TO 10 DO
       270   IF a$(f)<>"Number 1" THEN STOP
-      280 ENDFOR
+      280 ENDFOR f
       290 //
       300 PRINT "All ok"
       310 //

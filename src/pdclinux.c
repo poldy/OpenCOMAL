@@ -41,7 +41,7 @@
         } \
 }
 
-PRIVATE int escape = 0;
+PRIVATE volatile int escape = 0;
 
 PRIVATE int paged = 0, pagern;
 PRIVATE bool is_utf8_put = false;
@@ -84,7 +84,6 @@ PRIVATE void errw(const char *msg)
 PRIVATE void int_handler(int signum)
 {
 	escape = 1;
-	signal(SIGINT, int_handler);
 }
 
 PRIVATE char wc_to_latin(wchar_t wc)
@@ -321,8 +320,16 @@ PRIVATE void screen_tini(void)
 
 PUBLIC void sys_init()
 {
+        struct sigaction sa;
+
 	ext_init();
-	signal(SIGINT, int_handler);
+        sa.sa_handler = int_handler;
+        sigemptyset(&sa.sa_mask);
+        sa.sa_flags = SA_RESTART;
+        if (sigaction(SIGINT, &sa, NULL) == -1) {
+                perror("sigaction");
+                exit(EXIT_FAILURE);
+        }
 	screen_init();
 }
 

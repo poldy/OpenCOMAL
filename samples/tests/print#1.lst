@@ -22,7 +22,7 @@
       220 a$:="Leeg"
       230 //
       240 OPEN FILE 1, "ofile10", READ 
-      250 READ FILE 1: a$
+      250 INPUT FILE 1: a$
       260 CLOSE
       270 //
       280 FOR f:=10 DOWNTO 1 DO
