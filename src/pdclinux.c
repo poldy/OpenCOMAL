@@ -378,15 +378,15 @@ PUBLIC void sys_randomize(long seed)
 }
 
 
-PUBLIC int sys_escape()
+PUBLIC bool sys_escape()
 {
 	if (escape) {
 		escape = 0;
 
-		return 1;
+		return true;
 	}
 
-	return 0;
+	return false;
 }
 
 PRIVATE void do_put(int stream, const char *buf, long len)
@@ -535,7 +535,7 @@ PUBLIC void sys_zone(long size)
 }
 
 
-PUBLIC int sys_yn(int stream, const char *prompt)
+PUBLIC bool sys_yn(int stream, const char *prompt)
 {
 	do_put(stream, prompt, strlen(prompt));
 
@@ -546,19 +546,19 @@ PUBLIC int sys_yn(int stream, const char *prompt)
 
 		if (sys_escape() || c == 'n' || c == 'N') {
 			CHECK(addstr, catgets(catdesc, LinuxSet, LinuxNo, "No\n"));
-			return 0;
+			return false;
 		} else if (c == 'y' || c == 'Y') {
 			CHECK(addstr, catgets(catdesc, LinuxSet, LinuxYes, "Yes\n"));
-			return 1;
+			return true;
 		}
 	}
 }
 
 
-PRIVATE int do_get(int stream, char *line, int maxlen, const char *prompt,
+PRIVATE bool do_get(int stream, char *line, int maxlen, const char *prompt,
 		   int cursor)
 {
-	int escape=0;
+	bool escape=false;
         char *l;
 
 	rl_num_chars_to_read=maxlen-1;
@@ -585,16 +585,16 @@ PRIVATE int do_get(int stream, char *line, int maxlen, const char *prompt,
 }
 
 
-PUBLIC int sys_get(int stream, char *line, int maxlen, const char *prompt)
+PUBLIC bool sys_get(int stream, char *line, int maxlen, const char *prompt)
 {
 	if (ext_get(stream, line, maxlen, prompt))
-		return 0;
+		return false;
 	else
 		return do_get(stream, line, maxlen, prompt, 1);
 }
 
 
-PUBLIC int sys_edit(int stream, char line[], int maxlen, int cursor)
+PUBLIC bool sys_edit(int stream, char line[], int maxlen, int cursor)
 {
 	return do_get(stream, line, maxlen, NULL, cursor);
 }
@@ -744,7 +744,7 @@ PUBLIC char *sys_key(long delay)
 }
 
 
-PUBLIC int sys_call(struct id_rec *id, struct exp_list *exproot, int
+PUBLIC bool sys_call(struct id_rec *id, struct exp_list *exproot, int
 		    calltype, void **result, enum VAL_TYPE *type)
 {
 	return ext_call(id, exproot, calltype, result, type);

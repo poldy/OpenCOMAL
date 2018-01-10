@@ -185,7 +185,7 @@ PRIVATE struct comal_line *routine_search(struct id_rec *id, int type,
  *
  * Traverse the entire segment and find all USEs
  */
-PRIVATE int scan_pass2(struct seg_des *seg, char *errtxt,
+PRIVATE bool scan_pass2(struct seg_des *seg, char *errtxt,
 		       struct comal_line **errline)
 {
 	struct comal_line *curline;
@@ -201,14 +201,14 @@ PRIVATE int scan_pass2(struct seg_des *seg, char *errtxt,
 			for (walk=curline->lc.idroot; walk; walk=walk->next)
 				if (!mod_use(seg,walk->id,errtxt,errline)) {
 					if (!*errline) *errline=curline;
-					return 0;
+					return false;
 				}
 
-	return 1;
+	return true;
 }
 
 
-PRIVATE int scan_pass4(struct seg_des *seg, char *errtxt,
+PRIVATE bool scan_pass4(struct seg_des *seg, char *errtxt,
 		       struct comal_line **errline)
 {
 	struct comal_line *curline;
@@ -246,7 +246,7 @@ PRIVATE int scan_pass4(struct seg_des *seg, char *errtxt,
 			term_strncpy(errtxt,
 			       "Non-// program lines in external segment outside PROC/FUNC def", MAX_LINELEN);
 			*errline = curline;
-			return 0;
+			return false;
 		} else if (theline->cmd == importSYM) {
 			if (!procline) // || !procline->lc.pfrec.closed)
 				err =
@@ -318,7 +318,7 @@ PRIVATE int scan_pass4(struct seg_des *seg, char *errtxt,
 						      proccall->exproot,
 						      errtxt)) {
 					*errline = curline;
-					return 0;
+					return false;
 				}
 			}
 		} else if (theline->cmd == restoreSYM) {
@@ -366,17 +366,17 @@ PRIVATE int scan_pass4(struct seg_des *seg, char *errtxt,
 		if (err) {
 			term_strncpy(errtxt, err, MAX_LINELEN);
 			*errline = curline;
-			return 0;
+			return false;
 		}
 
 		curline = curline->ld->next;
 	}
 
-	return 1;
+	return true;
 }
 
 
-PRIVATE int check_case(struct comal_line *fromline, char *errtxt,
+PRIVATE bool check_case(struct comal_line *fromline, char *errtxt,
 		       struct comal_line **errline)
 {
 	do
@@ -386,14 +386,14 @@ PRIVATE int check_case(struct comal_line *fromline, char *errtxt,
 	if (fromline->cmd != whenSYM) {
 		*errline = fromline;
 		term_strncpy(errtxt, "CASE should be followed by WHEN", MAX_LINELEN);
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
 
-PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
+PRIVATE bool do_special1(struct scan_entry *p, struct comal_line *theline,
 			struct comal_line *curline,
 			struct comal_line **errline, char *errtxt,
 			int *level, struct comal_line **procroot,
@@ -411,7 +411,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 		if (seg) {
 			term_strncpy(errtxt,
 			       "DATA not allowed in external segment", MAX_LINELEN);
-			return 0;
+			return false;
 		}
 
 		if (curenv->datalptr)
@@ -428,7 +428,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 		if (sym == 0) {
 			term_strncpy(errtxt, "Can only EXIT from within a loop", MAX_LINELEN);
 			*errline = curline;
-			return 0;
+			return false;
 		}
 
 		break;
@@ -440,7 +440,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 		if (scan_sp !=1 || scan_stack[scan_sp-1].sym != endmoduleSYM) {
 			term_strncpy(errtxt, "Can not have EXPORT here", MAX_LINELEN);
 			*errline = curline;
-			return 0;
+			return false;
 		}
 
 		break;
@@ -456,7 +456,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 			if (sym!=endprocSYM && sym!=endfuncSYM && sym!=endmoduleSYM) {
 				term_strncpy(errtxt, "Can not have USE here", MAX_LINELEN);
 				*errline = curline;
-				return 0;
+				return false;
 			}
 		}
 
@@ -468,7 +468,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 		if (sym == 0) {
 			term_strncpy(errtxt, "Can only RETRY from within the HANDLER part of a TRAP/ENDTRAP", MAX_LINELEN);
 			*errline = curline;
-			return 0;
+			return false;
 		}
 
 		break;
@@ -481,7 +481,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 				lex_sym(theline->cmd),
 				theline->lc.pfrec.id->name);
 			*errline = curline;
-			return 0;
+			return false;
 		}
 
 		/*
@@ -500,7 +500,7 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 			if (sym!=0 && sym!=endprocSYM && sym!=endfuncSYM && sym!=endmoduleSYM) {
 				term_strncpy(errtxt, "PROC/FUNC may not be defined here", MAX_LINELEN);
 				*errline = curline;
-				return 0;
+				return false;
 			}
 		}
 
@@ -538,11 +538,11 @@ PRIVATE int do_special1(struct scan_entry *p, struct comal_line *theline,
 		break;
 	}
 
-	return 1;
+	return true;
 }
 
 
-PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
+PUBLIC bool scan_scan(struct seg_des *seg, char *errtxt,
 		     struct comal_line **errline)
 {
 	struct comal_line *curline;
@@ -585,7 +585,7 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 				"Too much control structure nesting (max. %d)",
 				MAX_INDENT);
 			*errline = curline;
-			return 0;
+			return false;
 		}
 
 		for (p = scan_tab; p->sym && p->sym != theline->cmd; p++);
@@ -604,13 +604,13 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 			if (p->atindent0 && scan_sp!=0) {
 				snprintf(errtxt,MAX_LINELEN,"Can not have %s here",lex_sym(p->sym));
 				*errline=curline;
-				return 0;
+				return false;
 			}
 
 			if (!do_special1
 			    (p, theline, curline, errline, errtxt, &level,
 			     &procroot, seg))
-				return 0;
+				return false;
 
 			if (!skip_processing) {
 				if (p->expectsym1 || p->expectsym2) {
@@ -636,7 +636,7 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 								 cmd));
 
 						*errline = curline;
-						return 0;
+						return false;
 					} else {
 						theline->lineptr = lineptr;
 						lineptr->lineptr = theline;
@@ -655,7 +655,7 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 	if (scan_sp) {
 		snprintf(errtxt, MAX_LINELEN, "%d open control structure%s at EOP\n",
 			scan_sp, scan_sp == 1 ? "" : "s");
-		return 0;
+		return false;
 	}
 
 	if (seg) {
@@ -664,18 +664,18 @@ PUBLIC int scan_scan(struct seg_des *seg, char *errtxt,
 		if (procroot->lc.pfrec.proclink) {
 			term_strncpy(errtxt,
 			       "More than 1 PROC/FUNC/MODULE in external segment", MAX_LINELEN);
-			return 0;
+			return false;
 		}
 	} else
 		curenv->globalproc = procroot;
 
 	if (!scan_pass2(seg, errtxt, errline))
-		return 0;
+		return false;
 
 	if (!scan_pass4(seg, errtxt, errline))
-		return 0;
+		return false;
 
-	return 1;
+	return true;
 }
 
 
@@ -744,7 +744,7 @@ PUBLIC int scan_nescessary(struct comal_line *line)
 	for (i = 0; scan_tab[i].sym; i++)
 		if (scan_tab[i].sym == line->cmd
 		    || scan_tab[i].sym == cmd2) {
-			curenv->scan_ok = 0;
+			curenv->scan_ok = false;
 
 			if (scan_tab[i].leavessym)
 				if (line_2cmd(line) != 0
@@ -769,12 +769,12 @@ PUBLIC int scan_nescessary(struct comal_line *line)
 }
 
 
-PUBLIC int assess_scan(struct comal_line *line)
+PUBLIC bool assess_scan(struct comal_line *line)
 {
 	const char *msg = NULL;
 
 	if (entering)
-		return 0;
+		return false;
 
 	if (line == curenv->curline) {
 		msg = catgets(catdesc, ScanSet, ScanCurExec, "the current execution line");
@@ -784,17 +784,17 @@ PUBLIC int assess_scan(struct comal_line *line)
 		msg = catgets(catdesc, ScanSet, ScanStrucLine, "a program structure line");
         }
 	if (msg) {
-		curenv->scan_ok = 0;
+		curenv->scan_ok = false;
 
 		if (curenv->running == HALTED && !curenv->con_inhibited) {
 			my_printf(MSG_DIALOG, 1,
 				  catgets(catdesc, ScanSet, ScanInhibCon, "Adding/Modifying/Deleting %s has inhibited CONtinuation"),
 				  msg);
-			curenv->con_inhibited = 1;
+			curenv->con_inhibited = true;
 		}
 
-		return 1;
+		return true;
 	}
 
-	return 0;
+	return false;
 }

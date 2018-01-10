@@ -17,7 +17,7 @@
 #include "pdclist.h"
 #include <string.h>
 
-PUBLIC int show_exec = 0;
+PUBLIC bool show_exec = false;
 
 PRIVATE void list_horse(char **buf, struct comal_line *line);
 PRIVATE void list_explist(char **buf, struct exp_list *exproot, int parens);

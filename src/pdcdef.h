@@ -18,6 +18,7 @@
 #include "pdcmem.h"
 
 #include <stdio.h>
+#include <stdbool.h>
 
 /** Base class for anything that is a member of a list */
 struct my_list {
@@ -147,11 +148,11 @@ struct sym_item {
 struct sym_env {
 	struct sym_env *prev;
 	struct sym_env *aliasenv;
-	int closed;
 	struct sym_item *itemroot;
 	char *name;
 	struct comal_line *curproc;
 	int level;
+	bool closed;
 };
 
 /** A binary expresion */
@@ -313,7 +314,6 @@ struct ext_rec {
 /** The arguments to a PROC or FUNC statement */
 struct proc_func_rec {
 	struct id_rec *id;
-	int closed;
 	struct ext_rec *external;
 	struct parm_list *parmroot;
 	struct sym_env *staticenv;
@@ -322,6 +322,7 @@ struct proc_func_rec {
 	struct comal_line *localproc;
 	struct comal_line *fatherproc;
 	struct seg_des *seg;
+	bool closed;
 };
 
 /** The arguments to an IF or WHILE statement */
@@ -351,7 +352,7 @@ struct open_rec {
 	struct expression *filename;
 	int type;
 	struct expression *reclen;
-	int read_only;
+	bool read_only;
 };
 
 /** Parameters to the CREATE statement */
@@ -483,8 +484,8 @@ struct file_rec {
 	long cfno;
 	FILE *hfptr;
 	int mode;
-	int read_only;
 	long reclen;
+	bool read_only;
 };
 
 /** Descriptor for an external segment */
@@ -509,8 +510,6 @@ struct mod_entry {
 	struct mod_entry	*next;
         struct id_rec           *id;
         struct comal_line       *line;
-	int			being_registered;
-	int			has_been_scanned;
 	struct seg_des 		*seg;
 };
 
@@ -536,13 +535,9 @@ struct comal_env {
 	struct mem_pool *program_pool;
 
 	int running;
-	int trace;
-	int escallowed;
 	int nrtraps;
 
 	char *name;
-	int scan_ok;
-	int changed;
 	int con_inhibited;
 
 	int error;
@@ -552,6 +547,10 @@ struct comal_env {
 	int lasterr;
 	char *lasterrmsg;
 	long lasterrline;
+	bool scan_ok;
+	bool trace;
+	bool escallowed;
+	bool changed;
 };
 
 #define	FOR_EACH_LINE(seg,var) for (var=seg_root(seg); var; var=var->ld->next)

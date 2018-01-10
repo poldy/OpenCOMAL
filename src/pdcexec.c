@@ -1262,12 +1262,12 @@ PRIVATE void exec_open(struct comal_line *line)
 		run_error(OPEN_ERR, "File %ld already open", frec->cfno);
 
 	frec->mode = o->type;
-	frec->read_only = 0;
+	frec->read_only = false;
 
 	switch (frec->mode) {
 	case readSYM:
 		flags = "rb";
-		frec->read_only = 1;
+		frec->read_only = true;
 		break;
 
 	case writeSYM:
@@ -1287,7 +1287,7 @@ PRIVATE void exec_open(struct comal_line *line)
 
 		if (o->read_only) {
                         flags = "rb";
-			frec->read_only = 1;
+			frec->read_only = true;
 		} else {
                         flags = "rb+";
                 }
@@ -1437,7 +1437,6 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 		   enum VAL_TYPE *type, long *totsize)
 {
 	long size;
-	long r;
 	int c;
 
 	*type = (enum VAL_TYPE) 0;
@@ -1445,6 +1444,8 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 	*type = (enum VAL_TYPE)c;
 
 	if (c != EOF) {
+		long r;
+
 		DBG_PRINTF(1,
 			  "Reading a type %d from file", *type);
 
@@ -1971,9 +1972,9 @@ PUBLIC void input_file(struct two_exp *twoexp, struct exp_list *lvalroot)
 }
 
 
-PRIVATE int input_line(char *s, long len, const char *p)
+PRIVATE bool input_line(char *s, long len, const char *p)
 {
-	int esc;
+	bool esc;
 
 	if (sel_infile) {
 		if (!fgets(s, len - 1, sel_infile)) {
@@ -1988,7 +1989,7 @@ PRIVATE int input_line(char *s, long len, const char *p)
 					  "Read error when reading SELECT INPUT file");
 		} else {
 			*(s + strlen(s) - 1) = '\0';	/* overwrite \n */
-			return 0;
+			return false;
 		}
 	}
 
@@ -2009,7 +2010,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 	int nr;
 	int n;
 	int quote;
-	int esc = 0;
+	bool esc = false;
 	const char *p;
 	long l;
 

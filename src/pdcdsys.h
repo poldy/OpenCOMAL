@@ -34,7 +34,7 @@ extern void sys_rand(long *result, long *scale);
 extern void sys_randomize(long seed);
 
 /** Test whether or not the escape (^C) key has been pressed */
-extern int sys_escape(void);
+extern bool sys_escape(void);
 
 /** Output a string to a stream */
 extern void sys_put(int stream, const char *buf, long len);
@@ -73,13 +73,13 @@ extern long sys_zone_num(void);
 extern void sys_zone(long size);
 
 /** Get a yes or no answer to a question */
-extern int sys_yn(int stream, const char *s);
+extern bool sys_yn(int stream, const char *s);
 
 /** Get a line of text */
-extern int sys_get(int stream, char *line, int maxlen, const char *prompt);
+extern bool sys_get(int stream, char *line, int maxlen, const char *prompt);
 
 /** Edit a line of text */
-extern int sys_edit(int stream, char *line, int maxlen, int cursor);
+extern bool sys_edit(int stream, char *line, int maxlen, int cursor);
 
 /** Get the current working directory */
 extern char *sys_dir_string();
@@ -116,7 +116,7 @@ extern int sys_call_scan(struct id_rec *id, struct exp_list *exproot,
  * Call a statement that is an extension
  * @todo Should I have used pdcext.c for all the statements I added?
  */
-extern int sys_call(struct id_rec *id, struct exp_list *exproot,
+extern bool sys_call(struct id_rec *id, struct exp_list *exproot,
 		    int calltype, void **result, enum VAL_TYPE *type);
 
 /** Evaluation a SYS(arg) expression */

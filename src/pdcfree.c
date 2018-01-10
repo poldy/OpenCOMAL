@@ -429,5 +429,5 @@ PUBLIC void line_free(struct comal_line *line, int mainprog)
 	free_horse(line);
 
 	if (mainprog)
-		curenv->changed = 1;
+		curenv->changed = true;
 }

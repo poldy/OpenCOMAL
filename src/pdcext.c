@@ -27,6 +27,7 @@ struct inpfile_stkent {
 	FILE *inpfile;
 };
 
+extern int yydebug;
 PRIVATE struct inpfile_stkent *inpfile_root = NULL;
 PRIVATE FILE *sys_inpfile = NULL;
 PRIVATE FILE *sys_outfile = NULL;
@@ -49,26 +50,25 @@ PUBLIC int ext_call_scan(struct id_rec *id, struct exp_list *exproot,
 }
 
 
-PUBLIC int ext_call(struct id_rec *id, struct exp_list *exproot, int
+PUBLIC bool ext_call(struct id_rec *id, struct exp_list *exproot, int
 		    calltype, void **result, enum VAL_TYPE *type)
 {
-	return 0;
+	return false;
 }
 
 
-PRIVATE int *is_flag(char *cmd)
+PRIVATE bool *is_flag(char *cmd)
 {
-	extern int yydebug;
-	extern int show_exec;
-	extern int short_circuit;
+	extern bool show_exec;
+	extern bool short_circuit;
 #ifndef NDEBUG
-	extern int comal_debug;
+	extern bool comal_debug;
 
 	if (strcmp(cmd, "debug") == 0)
 		return &comal_debug;
 #endif
 	if (strcmp(cmd, "yydebug") == 0)
-		return &yydebug;
+		return (bool *)&yydebug;
 
 	if (strcmp(cmd, "show_exec") == 0)
 		return &show_exec;
@@ -100,7 +100,7 @@ PUBLIC int ext_sys_exp(struct exp_list *exproot, void **result, enum
 		sscanf(VERSION, "%lG", *(double **) result);
 		*type = V_FLOAT;
 	} else {
-		int *flag;
+		bool *flag;
 
 		flag = is_flag(cmd);
 
@@ -108,7 +108,11 @@ PUBLIC int ext_sys_exp(struct exp_list *exproot, void **result, enum
 			return -1;
 
 		*result = cell_alloc(INT_CPOOL);
-		**(long **) result = *flag;
+		if (flag == (bool *)&yydebug) {
+			**(long **) result = yydebug;
+		} else {
+			**(long **) result = *flag;
+		}
 		*type = V_INT;
 	}
 
@@ -120,7 +124,7 @@ PUBLIC int ext_syss_exp(struct exp_list *exproot, struct string
 			**result, enum VAL_TYPE *type)
 {
 	char *cmd;
-	int *flag;
+	bool *flag;
 	const char *s;
 	extern char *sys_interpreter();
 
@@ -151,7 +155,11 @@ PUBLIC int ext_syss_exp(struct exp_list *exproot, struct string
 		if (!flag)
 			return -1;
 
-		s = *flag ? "on" : "off";
+		if (flag == (bool *)&yydebug) {
+			s = yydebug ? "on" : "off";
+		} else {
+			s = *flag ? "on" : "off";
+		}
 	}
 
 	*result = str_make(RUN_POOL, s);
@@ -200,7 +208,7 @@ PUBLIC int ext_sys_stat(struct exp_list *exproot)
 	void *result;
 	struct string *name;
 	enum VAL_TYPE type;
-	int *flag;
+	bool *flag;
 	char *cmd;
 
 	flag = is_flag(exp_cmd(exproot->exp));
@@ -325,7 +333,7 @@ PUBLIC int ext_sys_stat(struct exp_list *exproot)
 }
 
 
-PUBLIC int ext_get(int stream, char *line, int maxlen, const char *prompt)
+PUBLIC bool ext_get(int stream, char *line, int maxlen, const char *prompt)
 {
 	line[0] = '\0';
 
@@ -333,7 +341,7 @@ PUBLIC int ext_get(int stream, char *line, int maxlen, const char *prompt)
 		int eof;
 
 		if (fgets(line, maxlen, sys_inpfile))
-			return 1;
+			return true;
 
 		eof = feof(sys_inpfile);
 		fclose(sys_inpfile);
@@ -346,7 +354,7 @@ PUBLIC int ext_get(int stream, char *line, int maxlen, const char *prompt)
 		return ext_get(stream, line, maxlen, prompt);
 	}
 
-	return 0;
+	return false;
 }
 
 

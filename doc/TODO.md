@@ -5,8 +5,7 @@ But, what about:
 - [ ] ~Remove internal reliance on chr$(0) as end-of-string~
 - [x] A Windowing interface
 - [ ] We could do with some comments in the source tree... :-) (Doxygen?)
-- [ ] A better SAVEd file format that can withstand some changes in the 
-  internal format (XDR?)
+- [ ] A better SAVEd file format that can withstand some changes in the internal format (XDR?)
 - [ ] ~A rewrite in C++ (has been long on my mind)~
 - [ ] Internationalisation of messages (X/Open message catalogs?)
 - [x] Fix the dependencies in the Makefile

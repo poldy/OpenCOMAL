@@ -21,7 +21,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-PUBLIC struct sym_env *sym_newenv(int closed, struct sym_env *prev,
+PUBLIC struct sym_env *sym_newenv(bool closed, struct sym_env *prev,
 				  struct sym_env *alias, 
 				  struct comal_line *curproc, const char *name)
 {

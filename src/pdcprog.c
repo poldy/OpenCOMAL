@@ -51,7 +51,7 @@ PUBLIC void prog_addline(struct comal_line *line)
 	} else
 		curenv->progroot = line;
 
-	curenv->changed = 1;
+	curenv->changed = true;
 
 	if (!scan)
 		scan = assess_scan(line);
@@ -140,7 +140,7 @@ PUBLIC void prog_load(char *fn)
 
 	prog_new();
 	curenv->progroot = expand_fromfile(fn);
-	curenv->changed = 0;
+	curenv->changed = false;
 }
 
 

@@ -1371,7 +1371,7 @@ PUBLIC struct comal_line *expand_fromfile(char *fname)
 	struct comal_line *last = NULL;
 	char *checkstr;
 	const char *s;
-	extern int eof(int file);
+	extern bool eof(int file);
 
 	sqash_file = open(fname, O_RDONLY | O_BINARY);
 

@@ -47,7 +47,7 @@ struct comal_line *find_func(struct comal_line *module, struct id_rec *fun)
 /*
  * Register an OpenComal module
  */
-PRIVATE int mod_register(struct comal_line *line, struct seg_des *seg, char *errtext, struct comal_line **errline)
+PRIVATE bool mod_register(struct comal_line *line, struct seg_des *seg, char *errtext, struct comal_line **errline)
 {
 	struct comal_line *walk;
 	struct mod_entry *work=GETCORE(RUN_POOL,struct mod_entry);
@@ -74,7 +74,7 @@ PRIVATE int mod_register(struct comal_line *line, struct seg_des *seg, char *err
 					snprintf(errtext,MAX_LINELEN,"Can not find PROC/FUNC %s in MODULE %s",
 						idwalk->id->name,line->lc.pfrec.id->name);
 					*errline=walk;
-					return 0;
+					return false;
 				}
 
 				DBG_PRINTF(1,"  Exporting %s",fun->lc.pfrec.id->name);
@@ -87,7 +87,7 @@ PRIVATE int mod_register(struct comal_line *line, struct seg_des *seg, char *err
 				modfun->module=work;
 			}
 
-	return 1;
+	return true;
 }
 
 /*
@@ -130,7 +130,7 @@ PRIVATE struct seg_des *mod_load(struct id_rec *id)
 /*
  * USE a module
  */
-PUBLIC int mod_use(struct seg_des *seg, struct id_rec *id, char *errtxt, struct comal_line **errline)
+PUBLIC bool mod_use(struct seg_des *seg, struct id_rec *id, char *errtxt, struct comal_line **errline)
 {
 	struct comal_line *defline;
 	struct seg_des *modseg=seg;
@@ -139,7 +139,7 @@ PUBLIC int mod_use(struct seg_des *seg, struct id_rec *id, char *errtxt, struct 
 	 * If this module has already been 
 	 * defined, there is nothing more we need to do
 	 */
-	if (mod_find(id)) return 1;
+	if (mod_find(id)) return true;
         
 	/*
 	 * Try to find the module inside this segment
@@ -151,7 +151,7 @@ PUBLIC int mod_use(struct seg_des *seg, struct id_rec *id, char *errtxt, struct 
 		assert(modseg == NULL);
 		if (!modseg) {
 			snprintf(errtxt,MAX_LINELEN,"Module %s can not be found",id->name);
-			return 0;
+			return false;
 		}
 	}
 

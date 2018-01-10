@@ -16,9 +16,9 @@
 #define PDCCMD_H
 
 /** Scan all of the entered program */
-extern int cmd_scan(struct comal_line *line);
+extern void cmd_scan(struct comal_line *line);
 
 /** Execute a command */
-extern int cmd_exec(struct comal_line *line, int *result);
+extern bool cmd_exec(struct comal_line *line);
 
 #endif

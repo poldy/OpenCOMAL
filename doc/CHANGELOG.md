@@ -13,8 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Extended PRINT and INPUT to take optional AT modifier.
 - Added support for Latin-9 charset in strings, comments & identifiers.
 - Added [standard.lst](../samples/examples/standard.lst)
-- Start Doxygen markup of public header files. WIP
-- Start extraction & translation of strings, also WIP.
+- Start translation of output messages, WIP.
 - Allow "USING" after "PRINT FILE" & "PRINT AT".
 - Added [gtk_server.lst](../samples/examples/gtk_server.lst) & [mbutton.lst](../samples/examples/mbutton.lst)
 

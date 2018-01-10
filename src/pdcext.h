@@ -19,14 +19,14 @@ extern void ext_init(void);
 extern void ext_tini(void);
 extern int ext_call_scan(struct id_rec *id, struct exp_list *exproot,
 			 char *errtext);
-extern int ext_call(struct id_rec *id, struct exp_list *exproot,
+extern bool ext_call(struct id_rec *id, struct exp_list *exproot,
 		    int calltype, void **result, enum VAL_TYPE *type);
 extern int ext_sys_exp(struct exp_list *exproot, void **result,
 		       enum VAL_TYPE *type);
 extern int ext_syss_exp(struct exp_list *exproot, struct string **result,
 			enum VAL_TYPE *type);
 extern int ext_sys_stat(struct exp_list *exproot);
-extern int ext_get(int stream, char *line, int maxlen, const char *prompt);
+extern bool ext_get(int stream, char *line, int maxlen, const char *prompt);
 extern bool ext_nl(void);
 
 /** Handle writing a tab to a redirected output file */

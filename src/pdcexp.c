@@ -36,7 +36,7 @@ extern double round(double x);
 PRIVATE struct string e_s = { 0L, {'\0'} };
 PRIVATE struct string *empty_string = &e_s;
 
-PUBLIC int short_circuit = 0;
+PUBLIC bool short_circuit = false;
 
 
 static inline long max(long x, long y)
@@ -817,7 +817,7 @@ PRIVATE void exp_binary_f(int op, void **result, enum VAL_TYPE *type,
 }
 
 
-PRIVATE int logval(void *value, enum VAL_TYPE type)
+PRIVATE bool logval(void *value, enum VAL_TYPE type)
 {
 	if (type == V_INT)
 		return *(long *) value != 0;
@@ -827,11 +827,11 @@ PRIVATE int logval(void *value, enum VAL_TYPE type)
 		fatal("Logval of non-num type");
 
 	/* NOTREACHED */
-	return 0;
+	return false;
 }
 
 
-PRIVATE int exp_binary_l(int op, struct expression *exp1,
+PRIVATE bool exp_binary_l(int op, struct expression *exp1,
 			 struct expression *exp2)
 {
 	void *result;
@@ -844,13 +844,13 @@ PRIVATE int exp_binary_l(int op, struct expression *exp1,
 
 	if (op == andthenSYM || (op == andSYM && short_circuit)) {
 		if (!i1)
-			return 0;
+			return false;
 		else
 			op = andSYM;
 	} else {
 		if (op == orthenSYM || (op == orSYM && short_circuit)) {
 			if (i1)
-				return 1;
+				return true;
 			else
 				op = orSYM;
 		}
@@ -873,7 +873,7 @@ PRIVATE int exp_binary_l(int op, struct expression *exp1,
 	}
 
 	/* NOTREACHED */
-	return 0;
+	return false;
 }
 
 /*
@@ -1012,7 +1012,7 @@ PRIVATE void exp_string(struct expression *exp, void **vresult,
 }
 
 
-PRIVATE int exp_name(struct id_rec *id, struct exp_list *exproot,
+PRIVATE bool exp_name(struct id_rec *id, struct exp_list *exproot,
 		     void **result, enum VAL_TYPE *type)
 {
 	struct sym_item *sym = sym_search(curenv->curenv, id, S_NAME);
@@ -1020,7 +1020,7 @@ PRIVATE int exp_name(struct id_rec *id, struct exp_list *exproot,
 	enum VAL_TYPE ntype;
 
 	if (!sym)
-		return 0;
+		return false;
 
 	if (exproot)
 		run_error(NAME_ERR,
@@ -1044,7 +1044,7 @@ PRIVATE int exp_name(struct id_rec *id, struct exp_list *exproot,
 				      type);
 	}
 
-	return 1;
+	return true;
 }
 
 

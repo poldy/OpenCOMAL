@@ -29,10 +29,10 @@ PUBLIC struct comal_env *env_new(const char *name)
 	work->progroot = NULL;
 	work->segroot = NULL;
 	work->envname = my_strdup(MISC_POOL, name);
-	work->scan_ok = 0;
+	work->scan_ok = false;
 	work->rootenv = NULL;
 	work->curenv = NULL;
-	work->changed = 0;
+	work->changed = false;
 	work->name = NULL;
 	work->curline = NULL;
 	work->trace = 0;
@@ -41,13 +41,13 @@ PUBLIC struct comal_env *env_new(const char *name)
 	work->errline = NULL;
 	work->datalptr = NULL;
 	work->dataeptr = NULL;
-	work->con_inhibited = 0;
+	work->con_inhibited = false;
 	work->running = 0;
 	work->fileroot = NULL;
 	work->lasterr = 0;
 	work->lasterrmsg = my_strdup(MISC_POOL, "");
 	work->errline = 0;
-	work->escallowed = 1;
+	work->escallowed = true;
 	work->nrtraps = 0;
 	work->program_pool = pool_new();
 
@@ -100,7 +100,7 @@ PUBLIC void clean_runenv(struct comal_env *env)
 	mem_free(env->lasterrmsg);
 	env->lasterrmsg = my_strdup(MISC_POOL, "");
 	env->errline = 0;
-	env->escallowed = 1;
+	env->escallowed = true;
 	env->nrtraps = 0;
 	env->running = 0;
 	env->curenv = NULL;
@@ -134,8 +134,8 @@ PUBLIC void clear_env(struct comal_env *env)
 
 	env->progroot = NULL;
 	env->rootenv = NULL;
-	env->changed = 0;
-	env->scan_ok = 0;
+	env->changed = false;
+	env->scan_ok = false;
 
 	if (env->name)
 		mem_free(env->name);

@@ -129,35 +129,35 @@ PUBLIC void free_list(struct my_list *root)
 }
 
 
-PUBLIC int exp_list_of_nums(struct exp_list *root)
+PUBLIC bool exp_list_of_nums(struct exp_list *root)
 {
 	while (root) {
 		if (root->exp->optype != T_EXP_IS_NUM)
-			return 0;
+			return false;
 
 		root = root->next;
 	}
 
-	return 1;
+	return true;
 }
 
 
-PUBLIC int check_changed()
+PUBLIC bool check_changed()
 {
 	if (!curenv->changed)
-		return 1;
+		return true;
 
 	return sys_yn(MSG_DIALOG,
 		      catgets(catdesc, MiscSet, MiscNotSaved, "Latest changes have not yet been saved! Proceed? "));
 }
 
-PUBLIC int check_changed_any()
+PUBLIC bool check_changed_any()
 {
 	struct env_list *walk = env_root;
 	int any_changes = 0;
-        int result;
+        bool result;
 
-        result = 1;
+        result = true;
 	while (walk) {
 		if (walk->env->changed) {
 			my_printf(MSG_DIALOG, 1,
@@ -255,10 +255,10 @@ PUBLIC struct id_rec *exp_of_id(struct expression *exp)
 	return id;
 }
 
-PUBLIC int exp_of_string(struct expression *exp)
+PUBLIC bool exp_of_string(struct expression *exp)
 {
 	if (exp->optype != T_EXP_IS_STRING)
-		return 0;
+		return false;
 
 	exp = exp->e.exp;
 
@@ -668,16 +668,16 @@ PUBLIC char *ltoa(long num, char *buf, int radix)
 	return buf;
 }
 
-PUBLIC int eof(int f)
+PUBLIC bool eof(int f)
 {
 	char dummy;
 
 	if (read(f, &dummy, 1) == 0)
-		return 1;
+		return true;
 
 	lseek(f, -1L, SEEK_CUR);
 
-	return 0;
+	return false;
 }
 #endif
 

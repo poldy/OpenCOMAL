@@ -15,7 +15,7 @@
 #ifndef PDCSYM_H
 #define PDCSYM_H
 
-extern struct sym_env *sym_newenv(int closed, struct sym_env *prev,
+extern struct sym_env *sym_newenv(bool closed, struct sym_env *prev,
 				  struct sym_env *alias,
 				  struct comal_line *curproc, const char *name);
 extern struct sym_env *search_env(char *name, struct sym_env *start);

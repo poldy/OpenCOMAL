@@ -19,7 +19,7 @@
 extern const char *sys_interpreter(void);
 
 /** Process one line of input into the interpreter, either a command or a program line */
-extern int process_comal_line(struct comal_line *line);
+extern void process_comal_line(struct comal_line *line);
 
 /** Parse a program line */
 extern struct comal_line *crunch_line(char *line);

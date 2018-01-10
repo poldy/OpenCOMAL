@@ -17,7 +17,7 @@
 #include "pdcrun.h"
 
 PUBLIC int yydebug = 0;		/* To replace YACC's yydebug */
-PUBLIC int show_exec = 0;	/* To replace PDCLIST.C's show_exec */
+PUBLIC bool show_exec = false;	/* To replace PDCLIST.C's show_exec */
 
 
 PUBLIC const char *sys_interpreter()

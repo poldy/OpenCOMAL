@@ -39,6 +39,7 @@ extern int yylex();
 	{
 		long num;
 		int inum;
+		bool flag;
 		struct string *str;
 		struct id_rec *id;
 		struct id_list *id_root;
@@ -219,9 +220,10 @@ extern int yylex();
 %type	<extptr>	opt_external
 %type	<twoexp>	file_designator substr_spec substr_spec2 at_designator
 %type	<twoexpp>	optfile optat
-%type	<inum>		optclosed optread_only relop pr_sep optpr_sep 
+%type	<inum>		relop pr_sep optpr_sep 
 %type	<inum>		todownto nassign sassign assign1 assign2 plusorminus
 %type	<imod>		input_modifier
+%type	<flag>		optclosed optread_only
 %type	<parmptr>	procfunc_head parmlist parmitem 
 %type	<printptr>	print_list prnum_list
 %type	<importptr>	import_list
@@ -619,7 +621,7 @@ module_stat	:	moduleSYM idSYM opt_external
 			{
 				$$.cmd=moduleSYM;
 				$$.lc.pfrec.id=$2;
-				$$.lc.pfrec.closed=1;
+				$$.lc.pfrec.closed=true;
 				$$.lc.pfrec.external=$3;
 				$$.lc.pfrec.staticenv=NULL;
 			}
@@ -2072,21 +2074,21 @@ optthen		:	thenSYM
 		
 optread_only	:	read_onlySYM
 			{
-				$$=read_onlySYM;
+				$$=true;
 			}
 		|	/* epsilon */
 			{
-				$$=0;
+				$$=false;
 			}
 		;	
 
 optclosed	:	closedSYM
 			{
-				$$=closedSYM;
+				$$=true;
 			}
 		|	/* epsilon */
 			{
-				$$=0;
+				$$=false;
 			}
 		;	
 

@@ -30,12 +30,10 @@ PUBLIC const char *sys_interpreter()
 }
 
 
-PUBLIC int process_comal_line(struct comal_line *line)
+PUBLIC void process_comal_line(struct comal_line *line)
 {
-	int result = 0;
-
 	if (!line)
-		return 0;
+		return;
 
 	if (line->cmd >= 0) {
 		if (line->ld) {
@@ -43,7 +41,7 @@ PUBLIC int process_comal_line(struct comal_line *line)
 			mem_shiftmem(PARSE_POOL, curenv->program_pool);
 		} else if (line->cmd != 0) {
 			if (setjmp(ERRBUF) == 0)
-				if (!cmd_exec(line, &result)) {
+				if (!cmd_exec(line)) {
 					if (!curenv->curenv)
 						curenv->curenv = ROOTENV();
 
@@ -55,8 +53,6 @@ PUBLIC int process_comal_line(struct comal_line *line)
 	}
 
 	mem_freepool(PARSE_POOL);
-
-	return result;
 }
 
 
@@ -98,29 +94,27 @@ PUBLIC void comal_loop(int newstate)
 {
 	char line[MAX_LINELEN];
 	struct comal_line *aline;
-	int ret = 0;
 	jmp_buf save_err;
 	const char *prompt="$ ";
 
 	curenv->running = newstate;
 	memcpy(save_err, ERRBUF, sizeof(jmp_buf));
 
-	do {
+	while (1) {
 		if (curenv->running==HALTED) 
 			prompt=catgets(catdesc, CLoopSet, CLoopHaltedPrompt, "(halted)$ ");
 
 		if (!sys_get(MSG_DIALOG, line, MAX_LINELEN, prompt)) {
 			aline = crunch_line(line);
-			ret = process_comal_line(aline);
+			process_comal_line(aline);
 
 			if (curenv->con_inhibited) {
-				curenv->con_inhibited = 0;
+				curenv->con_inhibited = false;
 				longjmp(RESTART, JUST_RESTART);
 			}
 		} else
 			my_printf(MSG_DIALOG, 1, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 	}
-	while (ret == 0);
 
 	curenv->running = RUNNING;
 	memcpy(ERRBUF, save_err, sizeof(jmp_buf));

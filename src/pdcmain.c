@@ -37,11 +37,12 @@ unsigned _stklen = 32768;
 PRIVATE const char *safe_getenv(const char *name)
 {
         const char *value;
-        static char result[ENVVAL_MAX];
 
         if ((value = getenv(name)) == NULL) {
                 return "(unset)";
         } else {
+        	static char result[ENVVAL_MAX];
+
                 snprintf(result, ENVVAL_MAX, "\"%s\"", value);
                 return result;
         }
@@ -90,15 +91,8 @@ PRIVATE locale_t safe_newlocale(const char *nlocname, locale_t loc, const char *
 PUBLIC int main(int argc, char *argv[])
 {
         int c;
-        int errflg = 0;
+        bool errflg = false;
         const char *locname;
-        char nlocname[LOCNAME_MAX];
-        int utf8_suffixlen, lang_countrylen;
-#if defined(__APPLE__) && defined(__MACH__)
-        const char *utf8_suffix = ".UTF-8", *latin_suffix = ".ISO8859-15";
-#else
-        const char *utf8_suffix = ".utf8", *latin_suffix = "@euro";
-#endif
 
         locname = safe_setlocale();
 
@@ -115,7 +109,7 @@ PUBLIC int main(int argc, char *argv[])
         while ((c = getopt(argc, argv, ":dym:")) != -1) {
                 switch (c) {
                 case 'd':
-                        comal_debug++;
+                        comal_debug = true;
                         break;
 #endif
                 case 'y':
@@ -130,14 +124,14 @@ PUBLIC int main(int argc, char *argv[])
 			break;
 		case ':':	/* -m without operand */
 			fprintf(stderr, str_ltou(catgets(catdesc, MainSet, MainReqOp, "Option -%c requires an operand\n")), optopt);
-			errflg++;
+			errflg = true;
 			break;
                 case '?':
                         fprintf(stderr, str_ltou(catgets(catdesc, MainSet, MainBadOpt, "Unrecognised option: '-%c'\n")), optopt);
-                        errflg++;
+                        errflg = true;
 			break;
 		default:
-			errflg++;
+			errflg = true;
 			break;
                 }
         }
@@ -156,9 +150,18 @@ PUBLIC int main(int argc, char *argv[])
                 return EXIT_FAILURE;
         }
         if (locname != NULL) {
+        	int utf8_suffixlen, lang_countrylen;
+#if defined(__APPLE__) && defined(__MACH__)
+        	const char *utf8_suffix = ".UTF-8", *latin_suffix = ".ISO8859-15";
+#else
+        	const char *utf8_suffix = ".utf8", *latin_suffix = "@euro";
+#endif
+
                 utf8_suffixlen = strlen(utf8_suffix);
                 lang_countrylen = strlen(locname) - utf8_suffixlen;
                 if (strncmp(locname + lang_countrylen, utf8_suffix, utf8_suffixlen) == 0) {
+        		char nlocname[LOCNAME_MAX];
+
                         term_strncpy(nlocname, locname, lang_countrylen + 1);
                         strncat(nlocname, latin_suffix, LOCNAME_MAX - lang_countrylen - 1);
                         latin_loc = safe_newlocale(nlocname, latin_loc, locname);

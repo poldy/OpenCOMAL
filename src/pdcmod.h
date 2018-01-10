@@ -15,7 +15,7 @@
 #ifndef PDCMOD_H
 #define PDCMOD_H
 
-extern int mod_use(struct seg_des *seg,struct id_rec *id, char *errtxt, struct comal_line **erline);
+extern bool mod_use(struct seg_des *seg,struct id_rec *id, char *errtxt, struct comal_line **erline);
 extern struct mod_entry *mod_find(struct id_rec *id);
 extern struct comal_line *mod_find_def(struct seg_des *seg, struct id_rec *id);
 extern struct comal_line *mod_search_routine(struct id_rec *id, int type);
