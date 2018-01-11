@@ -335,22 +335,22 @@ PRIVATE void sqash_print(struct comal_line *line)
 		switch (p->modifier->type) {
 		case fileSYM:
 			sqash_putint(SQ_MODIFIER, p->modifier->type);
-			sqash_twoexp(p->modifier->data.twoexp);
+			sqash_twoexp(p->modifier->twoexp);
 			break;
 
 		case atSYM:
-			if (p->modifier->data.twoexp != NULL) {
+			if (p->modifier->twoexp != NULL) {
 				sqash_putint(SQ_MODIFIER, p->modifier->type);
-				sqash_twoexp(p->modifier->data.twoexp);
+				sqash_twoexp(p->modifier->twoexp);
 			}
 			break;
 
 		default:
 			fatal("Print modifier incorrect (sqash)");
 		}
-		if (p->using_modifier != NULL) {
+		if (p->modifier->using != NULL) {
 			sqash_putint(SQ_MODIFIER, usingSYM);
-			sqash_exp(p->using_modifier);
+			sqash_exp(p->modifier->using);
 		}
 	}
 
@@ -1054,18 +1054,18 @@ PRIVATE void expand_print(struct comal_line *line)
 
 		switch (p->modifier->type) {
 		case fileSYM:
-			p->modifier->data.twoexp = (struct two_exp *)mem_alloc_private(curenv->program_pool, sizeof(*p->modifier->data.twoexp));
-			expand_twoexp(p->modifier->data.twoexp);
+			p->modifier->twoexp = (struct two_exp *)mem_alloc_private(curenv->program_pool, sizeof(*p->modifier->twoexp));
+			expand_twoexp(p->modifier->twoexp);
 			break;
 
 		case usingSYM:
-			p->using_modifier = expand_exp();
+			p->modifier->using = expand_exp();
                         p->modifier->type = atSYM;
 			break;
 
 		case atSYM:
-			p->modifier->data.twoexp = (struct two_exp *)mem_alloc_private(curenv->program_pool, sizeof(*p->modifier->data.twoexp));
-			expand_twoexp(p->modifier->data.twoexp);
+			p->modifier->twoexp = (struct two_exp *)mem_alloc_private(curenv->program_pool, sizeof(*p->modifier->twoexp));
+			expand_twoexp(p->modifier->twoexp);
 			break;
 
 		default:
@@ -1075,7 +1075,7 @@ PRIVATE void expand_print(struct comal_line *line)
 			expand_getc();
 			type = expand_getint();
 			if (type == usingSYM) {
-				p->using_modifier = expand_exp();
+				p->modifier->using = expand_exp();
 			} else {
 				fatal("Print modifier incorrect (expand)");
 			}

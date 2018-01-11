@@ -378,16 +378,13 @@ struct print_list {
  */
 struct print_modifier {
 	int type;
-	union {
-		struct expression *str;
-		struct two_exp *twoexp;
-	} data;
+	struct two_exp *twoexp;
+	struct expression *using;	/**< This can be "stacked" with "AT" or "FILE" */
 };
 
 /** Parameters to the PRINT statement */
 struct print_rec {
 	struct print_modifier *modifier;
-	struct expression *using_modifier;	/**< This can be "stacked" with "AT" or "FILE" */
 	struct print_list *printroot;
 	int pr_sep;
 };

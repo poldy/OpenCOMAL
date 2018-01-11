@@ -1840,17 +1840,17 @@ PRIVATE void print_using(struct expression *str,
 
 PRIVATE void print_maybe_using(struct print_rec *p)
 {
-	if (p->using_modifier == NULL) {
+	if (p->modifier == NULL || p->modifier->using == NULL) {
 		print_con(p->printroot, p->pr_sep);
 	} else {
-		print_using(p->using_modifier, p->printroot, p->pr_sep);
+		print_using(p->modifier->using, p->printroot, p->pr_sep);
 	}
 }
 
 PRIVATE void print_at(struct print_rec *p)
 {
-	sys_cursor(sel_outfile, calc_intexp(p->modifier->data.twoexp->exp1),
-		   calc_intexp(p->modifier->data.twoexp->exp2));
+	sys_cursor(sel_outfile, calc_intexp(p->modifier->twoexp->exp1),
+		   calc_intexp(p->modifier->twoexp->exp2));
 	print_maybe_using(p);
 }
 
@@ -1860,14 +1860,14 @@ PRIVATE void exec_print(struct comal_line *line)
 
 	if (p->modifier != NULL) {
 		if (p->modifier->type == atSYM) {
-			if (p->modifier->data.twoexp != NULL) {
+			if (p->modifier->twoexp != NULL) {
 				print_at(p);
 			} else {
 				print_maybe_using(p);
 			}
 		} else if (p->modifier->type == fileSYM) {
-			print_file(p->modifier->data.twoexp,
-				   p->printroot, p->pr_sep, p->using_modifier);
+			print_file(p->modifier->twoexp,
+				   p->printroot, p->pr_sep, p->modifier->using);
 		} else {
 			fatal("Bad print_rec.modifier.type");
 		}

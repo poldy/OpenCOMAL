@@ -204,15 +204,14 @@ PRIVATE void free_print(struct comal_line *line)
 	if (p->modifier) {
 		switch (p->modifier->type) {
 		case fileSYM:
-			free_twoexp(p->modifier->data.twoexp);
-			break;
-
-		case usingSYM:
-			free_exp(p->modifier->data.str);
+			free_twoexp(p->modifier->twoexp);
 			break;
 
 		case atSYM:
-			free_twoexp(p->modifier->data.twoexp);
+			free_twoexp(p->modifier->twoexp);
+                        if (p->modifier->using != NULL) {
+                                free_exp(p->modifier->using);
+                        }
 			break;
 
 		default:

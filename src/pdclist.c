@@ -481,18 +481,18 @@ PRIVATE void list_print(char **buf, struct comal_line *line)
 	if (p->modifier)
 		switch (p->modifier->type) {
 		case fileSYM:
-			list_file(buf, p->modifier->data.twoexp);
-			if (p->using_modifier != NULL) {
-				list_using(buf, p->using_modifier);
+			list_file(buf, p->modifier->twoexp);
+			if (p->modifier->using != NULL) {
+				list_using(buf, p->modifier->using);
 			}
 			break;
 
 		case atSYM:
-			if (p->modifier->data.twoexp != NULL) {
-				list_at(buf, p->modifier->data.twoexp);
+			if (p->modifier->twoexp != NULL) {
+				list_at(buf, p->modifier->twoexp);
 			}
-			if (p->using_modifier != NULL) {
-				list_using(buf, p->using_modifier);
+			if (p->modifier->using != NULL) {
+				list_using(buf, p->modifier->using);
 			}
 			break;
 

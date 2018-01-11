@@ -1067,7 +1067,6 @@ print_stat	:	printi
 			{
 				$$.cmd=printSYM;
 				$$.lc.printrec.modifier=NULL;
-				$$.lc.printrec.using_modifier=NULL;
 				$$.lc.printrec.printroot=NULL;
 				$$.lc.printrec.pr_sep=0;
 			}
@@ -1076,8 +1075,8 @@ print_stat	:	printi
 				$$.cmd=printSYM;
 				$$.lc.printrec.modifier=(struct print_modifier *)mem_alloc(PARSE_POOL,sizeof(struct print_modifier));
 				$$.lc.printrec.modifier->type=atSYM;
-				$$.lc.printrec.modifier->data.twoexp=$2;
-				$$.lc.printrec.using_modifier=$3;
+				$$.lc.printrec.modifier->twoexp=$2;
+				$$.lc.printrec.modifier->using=$3;
 				$$.lc.printrec.printroot=(struct print_list *)my_reverse($4);
 				$$.lc.printrec.pr_sep=$5;
 			}
@@ -1086,8 +1085,7 @@ print_stat	:	printi
 				$$.cmd=printSYM;
 				$$.lc.printrec.modifier=(struct print_modifier *)mem_alloc(PARSE_POOL,sizeof(struct print_modifier));
 				$$.lc.printrec.modifier->type=atSYM;
-				$$.lc.printrec.modifier->data.twoexp=$2;
-				$$.lc.printrec.using_modifier=NULL;
+				$$.lc.printrec.modifier->twoexp=$2;
 				$$.lc.printrec.printroot=(struct print_list *)my_reverse($3);
 				$$.lc.printrec.pr_sep=$4;
 			}
@@ -1096,9 +1094,8 @@ print_stat	:	printi
 				$$.cmd=printSYM;
 				$$.lc.printrec.modifier=(struct print_modifier *)mem_alloc(PARSE_POOL,sizeof(struct print_modifier));
 				$$.lc.printrec.modifier->type=fileSYM;
-				$$.lc.printrec.modifier->data.twoexp=(struct two_exp *)mem_alloc(PARSE_POOL,sizeof(struct two_exp));
-				*($$.lc.printrec.modifier->data.twoexp)=$2;
-				$$.lc.printrec.using_modifier=NULL;
+				$$.lc.printrec.modifier->twoexp=(struct two_exp *)mem_alloc(PARSE_POOL,sizeof(struct two_exp));
+				*($$.lc.printrec.modifier->twoexp)=$2;
 				$$.lc.printrec.printroot=(struct print_list *)my_reverse($3);
 				$$.lc.printrec.pr_sep=$4;
 			}
@@ -1107,9 +1104,9 @@ print_stat	:	printi
 				$$.cmd=printSYM;
 				$$.lc.printrec.modifier=(struct print_modifier *)mem_alloc(PARSE_POOL,sizeof(struct print_modifier));
 				$$.lc.printrec.modifier->type=fileSYM;
-				$$.lc.printrec.modifier->data.twoexp=(struct two_exp *)mem_alloc(PARSE_POOL,sizeof(struct two_exp));
-				*($$.lc.printrec.modifier->data.twoexp)=$2;
-				$$.lc.printrec.using_modifier=$3;
+				$$.lc.printrec.modifier->twoexp=(struct two_exp *)mem_alloc(PARSE_POOL,sizeof(struct two_exp));
+				*($$.lc.printrec.modifier->twoexp)=$2;
+				$$.lc.printrec.modifier->using=$3;
 				$$.lc.printrec.printroot=(struct print_list *)my_reverse($4);
 				$$.lc.printrec.pr_sep=$5;
 			}
