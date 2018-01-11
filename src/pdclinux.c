@@ -552,10 +552,10 @@ PUBLIC bool sys_yn(int stream, const char *prompt)
 		c = my_getch();
 
 		if (sys_escape() || c == 'n' || c == 'N') {
-			CHECK(addstr, catgets(catdesc, LinuxSet, LinuxNo, "No\n"));
+			addlstr(catgets(catdesc, LinuxSet, LinuxNo, "No\n"));
 			return false;
 		} else if (c == 'y' || c == 'Y') {
-			CHECK(addstr, catgets(catdesc, LinuxSet, LinuxYes, "Yes\n"));
+			addlstr(catgets(catdesc, LinuxSet, LinuxYes, "Yes\n"));
 			return true;
 		}
 	}

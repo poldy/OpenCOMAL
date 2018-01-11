@@ -202,22 +202,22 @@ PRIVATE void free_print(struct comal_line *line)
 	struct print_rec *p = &line->lc.printrec;
 
 	if (p->modifier) {
-		switch (p->modifier->type) {
-		case fileSYM:
-			free_twoexp(p->modifier->twoexp);
-			break;
-
-		case atSYM:
-			free_twoexp(p->modifier->twoexp);
-                        if (p->modifier->using != NULL) {
-                                free_exp(p->modifier->using);
+                switch (p->modifier->type) {
+                case fileSYM:
+                        free_twoexp(p->modifier->twoexp);
+                        break;
+                case atSYM:
+                        if (p->modifier->twoexp != NULL) {
+                                free_twoexp(p->modifier->twoexp);
                         }
-			break;
-
-		default:
+                        break;
+                default:
 			fatal("Print modifier incorrect (free)");
+                        break;
 		}
-
+                if (p->modifier->using != NULL) {
+                        free_exp(p->modifier->using);
+                }
 		mem_free(p->modifier);
 	}
 
