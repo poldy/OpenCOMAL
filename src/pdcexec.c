@@ -44,6 +44,7 @@
 
 PRIVATE void *return_result;	/* For comms of FUNC results */
 PRIVATE enum VAL_TYPE return_type;
+PRIVATE FILE *prev_sel_infile, *prev_sel_outfile;
 
 PRIVATE int exec_seq3(void);
 PRIVATE int exec_seq2(void);
@@ -80,7 +81,14 @@ PUBLIC void run_error(int error, const char *s, ...)
 	}
 
 	curenv->errmsg = buf;
-
+	if (prev_sel_infile != NULL) {
+		sel_infile = prev_sel_infile;
+		prev_sel_infile = NULL;
+	}
+	if (prev_sel_outfile != NULL) {
+		sel_outfile = prev_sel_outfile;
+		prev_sel_outfile = NULL;
+	}
 	longjmp(ERRBUF, 666);
 }
 
@@ -1694,12 +1702,10 @@ PUBLIC void exec_write(struct comal_line *line)
 	}
 }
 
-
 PUBLIC void print_file(struct two_exp *twoexp,
 		       struct print_list *printroot, int pr_sep, struct expression *using_modifier)
 {
 	struct file_rec *f = pos_file(twoexp);
-	FILE *prev_sel_outfile;
 
 	if (f->read_only)
 		run_error(WRITE_ERR, "File open for READ (only)");
@@ -1712,6 +1718,7 @@ PUBLIC void print_file(struct two_exp *twoexp,
 		print_using(using_modifier, printroot, pr_sep);
 	}
 	sel_outfile = prev_sel_outfile;
+	prev_sel_outfile = NULL;
 }
 
 
@@ -1959,16 +1966,15 @@ PRIVATE void exec_import(struct comal_line *line)
 	}
 }
 
-
 PUBLIC void input_file(struct two_exp *twoexp, struct exp_list *lvalroot)
 {
 	struct file_rec *f = pos_file(twoexp);
-	FILE *prev_sel_infile;
 
 	prev_sel_infile = sel_infile;
 	sel_infile = f->hfptr;
 	input_con(NULL, NULL, lvalroot, commaSYM);
 	sel_infile = prev_sel_infile;
+	prev_sel_infile = NULL;
 }
 
 
