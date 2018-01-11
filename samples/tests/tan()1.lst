@@ -6,7 +6,7 @@
        60   CURSOR 4,1
        70   PRINT USING "#.########": f;
        80   d:=TAN(f)-SIN(f)/COS(f)
-       90   IF ABS(d)>0.0000001 THEN STOP
-      100 ENDFOR
+       90   IF ABS(TAN(f))<1.0e+15 AND ABS(d)>0.0000001 THEN STOP
+      100 ENDFOR f
       110 PRINT 
       120 PRINT "All ok"
