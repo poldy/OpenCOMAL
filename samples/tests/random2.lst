@@ -7,12 +7,12 @@
        50 ENDTRAP
        60 //
        70 OPEN FILE 1, "ofile7", RANDOM 18
-       80 FOR f#:=1 TO 5 DO PRINT FILE 1,f#: 2*f#,2*f#+1
+       80 FOR f#:=1 TO 5 DO WRITE FILE 1,f#: 2*f#, 2*f#+1
        90 CLOSE FILE 1
       100 //
       110 OPEN FILE 1, "ofile7", RANDOM 18 READ ONLY
       120 TRAP
-      130   PRINT FILE 1,1: 8
+      130   WRITE FILE 1,1: 8
       140   STOP
       150 HANDLER
       160   PRINT "Expected error occurred: ";ERRTEXT$

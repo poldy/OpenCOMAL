@@ -7,7 +7,7 @@
        50 ENDTRAP
        60 //
        70 OPEN FILE 1, "ofile7", RANDOM 18
-       80 FOR f#:=1 TO 50 DO PRINT FILE 1,f#: 2*f#,2*f#+1
+       80 FOR f#:=1 TO 50 DO WRITE FILE 1,f#: 2*f#,2*f#+1
        90 CLOSE FILE 1
       100 //
       110 OPEN FILE 1, "ofile7", RANDOM 9
