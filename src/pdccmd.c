@@ -73,7 +73,7 @@ PRIVATE void cmd_list_horse(struct string *filename, long from, long to)
 }
 
 
-PRIVATE void cmd_list(struct comal_line *line)
+PRIVATE bool cmd_list(struct comal_line *line)
 {
 	struct comal_line *curline;
 
@@ -114,10 +114,11 @@ PRIVATE void cmd_list(struct comal_line *line)
 		cmd_list_horse(line->lc.listrec.str, from, to);
 
 	}
+        return false;
 }
 
 
-PRIVATE void cmd_enter(struct comal_line *line)
+PRIVATE bool cmd_enter(struct comal_line *line)
 {
 	FILE *yyenter;
 	char tline[MAX_LINELEN];
@@ -157,10 +158,11 @@ PRIVATE void cmd_enter(struct comal_line *line)
 	fclose(yyenter);
 	--entering;
 	prog_structure_scan();
+        return false;
 }
 
 
-PRIVATE void cmd_new(struct comal_line *line)
+PRIVATE bool cmd_new(struct comal_line *line)
 {
 	if (check_changed()) {
 		prog_new();
@@ -168,16 +170,18 @@ PRIVATE void cmd_new(struct comal_line *line)
 
 		longjmp(RESTART, JUST_RESTART);
 	}
+        return false;
 }
 
 
-PUBLIC void cmd_scan(struct comal_line *line)
+PUBLIC bool cmd_scan(struct comal_line *line)
 {
 	prog_total_scan();
+        return false;
 }
 
 
-PRIVATE void cmd_save(struct comal_line *line)
+PRIVATE bool cmd_save(struct comal_line *line)
 {
 	if (!line->lc.str && !curenv->name)
 		run_error(CMD_ERR, "Missing program name (to SAVE)");
@@ -196,10 +200,11 @@ PRIVATE void cmd_save(struct comal_line *line)
 		sqash_2file(curenv->name);
 		curenv->changed = false;
 	}
+        return false;
 }
 
 
-PRIVATE void cmd_load(struct comal_line *line)
+PRIVATE bool cmd_load(struct comal_line *line)
 {
 	char *fn;
 
@@ -221,23 +226,25 @@ PRIVATE void cmd_load(struct comal_line *line)
 
 		longjmp(RESTART, JUST_RESTART);
 	}
+        return false;
 }
 
 
-PRIVATE void cmd_auto(struct comal_line *line)
+PRIVATE bool cmd_auto(struct comal_line *line)
 {
 	char buf[MAX_LINELEN];
 	char *buf2;
 	int direct_cmd = 0;
 	long nr = line->lc.twonum.num1;
 	long step = line->lc.twonum.num2;
+        bool result = false;
 
 	while (!direct_cmd) {
 		struct comal_line *work;
 		struct comal_line *aline;
 
 		if (nr < 0)
-			return;	/* nr<0 after nr+=step past INT_MAX */
+			return false;	/* nr<0 after nr+=step past INT_MAX */
 
 		work = search_line(nr, 1);
 
@@ -249,34 +256,37 @@ PRIVATE void cmd_auto(struct comal_line *line)
 		}
 
 		if (sys_edit(MSG_DIALOG, buf, MAX_LINELEN, 11))
-			return;
+			return false;
 
 		aline = crunch_line(buf);
 
 		direct_cmd = !aline->ld;
-		process_comal_line(aline);
+		result = process_comal_line(aline);
 		nr += step;
 	}
+        return result;
 }
 
 
-PRIVATE void cmd_cont(struct comal_line *line)
+PRIVATE bool cmd_cont(struct comal_line *line)
 {
 	if (curenv->running != HALTED)
 		run_error(CMD_ERR, "CONtinuation not possible");
+        return true;
 }
 
 
-PRIVATE void cmd_run(struct comal_line *line)
+PRIVATE bool cmd_run(struct comal_line *line)
 {
 	mem_freepool(PARSE_POOL);
 
 	longjmp(RESTART, RUN);
+        return false;
 }
 
 
 
-PRIVATE void cmd_del(struct comal_line *line)
+PRIVATE bool cmd_del(struct comal_line *line)
 {
 	long from = line->lc.twonum.num1;
 	long to = line->lc.twonum.num2;
@@ -287,27 +297,29 @@ PRIVATE void cmd_del(struct comal_line *line)
 
 	if (prog_del(&curenv->progroot, from, to, 1))
 		prog_structure_scan();
+        return false;
 }
 
 
-PRIVATE void cmd_edit(struct comal_line *line)
+PRIVATE bool cmd_edit(struct comal_line *line)
 {
 	char buf[MAX_LINELEN];
 	char *buf2;
 	long nr = line->lc.twonum.num1;
 	long to = line->lc.twonum.num2;
 	struct comal_line *work;
+        bool result = false;
 
-	while (1) {
+	while (!result) {
 		struct comal_line *aline;
 
 		if (nr > to || nr < 0)
-			return;	/* nr<0 after nr++ at INT_MAX */
+			return false;	/* nr<0 after nr++ at INT_MAX */
 
 		work = search_line(nr, 0);
 
 		if (!work)
-			return;
+			return false;
 
 		nr = work->ld->lineno + 1;
 
@@ -315,11 +327,12 @@ PRIVATE void cmd_edit(struct comal_line *line)
 		line_list(&buf2, work);
 
 		if (sys_edit(MSG_DIALOG, buf, MAX_LINELEN, 10))
-			return;
+			return false;
 
 		aline = crunch_line(buf);
-		process_comal_line(aline);
+		result = process_comal_line(aline);
 	}
+        return result;
 }
 
 
@@ -343,16 +356,18 @@ PRIVATE void renum_horse(long num, long step)
 }
 
 
-PRIVATE void cmd_renumber(struct comal_line *line)
+PRIVATE bool cmd_renumber(struct comal_line *line)
 {
 	renum_horse(line->lc.twonum.num1, line->lc.twonum.num2);
+        return false;
 }
 
 
-PRIVATE void cmd_quit(struct comal_line *line)
+PRIVATE bool cmd_quit(struct comal_line *line)
 {
 	if (check_changed_any())
 		longjmp(RESTART, QUIT);
+        return false;
 }
 
 PRIVATE void cmd_env_list()
@@ -379,18 +394,19 @@ PRIVATE void cmd_env_list()
 	}
 }
 
-PRIVATE void cmd_env(struct comal_line *line)
+PRIVATE bool cmd_env(struct comal_line *line)
 {
 	if (line->lc.id == NULL)
 		cmd_env_list();
 	else
 		curenv = env_find(line->lc.id->name);
+        return false;
 }
 
 
 PRIVATE struct {
 	int sym;
-	void (*func) (struct comal_line *line);
+	bool (*func) (struct comal_line *line);
 } cmdtab[] = {
 	{
 	listSYM, cmd_list}, {
@@ -411,7 +427,7 @@ PRIVATE struct {
 };
 
 
-PUBLIC bool cmd_exec(struct comal_line *line)
+PUBLIC bool cmd_exec(struct comal_line *line, bool *result)
 {
 	int i;
 
@@ -420,7 +436,7 @@ PUBLIC bool cmd_exec(struct comal_line *line)
 	if (!cmdtab[i].sym)
 		return false;
 
-	cmdtab[i].func(line);
+	*result = cmdtab[i].func(line);
 
 	return true;
 }
