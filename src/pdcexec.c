@@ -44,7 +44,8 @@
 
 PRIVATE void *return_result;	/* For comms of FUNC results */
 PRIVATE enum VAL_TYPE return_type;
-PRIVATE FILE *prev_sel_infile, *prev_sel_outfile;
+PRIVATE FILE *prev_sel_file;
+PRIVATE bool in_print_file, in_input_file;
 
 PRIVATE int exec_seq3(void);
 PRIVATE int exec_seq2(void);
@@ -81,13 +82,15 @@ PUBLIC void run_error(int error, const char *s, ...)
 	}
 
 	curenv->errmsg = buf;
-	if (prev_sel_infile != NULL) {
-		sel_infile = prev_sel_infile;
-		prev_sel_infile = NULL;
+	if (in_input_file) {
+		sel_infile = prev_sel_file;
+		prev_sel_file = NULL;
+                in_input_file = false;
 	}
-	if (prev_sel_outfile != NULL) {
-		sel_outfile = prev_sel_outfile;
-		prev_sel_outfile = NULL;
+	if (in_print_file) {
+		sel_outfile = prev_sel_file;
+		prev_sel_file = NULL;
+                in_print_file = false;
 	}
 	longjmp(ERRBUF, 666);
 }
@@ -1710,15 +1713,17 @@ PUBLIC void print_file(struct two_exp *twoexp,
 	if (f->read_only)
 		run_error(WRITE_ERR, "File open for READ (only)");
 
-	prev_sel_outfile = sel_outfile;
+	prev_sel_file = sel_outfile;
 	sel_outfile = f->hfptr;
+        in_print_file = true;
 	if (using_modifier == NULL) {
 		print_con(printroot, pr_sep);
 	} else {
 		print_using(using_modifier, printroot, pr_sep);
 	}
-	sel_outfile = prev_sel_outfile;
-	prev_sel_outfile = NULL;
+	sel_outfile = prev_sel_file;
+	prev_sel_file = NULL;
+        in_print_file = false;
 }
 
 
@@ -1970,11 +1975,13 @@ PUBLIC void input_file(struct two_exp *twoexp, struct exp_list *lvalroot)
 {
 	struct file_rec *f = pos_file(twoexp);
 
-	prev_sel_infile = sel_infile;
+	prev_sel_file = sel_infile;
 	sel_infile = f->hfptr;
+        in_input_file = true;
 	input_con(NULL, NULL, lvalroot, commaSYM);
-	sel_infile = prev_sel_infile;
-	prev_sel_infile = NULL;
+	sel_infile = prev_sel_file;
+	prev_sel_file = NULL;
+        in_input_file = false;
 }
 
 
