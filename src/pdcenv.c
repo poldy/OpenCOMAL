@@ -72,7 +72,7 @@ PUBLIC struct comal_env *env_find(char *name)
 	if (walk)
 		return walk->env;
 
-	my_printf(MSG_DIALOG, 1, "Creating new environment %s", name);
+	my_printf(MSG_DIALOG, true, "Creating new environment %s", name);
 
 	return env_new(name);
 }
@@ -83,7 +83,7 @@ PUBLIC void clean_runenv(struct comal_env *env)
 	struct file_rec *fwalk = curenv->fileroot;
 	struct comal_line *walk;
 
-        DBG_PRINTF(1, "Cleaning runenv");
+        DBG_PRINTF(true, "Cleaning runenv");
 
 	/*
 	 * Free all the existing static environments of procedures, functions
@@ -112,7 +112,7 @@ PUBLIC void clean_runenv(struct comal_env *env)
 	 * Close all open files
 	 */
 	while (fwalk) {
-		DBG_PRINTF(1, "Closing comal file %ld",
+		DBG_PRINTF(true, "Closing comal file %ld",
 			  fwalk->cfno);
 
 		fclose(fwalk->hfptr);

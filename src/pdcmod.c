@@ -60,7 +60,7 @@ PRIVATE bool mod_register(struct comal_line *line, struct seg_des *seg, char *er
 	work->id=line->lc.pfrec.id;
 	work->line=line;
 
-	DBG_PRINTF(1,"Registering MODULE %s",line->lc.pfrec.id->name);
+	DBG_PRINTF(true,"Registering MODULE %s",line->lc.pfrec.id->name);
 
 	/*
 	 * Find all the exports in this MODULE and register them
@@ -77,7 +77,7 @@ PRIVATE bool mod_register(struct comal_line *line, struct seg_des *seg, char *er
 					return false;
 				}
 
-				DBG_PRINTF(1,"  Exporting %s",fun->lc.pfrec.id->name);
+				DBG_PRINTF(true,"  Exporting %s",fun->lc.pfrec.id->name);
 
 				modfun=GETCORE(RUN_POOL,struct mod_func_entry);
 				modfun->next=mod_func_root;

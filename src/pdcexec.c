@@ -99,7 +99,7 @@ PUBLIC void run_error(int error, const char *s, ...)
 PRIVATE void exec_temphalt(const char *reason)
 {
 	puts_line(MSG_DIALOG, curenv->curline);
-	my_printf(MSG_DIALOG, 1, reason);
+	my_printf(MSG_DIALOG, true, reason);
 
 	comal_loop(HALTED);
 }
@@ -155,7 +155,7 @@ PRIVATE void *exec_lval(struct expression *exp, enum VAL_TYPE *type,
 		lval = &(*var)->data;
 	}
 
-	DBG_PRINTF(1, "Exec_LVAL returns %p", lval);
+	DBG_PRINTF(true, "Exec_LVAL returns %p", lval);
 
 	return lval;
 }
@@ -174,10 +174,10 @@ PRIVATE struct comal_line *routine_search_horse(struct id_rec *id,
 						int type,
 						struct comal_line *root)
 {
-	DBG_PRINTF(1, "Searching routine %s", id->name);
+	DBG_PRINTF(true, "Searching routine %s", id->name);
 
 	while (root) {
-		DBG_PRINTF(1, "  Examining %s",
+		DBG_PRINTF(true, "  Examining %s",
 			  root->lc.pfrec.id->name);
 
 		if (root->cmd == type && root->lc.pfrec.id == id)
@@ -278,7 +278,7 @@ PRIVATE void parm_array_val(struct sym_env *env, struct id_rec *id,
 	if (type!=V_ARRAY)
 		run_error(PARM_ERR, "Parameter %s should be an array()",id->name);
 
-	DBG_PRINTF(1, "id=%s(%d), type=%d", id->name,
+	DBG_PRINTF(true, "id=%s(%d), type=%d", id->name,
 		  id->type, type);
 
 	if (lvar->type != id->type)
@@ -1123,7 +1123,7 @@ PRIVATE int exec_for(struct comal_line *line)
 		if (f->mode == downtoSYM)
 			dstep = -dstep;
 
-		DBG_PRINTF(1,
+		DBG_PRINTF(true,
 			  "FOR from %lf to %lf step %lf",
 			  *(double *) lval, dto, dstep);
 	} else {
@@ -1143,7 +1143,7 @@ PRIVATE int exec_for(struct comal_line *line)
 		if (f->mode == downtoSYM)
 			lstep = -lstep;
 
-		DBG_PRINTF(1,
+		DBG_PRINTF(true,
 			  "FOR from %ld to %ld step %ld",
 			  *(long *) lval, lto, lstep);
 	}
@@ -1154,11 +1154,11 @@ PRIVATE int exec_for(struct comal_line *line)
 #ifndef NDEBUG
                 if (comal_debug) {
 		        if (ltype == V_INT) {
-			        DBG_PRINTF(1,
+			        DBG_PRINTF(true,
 				        "FOR loop, lval=%p, %ld", lval,
 				        *(long *) lval);
                         } else {
-			        DBG_PRINTF(1,
+			        DBG_PRINTF(true,
 				        "FOR loop, lval=%p, %lf", lval,
 				        *(double *) lval);
 		        }
@@ -1357,7 +1357,7 @@ PRIVATE void exec_close(struct comal_line *line)
 		walk = curenv->fileroot;
 
 		while (walk) {
-			DBG_PRINTF(1,
+			DBG_PRINTF(true,
 				  "Closing Comal file %ld",
 				  walk->cfno);
 
@@ -1428,7 +1428,7 @@ PRIVATE struct file_rec *pos_file(struct two_exp *r)
 			run_error(POS_ERR,
 				  "Random file record number must be >=1");
 
-		DBG_PRINTF(1,
+		DBG_PRINTF(true,
 			  "Positioning file %ld (host=%p) to record %ld, offset %ld",
 			  f->cfno, f->hfptr, recno,
 			  (recno - 1) * f->reclen);
@@ -1457,7 +1457,7 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 	if (c != EOF) {
 		long r;
 
-		DBG_PRINTF(1,
+		DBG_PRINTF(true,
 			  "Reading a type %d from file", *type);
 
 		if (*type != id->type)
@@ -1485,7 +1485,7 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 		}
 
                 if (!(*type == V_STRING && r == 0)) {
-			DBG_PRINTF(1,
+			DBG_PRINTF(true,
 				  "Reading %ld bytes from file %ld (host %p)",
 				  size, f->cfno, f->hfptr);
 
@@ -1642,7 +1642,7 @@ PRIVATE void write1(struct file_rec *f, void *data, enum VAL_TYPE type,
         w = fputc(c, f->hfptr);
 
 	if (w != EOF) {
-		DBG_PRINTF(1,
+		DBG_PRINTF(true,
 			  "Writing %ld bytes to file %ld (host %p)",
 			  size, f->cfno, f->hfptr);
 
@@ -1825,7 +1825,7 @@ PRIVATE void print_using(struct expression *str,
 
 		val_free(result, type);
 		formatptr = format_using(formatptr, floatusing);
-		my_printf(MSG_PROGRAM, 0, floatusing, d);
+		my_printf(MSG_PROGRAM, false, floatusing, d);
 		if (*formatptr != '\0') {
 			formatptr = put_using(formatptr);
 		}
@@ -1941,7 +1941,7 @@ PRIVATE void exec_import(struct comal_line *line)
 				  	work->id->name);
 			else if (import_warning) {
 				puts_line(MSG_DIALOG,line);
-				my_printf(MSG_DIALOG,1,"Warning: IMPORT of PROC/FUNC not necessary in OpenComal");
+				my_printf(MSG_DIALOG,true,"Warning: IMPORT of PROC/FUNC not necessary in OpenComal");
 				import_warning=0;
 			}
 		} else {
@@ -1995,7 +1995,7 @@ PRIVATE bool input_line(char *s, long len, const char *p)
 				fclose(sel_infile);
 				sel_infile = NULL;
 
-				DBG_PRINTF(1,
+				DBG_PRINTF(true,
 					  "Closing SELINPUT file");
 			} else
 				run_error(SELECT_ERR,
@@ -2052,7 +2052,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 				if (curenv->escallowed)
 					exec_temphalt(catgets(catdesc, ExecSet, ExecInputEsc, "Escape from INPUT"));
 
-				my_printf(MSG_DIALOG, 1,
+				my_printf(MSG_DIALOG, true,
 					  "Please re-INPUT from start");
 				work = lvalroot;
 				esc = input_line(line, l, p);
@@ -2075,7 +2075,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 			}
 		}
 
-		DBG_PRINTF(1,
+		DBG_PRINTF(true,
 			  "Assessing \"%s\" for input type %d", i,
 			  type);
 
@@ -2144,7 +2144,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 	}
 
 	if (*i)
-		my_printf(MSG_DIALOG, 1, "Extra input ignored");
+		my_printf(MSG_DIALOG, true, "Extra input ignored");
 	
 	if (pr_sep == 0) {
 		my_nl(MSG_PROGRAM);
@@ -2197,7 +2197,7 @@ PRIVATE void exec_run(struct comal_line *line)
 	runfilename = my_strdup(MISC_POOL, result->s);
 	mem_free(result);
 
-	DBG_PRINTF(1, "About to go RUNning: %s",
+	DBG_PRINTF(true, "About to go RUNning: %s",
 		  runfilename);
 
 	longjmp(RESTART, RUN);
@@ -2550,7 +2550,7 @@ PRIVATE int exec_seq2()
 
 			give_run_err(curenv->errline);
 
-			DBG_PRINTF(1,
+			DBG_PRINTF(true,
 				  "Starting secondary COMAL loop");
 
 			comal_loop(HALTED);
@@ -2578,7 +2578,7 @@ PUBLIC void exec_mod_init(struct comal_line *line)
 	struct sym_env *env;
 	struct sym_env *oldenv=curenv->curenv;
 
-	DBG_PRINTF(1,"Initialising module %s",
+	DBG_PRINTF(true,"Initialising module %s",
 		line->lc.pfrec.id->name);
 	env =
 	    sym_newenv(line->lc.pfrec.closed, NULL, NULL, line, line->lc.pfrec.id->name);

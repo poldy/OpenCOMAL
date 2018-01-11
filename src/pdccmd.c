@@ -51,7 +51,7 @@ PRIVATE void cmd_list_horse(struct string *filename, long from, long to)
 
 	while (work && work->ld->lineno <= to) {
 		if (sys_escape()) {
-			my_printf(MSG_DIALOG, 1, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
+			my_printf(MSG_DIALOG, true, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 			break;
 		}
 
@@ -61,7 +61,7 @@ PRIVATE void cmd_list_horse(struct string *filename, long from, long to)
 		if (listfile)
 			fprintf(listfile, "%s\n", buf);
 		else
-			my_printf(MSG_DIALOG, 1, "%s", buf);
+			my_printf(MSG_DIALOG, true, "%s", buf);
 
 		work = work->ld->next;
 	}
@@ -146,7 +146,7 @@ PRIVATE void cmd_enter(struct comal_line *line)
 
 			if (!aline) {
 				my_nl(MSG_DIALOG);
-				my_printf(MSG_DIALOG, 1,
+				my_printf(MSG_DIALOG, true,
 					  "Ignored line: %s", tline);
 				mem_freepool(PARSE_POOL);
 			} else
@@ -191,7 +191,7 @@ PRIVATE void cmd_save(struct comal_line *line)
 			curenv->name =
 			    my_strdup(MISC_POOL, line->lc.str->s);
 		} else
-			my_printf(MSG_DIALOG, 1, curenv->name);
+			my_printf(MSG_DIALOG, true, curenv->name);
 
 		sqash_2file(curenv->name);
 		curenv->changed = false;
@@ -210,7 +210,7 @@ PRIVATE void cmd_load(struct comal_line *line)
 			fn = line->lc.str->s;
 		else {
 			fn = curenv->name;
-			my_printf(MSG_DIALOG, 1, fn);
+			my_printf(MSG_DIALOG, true, fn);
 		}
 
 		fn = my_strdup(MISC_POOL, fn);
@@ -332,7 +332,7 @@ PRIVATE void renum_horse(long num, long step)
 		num += step;
 
 		if (num < work->ld->lineno) {	/* overflow */
-			my_printf(MSG_ERROR, 1,
+			my_printf(MSG_ERROR, true,
 				  "Renumber overflow, renumbering 1,1");
 			renum_horse(1L, 1L);
 			return;
@@ -369,10 +369,10 @@ PRIVATE void cmd_env_list()
 			term_strncpy(buf, "       <No program>", MAX_LINELEN);
 		}
 
-		my_printf(MSG_DIALOG, 1, "Environment %s%s:",
+		my_printf(MSG_DIALOG, true, "Environment %s%s:",
 			  walk->env->envname,
 			  walk->env == curenv ? " [current]" : "");
-		my_printf(MSG_DIALOG, 1, buf);
+		my_printf(MSG_DIALOG, true, buf);
 
 		walk = walk->next;
 

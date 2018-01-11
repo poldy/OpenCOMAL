@@ -29,7 +29,7 @@ PUBLIC struct sym_env *sym_newenv(bool closed, struct sym_env *prev,
 
 #ifndef NDEBUG
 	if (comal_debug) {
-		DBG_PRINTF(0,
+		DBG_PRINTF(false,
 			  "Handing out new env %s at %p, prev=%p for: ",
 			  name, work, prev);
 		puts_line(MSG_DEBUG, curproc);
@@ -88,7 +88,7 @@ PUBLIC struct sym_item *sym_enter(struct sym_env *env, struct id_rec *id,
 {
 	struct sym_item *work = env->itemroot;
 
-	DBG_PRINTF(1,
+	DBG_PRINTF(true,
 		  "Entering Symbol %s (type %d) in table %p",
 		  id->name, type, env);
 
@@ -96,7 +96,7 @@ PUBLIC struct sym_item *sym_enter(struct sym_env *env, struct id_rec *id,
 		work = work->next;
 
 	if (work) {
-		DBG_PRINTF(1,
+		DBG_PRINTF(true,
 			  "Illegally found SYM at %p, %s", work,
 			  work->id->name);
 
@@ -128,30 +128,30 @@ PRIVATE struct sym_item *search_horse(struct sym_env *env,
 
 	work = env->itemroot;
 
-	DBG_PRINTF(1,
+	DBG_PRINTF(true,
 		  "Searching Symbol %s (type %d) in table %p",
 		  id->name, type, env);
 
 	while (work && !(work->id == id && work->symtype == type)) {
-		DBG_PRINTF(1, "  Examining symbol %s",
+		DBG_PRINTF(true, "  Examining symbol %s",
 			  work->id->name);
 
 		work = work->next;
 	}
 
 	if (!work && env->curproc && env!=env->curproc->lc.pfrec.staticenv) {
-		DBG_PRINTF(1,"  Not found, starting to look in static env");
+		DBG_PRINTF(true,"  Not found, starting to look in static env");
 		
 		work=search_horse(env->curproc->lc.pfrec.staticenv,id,type);
 	}
 #ifndef NDEBUG
 	if (comal_debug) {
 		if (work) {
-			DBG_PRINTF(1,
+			DBG_PRINTF(true,
 				  "Found SYM at %p, %s, type %d", work,
 				  work->id->name, work->symtype);
                 } else {
-			DBG_PRINTF(1, "Returning NULL");
+			DBG_PRINTF(true, "Returning NULL");
                 }
 	}
 #endif
@@ -177,7 +177,7 @@ PUBLIC struct sym_item *sym_search(struct sym_env *env, struct id_rec *id,
 			env = env->prev;
 	}
 
-	DBG_PRINTF(1, "Returning %p", ret);
+	DBG_PRINTF(true, "Returning %p", ret);
 
 	return ret;
 }
@@ -219,7 +219,7 @@ PRIVATE struct sym_item *free_symitem(struct sym_item *item)
 {
 	struct sym_item *next = item->next;
 
-	DBG_PRINTF(1, "Free item %s", item->id->name);
+	DBG_PRINTF(true, "Free item %s", item->id->name);
 
 	switch (item->symtype) {
 	case S_PROCVAR:
@@ -250,7 +250,7 @@ PUBLIC struct sym_env *sym_freeenv(struct sym_env *env, int recur)
 	do {
 		struct sym_item *work;
 
-		DBG_PRINTF(1, "Free env %p", env);
+		DBG_PRINTF(true, "Free env %p", env);
 
 		work = env->itemroot;
 
@@ -324,7 +324,7 @@ PUBLIC struct var_item *var_refvar(struct var_item *lvar, enum VAL_TYPE type, lo
 {
 	struct var_item *work;
 
-	DBG_PRINTF(1, "NEW RefVar pointing at %p", vref);
+	DBG_PRINTF(true, "NEW RefVar pointing at %p", vref);
 
 	work =
 	    (struct var_item *)mem_alloc(RUN_POOL,
@@ -400,13 +400,13 @@ PRIVATE void sym_list_horse(struct sym_env *env)
 	const char *s = NULL;
 	void (*fun)(struct sym_item *) = NULL;
 	
-	my_printf(MSG_DIALOG,0,"Symbol environment: ");
+	my_printf(MSG_DIALOG,false,"Symbol environment: ");
 	
 	if (env->curproc) {
 		line_list(&buf, env->curproc);
-		my_printf(MSG_DIALOG,1,line);
+		my_printf(MSG_DIALOG,true,line);
 	} else
-		my_printf(MSG_DIALOG,1,"Global");
+		my_printf(MSG_DIALOG,true,"Global");
 
 	if (env->aliasenv) env=env->aliasenv;
 	
@@ -431,7 +431,7 @@ PRIVATE void sym_list_horse(struct sym_env *env)
 			default:	fatal("sym_list_horse: Err#1");
 		}
 
-		my_printf(MSG_DIALOG,0,"  Item: %s (is %s) Value: ",walk->id->name,s);
+		my_printf(MSG_DIALOG,false,"  Item: %s (is %s) Value: ",walk->id->name,s);
 		(*fun)(walk);
 		my_nl(MSG_DIALOG);
 	}

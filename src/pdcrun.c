@@ -40,7 +40,7 @@ PUBLIC void line_list(char **buf, struct comal_line *line)
 
 PUBLIC void comal_loop(int newstate)
 {
-	my_printf(MSG_ERROR, 1, "Aborting...");
+	my_printf(MSG_ERROR, true, "Aborting...");
 	longjmp(RESTART, QUIT);
 }
 

@@ -25,7 +25,7 @@ PUBLIC void seg_total_scan(struct seg_des *seg)
 	char errtxt[MAX_LINELEN];
 	struct comal_line *errline = NULL;
 
-	DBG_PRINTF(1, "External Total scanning...");
+	DBG_PRINTF(true, "External Total scanning...");
 
 	if (!scan_scan(seg, errtxt, &errline))
 		run_error(SCAN_ERR, "SCAN error: %s", errtxt);

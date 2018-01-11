@@ -322,7 +322,7 @@ PUBLIC int pars_handle_error()
 	int i = pars_error_happened;
 
 	if (i) {
-		my_printf(MSG_ERROR, 1, pars_errtxt);
+		my_printf(MSG_ERROR, true, pars_errtxt);
 		mem_freepool(PARSE_POOL);
 		pars_error_happened = 0;
 	}

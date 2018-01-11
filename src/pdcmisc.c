@@ -73,7 +73,7 @@ PUBLIC void my_put(int stream, const char *buf, long len)
 }
 
 
-PUBLIC void my_printf(int stream, int newline, const char *s, ...)
+PUBLIC void my_printf(int stream, bool newline, const char *s, ...)
 {
 	char buf[MAX_LINELEN];
 	va_list ap;
@@ -96,7 +96,7 @@ PUBLIC void fatal(const char *s, ...)
 	va_start(ap, s);
 	vsnprintf(buf, 140, s, ap);
 	va_end(ap);
-	my_printf(MSG_ERROR, 1, "FATAL error: %s", buf);
+	my_printf(MSG_ERROR, true, "FATAL error: %s", buf);
 
 	longjmp(RESTART, ERR_FATAL);
 }
@@ -160,7 +160,7 @@ PUBLIC bool check_changed_any()
         result = true;
 	while (walk) {
 		if (walk->env->changed) {
-			my_printf(MSG_DIALOG, 1,
+			my_printf(MSG_DIALOG, true,
 				  catgets(catdesc, MiscSet, MiscEnvUnsaved, "Environment %s contains unsaved changes!"),
 				  walk->env->envname);
 			any_changes = 1;
@@ -184,9 +184,9 @@ PUBLIC void puts_line(int stream, struct comal_line *line)
 	if (line) {
 		buf2 = buf;
 		line_list(&buf2, line);
-		my_printf(stream, 1, buf);
+		my_printf(stream, true, buf);
 	} else
-		my_printf(stream, 1, "<NULL Line>");
+		my_printf(stream, true, "<NULL Line>");
 }
 
 
@@ -276,7 +276,7 @@ PUBLIC struct comal_line *search_line(long l, int exact)
 {
 	struct comal_line *work = curenv->progroot;
 
-	DBG_PRINTF(1, "Searching line %ld", l);
+	DBG_PRINTF(true, "Searching line %ld", l);
 
 	while (work && work->ld->lineno < l)
 		work = work->ld->next;
@@ -291,7 +291,7 @@ PUBLIC struct comal_line *search_line(long l, int exact)
 	        if (work) {
 		        puts_line(MSG_DEBUG, work);
                 } else {
-		        DBG_PRINTF(1, "Returning NULL");
+		        DBG_PRINTF(true, "Returning NULL");
                 }
         }
 #endif
@@ -488,7 +488,7 @@ PUBLIC int stat_size(int cmd)
 	i = sizetab[i].size + sizeof(struct comal_line) -
 	    sizeof(union line_contents);
 
-	DBG_PRINTF(1, "Stat_size returns %d", i);
+	DBG_PRINTF(true, "Stat_size returns %d", i);
 
 	return i;
 }
@@ -500,7 +500,7 @@ PUBLIC void give_run_err(struct comal_line *line)
 		if (line)
 			puts_line(MSG_ERROR, line);
 
-		my_printf(MSG_ERROR, 1, curenv->errmsg);
+		my_printf(MSG_ERROR, true, curenv->errmsg);
 		mem_free(curenv->errmsg);
 		curenv->errmsg = NULL;
 		curenv->error = 0;
@@ -552,7 +552,7 @@ PUBLIC int proclevel(struct comal_line *proc)
 
 #ifndef NDEBUG
 	if (comal_debug) {
-		DBG_PRINTF(0, "ProcLevel of ");
+		DBG_PRINTF(false, "ProcLevel of ");
 		puts_line(MSG_DEBUG, proc);
 	}
 #endif
@@ -561,7 +561,7 @@ PUBLIC int proclevel(struct comal_line *proc)
 	else
 		i = -1;
 
-	DBG_PRINTF(1, "  Returns %d", i);
+	DBG_PRINTF(true, "  Returns %d", i);
 
 	return i;
 }
@@ -621,7 +621,7 @@ PUBLIC void trace_trace()
 	struct int_trace *work = tr_root;
 
 	while (work) {
-		my_printf(MSG_TRACE, 1, "Trace %s value = %d", work->name,
+		my_printf(MSG_TRACE, true, "Trace %s value = %d", work->name,
 			  *(work->value));
 		work = work->next;
 	}

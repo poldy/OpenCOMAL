@@ -251,7 +251,7 @@ PRIVATE void free_horse(struct comal_line *line)
 		return;
 #ifndef NDEBUG
         if (comal_debug) {
-	        DBG_PRINTF(0, "Freeing line: ");
+	        DBG_PRINTF(false, "Freeing line: ");
 	        puts_line(MSG_DEBUG, line);
         }
 #endif

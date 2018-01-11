@@ -114,7 +114,7 @@ PUBLIC void prog_total_scan()
 	char errtxt[MAX_LINELEN];
 	struct comal_line *errline = NULL;
 
-	DBG_PRINTF(1, "Total scanning...");
+	DBG_PRINTF(true, "Total scanning...");
 
 	curenv->scan_ok = scan_scan(NULL, errtxt, &errline);
 
@@ -122,7 +122,7 @@ PUBLIC void prog_total_scan()
 		if (errline)
 			puts_line(MSG_ERROR, errline);
 
-		my_printf(MSG_ERROR, 1, errtxt);
+		my_printf(MSG_ERROR, true, errtxt);
 	}
 }
 
@@ -136,7 +136,7 @@ PUBLIC void prog_new()
 
 PUBLIC void prog_load(char *fn)
 {
-	DBG_PRINTF(1, "LOADing %s", fn);
+	DBG_PRINTF(true, "LOADing %s", fn);
 
 	prog_new();
 	curenv->progroot = expand_fromfile(fn);

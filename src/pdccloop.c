@@ -83,7 +83,7 @@ PUBLIC struct comal_line *crunch_line(char *line)
 		remove_trailing(line,"\r","");
 
 		if (sys_edit(MSG_DIALOG, line, MAX_LINELEN, errpos)) {
-			my_printf(MSG_DIALOG, 1, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
+			my_printf(MSG_DIALOG, true, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 			return NULL;
 		}
 	}
@@ -113,7 +113,7 @@ PUBLIC void comal_loop(int newstate)
 				longjmp(RESTART, JUST_RESTART);
 			}
 		} else
-			my_printf(MSG_DIALOG, 1, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
+			my_printf(MSG_DIALOG, true, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 	}
 
 	curenv->running = RUNNING;
@@ -127,7 +127,7 @@ PUBLIC void pdc_go(int argc, char *argv[])
 
 	restart_err = setjmp(RESTART);
 
-        DBG_PRINTF(1, "Interpreter restart code: %d",
+        DBG_PRINTF(true, "Interpreter restart code: %d",
 		  restart_err);
 
 	if (restart_err == PROG_END)

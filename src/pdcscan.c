@@ -694,7 +694,7 @@ PUBLIC void prog_structure_scan()
 	struct comal_line *curline = curenv->progroot;
 	struct scan_entry *p;
 
-	DBG_PRINTF(1, "Structure scanning...");
+	DBG_PRINTF(true, "Structure scanning...");
 
 	while (curline) {
 		int skip_processing;
@@ -787,7 +787,7 @@ PUBLIC bool assess_scan(struct comal_line *line)
 		curenv->scan_ok = false;
 
 		if (curenv->running == HALTED && !curenv->con_inhibited) {
-			my_printf(MSG_DIALOG, 1,
+			my_printf(MSG_DIALOG, true,
 				  catgets(catdesc, ScanSet, ScanInhibCon, "Adding/Modifying/Deleting %s has inhibited CONtinuation"),
 				  msg);
 			curenv->con_inhibited = true;

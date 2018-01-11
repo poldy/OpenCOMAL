@@ -21,7 +21,7 @@ extern void my_nl(int stream);
 extern void my_ht(int stream);
 
 extern void my_put(int stream, const char *buf, long len);
-extern void my_printf(int stream, int newline, const char *s, ...);
+extern void my_printf(int stream, bool newline, const char *s, ...);
 
 /** Optionally print a debug message */
 #ifdef NDEBUG

@@ -114,17 +114,17 @@ PUBLIC void *cell_alloc(unsigned pool)
 	CELL_HDR *c = cell_hdr[pool];
 	CELL *cell;
 
-	DBG_PRINTF(0, "CELL alloc pool %d ", pool);
+	DBG_PRINTF(false, "CELL alloc pool %d ", pool);
 
 	if (c->root != (CELL *) CELL_FULL) {
-		DBG_PRINTF(1, "handing out cell @ %p",
+		DBG_PRINTF(true, "handing out cell @ %p",
 			  c->root);
 
 		cell = c->root;
 		c->root = cell->c.next;
 		cell->c.marker = CELL_MARKER + pool;
 	} else {
-		DBG_PRINTF(1, " handing out from heap");
+		DBG_PRINTF(true, " handing out from heap");
 
 		cell = (CELL *)mem_alloc(RUN_POOL, CELL_SIZE(pool));
 		cell->c.marker = CELL_IN_MEM;
@@ -145,7 +145,7 @@ PUBLIC void *mem_alloc_private(struct mem_pool *pool, long size)
 {
 	struct mem_block *p;
 
-	DBG_PRINTF(0,
+	DBG_PRINTF(false,
 		  "Mem_alloc block in pool %d, size %ld", pool->id,
 		  size);
 
@@ -165,7 +165,7 @@ PUBLIC void *mem_alloc_private(struct mem_pool *pool, long size)
 	if (p->next)
 		p->next->prev = p;
 
-	DBG_PRINTF(1, " at %p", p);
+	DBG_PRINTF(true, " at %p", p);
 
 	return ++p;
 }
@@ -205,7 +205,7 @@ PUBLIC void cell_free(void *m)
 
 	--cell;
 
-	DBG_PRINTF(1, "CELL free @ %p", cell);
+	DBG_PRINTF(true, "CELL free @ %p", cell);
 
 	if (cell->c.marker == CELL_IN_MEM)
 		mem_free(cell);
@@ -227,7 +227,7 @@ PUBLIC void *mem_free(void *m)
 
 	--memblock;
 
-	DBG_PRINTF(1, "Memfree block at %p (pool %d)",
+	DBG_PRINTF(true, "Memfree block at %p (pool %d)",
 		  memblock, memblock->pool->id);
 
 	if (memblock->marker != MEM_MARKER)
@@ -276,10 +276,10 @@ PUBLIC void mem_freepool_private(struct mem_pool *pool)
 	struct mem_block *work = pool->root;
 	struct mem_block *next;
 
-	DBG_PRINTF(1, "Freepool %d", pool->id);
+	DBG_PRINTF(true, "Freepool %d", pool->id);
 
 	while (work) {
-		DBG_PRINTF(1, "  Free block at %p",
+		DBG_PRINTF(true, "  Free block at %p",
 			  work);
 
 		next = work->next;
@@ -304,7 +304,7 @@ PUBLIC void mem_shiftmem(unsigned _frompool, struct mem_pool *topool)
 	struct mem_pool *frompool = &mem_pool[_frompool];
 	struct mem_block *work = frompool->root;
 
-	DBG_PRINTF(1,
+	DBG_PRINTF(true,
 		  "Shift mem from pool %d to pool %d",
 		  frompool->id, topool->id);
 
@@ -332,7 +332,7 @@ PUBLIC void mem_debug(int level)
 	int i;
 
 	for (i = 0; i < NR_FIXED_POOLS; i++)
-		my_printf(MSG_DEBUG, 1, "poolsize[%d]=%ld", i,
+		my_printf(MSG_DEBUG, true, "poolsize[%d]=%ld", i,
 			  mem_pool[i].size);
 }
 
@@ -342,7 +342,7 @@ PUBLIC struct mem_pool *pool_new()
 
 	pool_init(work);
 
-	DBG_PRINTF(1, "Allocating new memory pool %d",
+	DBG_PRINTF(true, "Allocating new memory pool %d",
 		  work->id);
 
 	return work;
