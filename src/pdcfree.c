@@ -10,6 +10,8 @@
 
 /* OpenComal routines to free lines */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdclexs.h"
 #include "pdcparss.h"
@@ -215,8 +217,8 @@ PRIVATE void free_print(struct comal_line *line)
 			fatal("Print modifier incorrect (free)");
                         break;
 		}
-                if (p->modifier->using != NULL) {
-                        free_exp(p->modifier->using);
+                if (p->modifier->c_using != NULL) {
+                        free_exp(p->modifier->c_using);
                 }
 		mem_free(p->modifier);
 	}

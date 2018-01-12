@@ -10,6 +10,8 @@
 
 /* Main file of OpenComal Command loop -- runtime only version */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdcstr.h"
 #include "pdcprog.h"

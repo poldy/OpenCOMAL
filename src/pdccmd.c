@@ -10,6 +10,8 @@
 
 /* Processing of the interpreters direct commands */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdcsym.h"
 #include "pdcmisc.h"

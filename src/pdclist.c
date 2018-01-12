@@ -10,6 +10,8 @@
 
 /* OpenComal routines to list program lines */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdclexs.h"
 #include "pdcparss.h"
@@ -482,8 +484,8 @@ PRIVATE void list_print(char **buf, struct comal_line *line)
 		switch (p->modifier->type) {
 		case fileSYM:
 			list_file(buf, p->modifier->twoexp);
-			if (p->modifier->using != NULL) {
-				list_using(buf, p->modifier->using);
+			if (p->modifier->c_using != NULL) {
+				list_using(buf, p->modifier->c_using);
 			}
 			break;
 
@@ -491,8 +493,8 @@ PRIVATE void list_print(char **buf, struct comal_line *line)
 			if (p->modifier->twoexp != NULL) {
 				list_at(buf, p->modifier->twoexp);
 			}
-			if (p->modifier->using != NULL) {
-				list_using(buf, p->modifier->using);
+			if (p->modifier->c_using != NULL) {
+				list_using(buf, p->modifier->c_using);
 			}
 			break;
 

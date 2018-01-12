@@ -10,6 +10,8 @@
 
 /* OpenComal line execution routines and related */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdclexs.h"
 #include "pdcexp.h"
@@ -1840,10 +1842,10 @@ PRIVATE void print_using(struct expression *str,
 
 PRIVATE void print_maybe_using(struct print_rec *p)
 {
-	if (p->modifier == NULL || p->modifier->using == NULL) {
+	if (p->modifier == NULL || p->modifier->c_using == NULL) {
 		print_con(p->printroot, p->pr_sep);
 	} else {
-		print_using(p->modifier->using, p->printroot, p->pr_sep);
+		print_using(p->modifier->c_using, p->printroot, p->pr_sep);
 	}
 }
 
@@ -1867,7 +1869,7 @@ PRIVATE void exec_print(struct comal_line *line)
 			}
 		} else if (p->modifier->type == fileSYM) {
 			print_file(p->modifier->twoexp,
-				   p->printroot, p->pr_sep, p->modifier->using);
+				   p->printroot, p->pr_sep, p->modifier->c_using);
 		} else {
 			fatal("Bad print_rec.modifier.type");
 		}

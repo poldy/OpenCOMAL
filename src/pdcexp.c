@@ -10,6 +10,8 @@
 
 /* Routines to calculate the results of expressions */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdcerr.h"
 #include "pdcmisc.h"

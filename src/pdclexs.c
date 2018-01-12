@@ -10,6 +10,8 @@
 
 /* Lex support routines */
 
+#define _XOPEN_SOURCE 700
+
 #define PDCPARS
 #include "pdcglob.h"
 #undef PDCPARS

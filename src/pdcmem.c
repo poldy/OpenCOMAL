@@ -10,6 +10,8 @@
 
 /* OpenComal Memory Management */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdcexec.h"
 #include "pdcmisc.h"

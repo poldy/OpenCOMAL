@@ -35,5 +35,8 @@ CurData "the current DATA line"
 StrucLine "a program structure line"
 InhibCon "Adding/Modifying/Deleting %s has inhibited CONtinuation"
 
+$set Pars
+SynErr "Syntax error"
+
 $set Common
 Escape "Escape"

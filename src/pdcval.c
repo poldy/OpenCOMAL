@@ -10,6 +10,8 @@
 
 /* Routines to manipulate OpenComal internal data values */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdcstr.h"
 #include "pdcmisc.h"

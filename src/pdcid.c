@@ -10,6 +10,8 @@
 
 /* OpenComal's ID routines */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdcmisc.h"
 #include "pdcid.h"

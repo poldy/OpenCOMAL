@@ -37,5 +37,8 @@ CurData "an líne DATA atá á úsáid"
 StrucLine "líne structúir an clár"
 InhibCon "Tar éis %s a athrú ní féidir leanúint"
 
+$set Pars
+SynErr "Earráid chomhréire"
+
 $set Common
 Escape "Éalú"

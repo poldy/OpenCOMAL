@@ -10,6 +10,8 @@
 
 /* OpenComal symbol table and related stuff */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdcid.h"
 #include "pdcstr.h"

@@ -10,6 +10,8 @@
 
 /* Main file of OpenComal */
 
+#define _XOPEN_SOURCE 700
+
 #define EXTERN
 
 #include "pdcglob.h"

@@ -10,6 +10,8 @@
 
 /* OpenComal routines to handle external segments */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdcsqash.h"
 #include "pdcmisc.h"

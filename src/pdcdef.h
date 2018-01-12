@@ -379,7 +379,7 @@ struct print_list {
 struct print_modifier {
 	int type;
 	struct two_exp *twoexp;
-	struct expression *using;	/**< This can be "stacked" with "AT" or "FILE" */
+	struct expression *c_using;	/**< This can be "stacked" with "AT" or "FILE" */
 };
 
 /** Parameters to the PRINT statement */

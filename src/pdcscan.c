@@ -10,6 +10,8 @@
 
 /* OpenComal program management */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdclexs.h"
 #include "pdcmisc.h"

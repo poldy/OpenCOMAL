@@ -42,7 +42,7 @@ endif
 ifeq ($(REALCC),c++)
 	CFLAGS+=-Weffc++ -std=c++14
 else
-	CFLAGS+=-std=gnu11
+	CFLAGS+=-std=c11
 endif
 ifneq ($(OPSYS),macos)
 	-include /usr/share/hardening-includes/hardening.make
@@ -102,7 +102,7 @@ else
 msgnrs.h: ../bin/en.cat
 endif
 
-pdcmain.o: msgnrs.h
+pdcpars.tab.o: msgnrs.h
 
 .PHONY: almostclean
 almostclean:	
@@ -113,7 +113,7 @@ almostclean:
 .PHONY: clean
 clean: almostclean
 	$(RM) $(TARG1) $(TARG2)
-	$(RM) ../bin/*.exe ../bin/*.EXE
+	$(RM) ../bin/*.exe ../bin/*.EXE ../bin/*.cat
 	$(RM) $(MKCATDEFS)
 
 DEPS		:= $(SOURCES:%.c=%.o.d)

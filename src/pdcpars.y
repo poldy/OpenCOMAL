@@ -21,6 +21,7 @@
 #include "pdcmisc.h"
 #include "pdcid.h"
 #include "pdcprog.h"
+#include "msgnrs.h"
 
 #include <string.h>
 #include <limits.h>
@@ -261,7 +262,7 @@ a_comal_line	:	comal_line eolnSYM
 			}
 		|	error eolnSYM
 			{
-				p_error("Syntax error");
+				p_error(catgets(catdesc, ParsSet, ParsSynErr, "Syntax error"));
 				yyerrok;
 				c_line.cmd=0;
 				YYACCEPT;
@@ -1076,7 +1077,7 @@ print_stat	:	printi
 				$$.lc.printrec.modifier=(struct print_modifier *)mem_alloc(PARSE_POOL,sizeof(struct print_modifier));
 				$$.lc.printrec.modifier->type=atSYM;
 				$$.lc.printrec.modifier->twoexp=$2;
-				$$.lc.printrec.modifier->using=$3;
+				$$.lc.printrec.modifier->c_using=$3;
 				$$.lc.printrec.printroot=(struct print_list *)my_reverse($4);
 				$$.lc.printrec.pr_sep=$5;
 			}
@@ -1106,7 +1107,7 @@ print_stat	:	printi
 				$$.lc.printrec.modifier->type=fileSYM;
 				$$.lc.printrec.modifier->twoexp=(struct two_exp *)mem_alloc(PARSE_POOL,sizeof(struct two_exp));
 				*($$.lc.printrec.modifier->twoexp)=$2;
-				$$.lc.printrec.modifier->using=$3;
+				$$.lc.printrec.modifier->c_using=$3;
 				$$.lc.printrec.printroot=(struct print_list *)my_reverse($4);
 				$$.lc.printrec.pr_sep=$5;
 			}

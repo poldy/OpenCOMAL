@@ -10,6 +10,8 @@
 
 /* OpenComal line squashing functions for save/load purposes */
 
+#define _XOPEN_SOURCE 700
+
 #include "pdcglob.h"
 #include "pdcid.h"
 #include "pdcmisc.h"
@@ -348,9 +350,9 @@ PRIVATE void sqash_print(struct comal_line *line)
 		default:
 			fatal("Print modifier incorrect (sqash)");
 		}
-		if (p->modifier->using != NULL) {
+		if (p->modifier->c_using != NULL) {
 			sqash_putint(SQ_MODIFIER, usingSYM);
-			sqash_exp(p->modifier->using);
+			sqash_exp(p->modifier->c_using);
 		}
 	}
 
@@ -1059,7 +1061,7 @@ PRIVATE void expand_print(struct comal_line *line)
 			break;
 
 		case usingSYM:
-			p->modifier->using = expand_exp();
+			p->modifier->c_using = expand_exp();
                         p->modifier->type = atSYM;
 			break;
 
@@ -1075,7 +1077,7 @@ PRIVATE void expand_print(struct comal_line *line)
 			expand_getc();
 			type = expand_getint();
 			if (type == usingSYM) {
-				p->modifier->using = expand_exp();
+				p->modifier->c_using = expand_exp();
 			} else {
 				fatal("Print modifier incorrect (expand)");
 			}
