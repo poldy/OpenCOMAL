@@ -11,6 +11,8 @@
 /* OpenComal SYS routines for LINUX */
 
 #define _XOPEN_SOURCE 700
+#define _DARWIN_C_SOURCE 1
+#define _XOPEN_SOURCE_EXTENDED 1
 
 #include "pdcglob.h"
 #include "pdcmisc.h"
@@ -765,6 +767,7 @@ PUBLIC void sys_sys_exp(struct exp_list *exproot, void **result, enum
 
         cmd = exp_cmd(exproot->exp);
 
+#if !(defined(__APPLE__) && defined(__MACH__))
         if (strcmp(cmd, "sbrk") == 0) {
                 if (exproot->next)
                         run_error(SYS_ERR,
@@ -773,7 +776,9 @@ PUBLIC void sys_sys_exp(struct exp_list *exproot, void **result, enum
                 *result = cell_alloc(INT_CPOOL);
 		**( (long **) result )=(long)sbrk(0);
                 *type = V_INT;
-	} else if (strcmp(cmd, "now") == 0) {
+	} else
+#endif
+	if (strcmp(cmd, "now") == 0) {
                 if (exproot->next)
                         run_error(SYS_ERR,
                                   "SYS(now) takes no further parameters");
