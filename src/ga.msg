@@ -4,13 +4,13 @@ $ even though the generated catalog will be installed in a utf8 locale.
 $quote "
 
 $set Main
-NewlocaleFailed "aire: Theip ar locale a roghadh.\naire: Ba cheart go mbeidís in ann an locale \"%s\" a úsáid ar do ríomhaire.\naire: Ag dul ar ais go dtí an príomh-locale (\"%s\").\n"
+NewlocaleFailed "rabhadh: Theip ar locale a roghadh.\nrabhadh: Ba cheart go mbeidís in ann an locale \"%s\" a úsáid ar do ríomhaire.\nrabhadh: Ag dul ar ais go dtí an príomh-locale (\"%s\").\n"
 BadOpt "Modh mí-aithneach: '-%c'\n"
 Usage "úsáid: %s [-y] [-m <msg-catalog>] ...\n"
 Copyright "             (c) Cóipcheart 1992-2002  Jos Visser <josv@osp.nl>"
 Banner "OpenComal -- Clár Comal saor (eagrán %s; %s; déanamh %s)"
 Built "             Déanta ar an %s timpeall %s"
-Lic1 "Tá OpenComal ceadaithe faoin Ceadúnas Poiblí Ginereálta (GPL) eagrán a 2"
+Lic1 "Tá OpenComal ceadaithe faoin Ceadúnas Poiblí Ginereálta (GPL) eagrán a 3"
 Lic2 "(Tá ráiteas iontach sa GPL faoi WARRANTY; is dócha gur ba mhaith leat é a léamh)"
 ReqOp "Tá operand ag teastáil ar option -%c\n"
 

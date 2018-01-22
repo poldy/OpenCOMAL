@@ -51,7 +51,7 @@ that don't have time to learn Computer Science.
 
 ### included:
 * [original README](README.orig)
-* [original TODO](doc/TODO.md)
+* [TODO](wiki/TODO.md)
 * [original documentation](doc/)
 
 ### external:
