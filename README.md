@@ -53,7 +53,7 @@ that don't have time to learn Computer Science.
 
 ### included:
 * [original README](README.orig)
-* [TODO](https://github.com/poldy/OpenCOMAL/wiki/TODO.md)
+* [TODO](https://github.com/poldy/OpenCOMAL/wiki/TODO)
 * [original documentation](doc/)
 
 ### external:
