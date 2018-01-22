@@ -1,6 +1,6 @@
 # OpenCOMAL
 
-(Tá [[leagan Gaeilge|LÉIGHMÉ]] den doiciméad seo ar fáil.)
+(Tá [leagan Gaeilge](LÉIGHMÉ.md) den doiciméad seo ar fáil.)
 
 This is a patched version of [Jos Visser](http://www.josvisser.nl/)'s
 [OpenComal](http://www.josvisser.nl/opencomal/)
@@ -53,7 +53,7 @@ that don't have time to learn Computer Science.
 
 ### included:
 * [original README](README.orig)
-* [TODO](/poldy/OpenCOMAL/wiki/TODO.md)
+* [TODO](https://github.com/poldy/OpenCOMAL/wiki/TODO.md)
 * [original documentation](doc/)
 
 ### external:
