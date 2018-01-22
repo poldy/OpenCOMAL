@@ -179,7 +179,7 @@ PUBLIC int main(int argc, char *argv[])
 	my_printf(MSG_DIALOG, true, catgets(catdesc, MainSet, MainCopyright, "             (c) Copyright 1992-2002  Jos Visser <josv@osp.nl>"));
 	my_printf(MSG_DIALOG, true, catgets(catdesc, MainSet, MainBuilt, "             Built on %s at approximately %s"), __DATE__, __TIME__);
 	my_nl(MSG_DIALOG);
-	my_printf(MSG_DIALOG, true,catgets(catdesc, MainSet, MainLic1, "OpenComal is licensed under the GNU General Public License (GPL) version 2"));
+	my_printf(MSG_DIALOG, true,catgets(catdesc, MainSet, MainLic1, "OpenComal is licensed under the GNU General Public License (GPL) version 3"));
 	my_printf(MSG_DIALOG, true,catgets(catdesc, MainSet, MainLic2, "(The GPL contains a very nice statement on WARRANTY; you might want to read it)"));
 	my_nl(MSG_DIALOG);
 
