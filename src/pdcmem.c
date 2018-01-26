@@ -85,7 +85,9 @@ PUBLIC void mem_init()
 PRIVATE void cell_tini(unsigned pool)
 {
 	mem_free(cell_hdr[pool]->addr);
+	cell_hdr[pool]->addr = NULL;
 	mem_free(cell_hdr[pool]);
+	cell_hdr[pool] = NULL;
 }
 
 
@@ -255,6 +257,10 @@ PUBLIC void cell_freepool(unsigned pool)
 	unsigned i;
 	CELL_HDR *c = cell_hdr[pool];
 
+	if (c == NULL) {
+		return;
+	}
+
 	c->root = c->addr;
 
 	for (i = 0; i < CELL_POOLSIZE - 1; i++)
@@ -296,8 +302,10 @@ PUBLIC void mem_freepool_private(struct mem_pool *pool)
 	pool->root = NULL;
 	pool->size = 0;
 
-	if (pool->id == RUN_POOL)
-		cell_freepool(INT_CPOOL), cell_freepool(FLOAT_CPOOL);
+	if (pool->id == RUN_POOL) {
+		cell_freepool(INT_CPOOL);
+		cell_freepool(FLOAT_CPOOL);
+	}
 }
 
 
