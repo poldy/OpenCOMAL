@@ -86,7 +86,9 @@ PRIVATE locale_t safe_newlocale(const char *nlocname, locale_t loc, const char *
                                "warning: Falling back to the global locale (\"%s\").\n")),
                        nlocname, fallback);
                 result = loc;
-        }
+        } else {
+		freelocale(loc);
+	}
         return result;
 }
 
