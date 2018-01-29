@@ -78,6 +78,9 @@ PRIVATE locale_t safe_newlocale(const char *nlocname, locale_t loc, const char *
         locale_t result;
 
         result = newlocale(LC_ALL_MASK, nlocname, loc);
+        // Note that this does *not* create a new locale object.
+        // It modifies 'loc' instead.
+
         if (result == (locale_t)0) {
                 perror("newlocale");
                 printf(str_ltou(catgets(catdesc, MainSet, MainNewlocaleFailed,
@@ -86,9 +89,7 @@ PRIVATE locale_t safe_newlocale(const char *nlocname, locale_t loc, const char *
                                "warning: Falling back to the global locale (\"%s\").\n")),
                        nlocname, fallback);
                 result = loc;
-        } else {
-		freelocale(loc);
-	}
+        }
         return result;
 }
 
