@@ -1,9 +1,9 @@
        10 INPUT "A number please : ": n#
        20 PRINT n#;
        30 IF isprime#(n#) THEN
-       40   PRINT " is a prime number!"
+       40   PRINT "is a prime number!"
        50 ELSE
-       60   PRINT " is not a prime number..."
+       60   PRINT "is not a prime number..."
        70 ENDIF
        80 
        90 FUNC isprime#(n#) CLOSED
