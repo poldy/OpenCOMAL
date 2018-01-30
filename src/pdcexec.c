@@ -69,8 +69,8 @@ PUBLIC void run_error(int error, const char *s, ...)
 	        curenv->lasterrmsg = my_strdup(MISC_POOL, buf2);
         } else {
                 curenv->lasterrmsg = NULL;
+                buf2[0] = '\0';
         }
-        DBG_PRINTF(1, "%s: curenv %p ->lasterrmsg %p", __func__, curenv, curenv->lasterrmsg);
 
 	curenv->error = curenv->lasterr = error;
 
