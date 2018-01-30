@@ -15,12 +15,16 @@
 #ifndef PDCMISC_H
 #define PDCMISC_H
 
+/** Write a nl to the specified stream */
 extern void my_nl(int stream);
 
 /** Write a tab to the specified stream */
 extern void my_ht(int stream);
 
+/** Write a string to the specified stream */
 extern void my_put(int stream, const char *buf, long len);
+
+/** Write a formatted string to the specified stream */
 extern void my_printf(int stream, bool newline, const char *s, ...);
 
 /** Optionally print a debug message */
@@ -30,14 +34,40 @@ extern void my_printf(int stream, bool newline, const char *s, ...);
 #define DBG_PRINTF(...) { if (comal_debug) { my_printf(MSG_DEBUG, __VA_ARGS__); } }
 #endif
 
+/** Abort execution of the current program and return to the command loop */
 extern void fatal(const char *s, ...);
+
+/**
+ * Reverse a list.
+ * @public @memberof my_list
+ */
 extern void *my_reverse(void *root);
+
+/**
+ * Free all nodes in a list.
+ * @public @memberof my_list
+ */
 extern void free_list(struct my_list *root);
+
+/** Check that an expression is a list of numbers */
 extern bool exp_list_of_nums(struct exp_list *root);
+
+/** Get confirmation to proceed if there are unsaved changes in the current environment */
 extern bool check_changed(void);
+
+/** Get confirmation to proceed if there are unsaved changes in any environment */
 extern bool check_changed_any(void);
+
+/** List a program line to the specified stream */
 extern void puts_line(int stream, struct comal_line *line);
+
+/**
+ * Count the length of a list.
+ * @public @memberof my_list
+ */
 extern int nr_items(struct my_list *list);
+
+/** Convert a float with no fractional part to an int */
 extern long d2int(double x, int whole);
 extern int type_match1(struct id_rec *id, struct expression *exp);
 extern struct id_rec *exp_of_id(struct expression *exp);

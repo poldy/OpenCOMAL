@@ -20,10 +20,9 @@
 
 PRIVATE struct id_rec *id_root = NULL;
 
-/* With id_eql you can compare two identifiers by their handles. The caller
- * gets 1 if they are equal and 0 if the two identifiers are unequal.
- * STRCMP is used instead of pointer comparision because pointers to the
- * same memory location can take different values on an 8086 CPU environment. 
+
+/* STRCMP was originally used because of 8086 segmentation.
+ * I left it in there because I'm not sure if the interpreter interns strings.
  */
 
 PUBLIC int id_eql(struct id_rec *id1, struct id_rec *id2)
@@ -100,10 +99,6 @@ PRIVATE struct id_rec *id_horse(char *idname)
 		return (lastone->right = installed);
 }
 
-
-/* id_search searches for an identifier and if it is not present installs it.
- * A handle for the identifier is returned.
- */
 
 PUBLIC struct id_rec *id_search(char *id)
 {

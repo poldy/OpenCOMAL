@@ -15,7 +15,16 @@
 #ifndef PDCID_H
 #define PDCID_H
 
+/**
+ * Compare two identifiers by their handles.
+ * @return 1 if they are equal and 0 if the two identifiers are unequal
+ */
 extern int id_eql(struct id_rec *id1, struct id_rec *id2);
+
+/**
+ * Search for an identifier and if it is not present installs it.
+ * @return a handle for the identifier
+ */
 extern struct id_rec *id_search(char *id);
 
 #endif

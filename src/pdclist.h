@@ -15,6 +15,7 @@
 #ifndef PDCLIST_H
 #define PDCLIST_H
 
+/** List one program line */
 extern void line_list(char **buf, struct comal_line *line);
 
 #endif
