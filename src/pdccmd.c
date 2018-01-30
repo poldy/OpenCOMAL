@@ -191,8 +191,7 @@ PRIVATE bool cmd_save(struct comal_line *line)
 		run_error(CMD_ERR, "No program (to SAVE)");
 	else {
 		if (line->lc.str) {
-			if (curenv->name)
-				mem_free(curenv->name);
+			mem_free(curenv->name);
 
 			curenv->name =
 			    my_strdup(MISC_POOL, line->lc.str->s);

@@ -153,6 +153,9 @@ PUBLIC void *mem_alloc_private(struct mem_pool *pool, long size)
 		  "Mem_alloc block in pool %d, size %ld", pool->id,
 		  size);
 
+        if (size < sizeof(void *)) {
+                size = sizeof(void *);  // Because mem_free() will dereference my_list->next
+        }
 	p = (struct mem_block *)calloc(1, size + sizeof(struct mem_block));
 
 	if (!p)
@@ -226,8 +229,12 @@ PUBLIC void cell_free(void *m)
 
 PUBLIC void *mem_free(void *m)
 {
+        if (m == NULL) {
+                return NULL;
+        }
+
 	struct mem_block *memblock = (struct mem_block *)m;
-	void *result = memblock->next;
+	void *result = ((struct my_list *)m)->next;
 
 	--memblock;
 

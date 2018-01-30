@@ -260,6 +260,7 @@ PUBLIC struct sym_env *sym_freeenv(struct sym_env *env, int recur)
 			work = free_symitem(work);
 
 		mem_free(env->name);
+                env->name = NULL;
 		env = (struct sym_env *)mem_free(env);
 	}
 	while (env && recur);

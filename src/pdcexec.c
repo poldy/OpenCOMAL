@@ -61,14 +61,18 @@ PUBLIC void run_error(int error, const char *s, ...)
 	char buf2[MAX_LINELEN];
 	va_list ap;
 
-	va_start(ap, s);
-
-	vsnprintf(buf2, MAX_LINELEN, s, ap);
-	va_end(ap);
+	mem_free(curenv->lasterrmsg);
+        if (s != NULL) {
+	        va_start(ap, s);
+	        vsnprintf(buf2, MAX_LINELEN, s, ap);
+	        va_end(ap);
+	        curenv->lasterrmsg = my_strdup(MISC_POOL, buf2);
+        } else {
+                curenv->lasterrmsg = NULL;
+        }
+        DBG_PRINTF(1, "%s: curenv %p ->lasterrmsg %p", __func__, curenv, curenv->lasterrmsg);
 
 	curenv->error = curenv->lasterr = error;
-	mem_free(curenv->lasterrmsg);
-	curenv->lasterrmsg = my_strdup(MISC_POOL, buf2);
 
 	buf = (char *)mem_alloc(MISC_POOL, MAX_LINELEN);
 
@@ -83,6 +87,7 @@ PUBLIC void run_error(int error, const char *s, ...)
 		curenv->lasterrline = 0;
 	}
 
+        mem_free(curenv->errmsg);
 	curenv->errmsg = buf;
 	if (in_input_file) {
 		sel_infile = prev_sel_file;
@@ -484,6 +489,7 @@ PUBLIC void exec_call(struct expression *exp, int calltype, void **result,
 	} else
 		env = sym_newenv(pfline->lc.pfrec.closed, save_env, 
 			NULL, pfline, exp->e.expid.id->name);
+                // The env name is strdup()ed by sym_newenv()
 
 	decode_parmlist(env, pfline->lc.pfrec.parmroot,
 			exp->e.expid.exproot);
@@ -2497,7 +2503,7 @@ PUBLIC int exec_line(struct comal_line *line)
 		break;
 	
 	case reportSYM:
-		run_error(calc_intexp(line->lc.exp), "");
+		run_error(calc_intexp(line->lc.exp), NULL);
 		break;
 	
 	case delaySYM:

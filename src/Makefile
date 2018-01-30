@@ -35,6 +35,7 @@ CFLAGS+=-Wall -Wextra -DOS_LINUX -D_FORTIFY_SOURCE=2
 MKCATDEFS:=../tools/mkcatdefs
 ifdef DEBUG
 	CFLAGS+=-O0 -ggdb
+	#LDFLAGS+=-lefence
 else
 	CFLAGS+=-DNDEBUG -Os -flto
 	LDFLAGS+=-Os -flto

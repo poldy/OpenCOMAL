@@ -47,7 +47,7 @@ PUBLIC struct comal_env *env_new(const char *name)
 	work->running = 0;
 	work->fileroot = NULL;
 	work->lasterr = 0;
-	work->lasterrmsg = my_strdup(MISC_POOL, "");
+	work->lasterrmsg = NULL;
 	work->errline = 0;
 	work->escallowed = true;
 	work->nrtraps = 0;
@@ -100,7 +100,7 @@ PUBLIC void clean_runenv(struct comal_env *env)
 
 	env->lasterr = 0;
 	mem_free(env->lasterrmsg);
-	env->lasterrmsg = my_strdup(MISC_POOL, "");
+	env->lasterrmsg = NULL;
 	env->errline = 0;
 	env->escallowed = true;
 	env->nrtraps = 0;
@@ -139,8 +139,7 @@ PUBLIC void clear_env(struct comal_env *env)
 	env->changed = false;
 	env->scan_ok = false;
 
-	if (env->name)
-		mem_free(env->name);
+	mem_free(env->name);
 
 	env->name = NULL;
 }

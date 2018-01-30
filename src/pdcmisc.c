@@ -80,6 +80,10 @@ PUBLIC void my_printf(int stream, bool newline, const char *s, ...)
 	char buf[MAX_LINELEN];
 	va_list ap;
 
+        if (s == NULL) {
+                return;
+        }
+
 	va_start(ap, s);
 	vsnprintf(buf, MAX_LINELEN, s, ap);
 	va_end(ap);

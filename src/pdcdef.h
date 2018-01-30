@@ -37,7 +37,8 @@ struct env_list {
 
 /**
  * A COMAL string
- * @todo Remove internal reliance on chr$(0) as end-of-string
+ * I want to use the same convention as the Oberon-2 Oakwood libraries,
+ * where end-of-string is indicated by chr$(0) *and* we keep a separate length field.
  */
 struct string {
 	long len;

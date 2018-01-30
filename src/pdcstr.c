@@ -39,11 +39,19 @@ PUBLIC int str_cmp(struct string *s1, struct string *s2)
 
 PUBLIC struct string *str_make(int pool, const char *s)
 {
-	long l = strlen(s);
-	struct string *work = STR_ALLOC(pool, l);
+	long l;
+	struct string *work;
 
-	work->len = l;
-	term_strncpy(work->s, s, l + 1);
+        if (s != NULL) {
+                l = strlen(s);
+        } else {
+                l = 0;
+        }
+	work = STR_ALLOC(pool, l);
+        if (s != NULL) {
+	        work->len = l;
+	        term_strncpy(work->s, s, l + 1);
+        }
 
 	return work;
 }
