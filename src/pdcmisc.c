@@ -30,15 +30,6 @@
 #include <ctype.h>
 
 
-struct int_trace {
-	struct int_trace *next;
-	char *name;
-	int *value;
-};
-
-PRIVATE struct int_trace *tr_root = NULL;
-
-
 PUBLIC void my_nl(int stream)
 {
 	if (sel_outfile && stream == MSG_PROGRAM) {
@@ -619,27 +610,6 @@ PUBLIC struct comal_line *stat_dup(struct comal_line *stat)
 		*to = *from;
 
 	return work;
-}
-
-
-PUBLIC void trace_trace()
-{
-	struct int_trace *work = tr_root;
-
-	while (work) {
-		my_printf(MSG_TRACE, true, "Trace %s value = %d", work->name,
-			  *(work->value));
-		work = work->next;
-	}
-}
-
-
-PUBLIC void trace_reset()
-{
-	struct int_trace *work = tr_root;
-
-	while (work)
-		work = (struct int_trace *)mem_free(work);
 }
 
 #ifndef EVIL32

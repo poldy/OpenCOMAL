@@ -126,7 +126,6 @@ PUBLIC void clean_runenv(struct comal_env *env)
 	mod_freeall();
 	seg_allfree();
 	mem_freepool(RUN_POOL);
-	trace_reset();
 }
 
 

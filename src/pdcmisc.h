@@ -69,21 +69,35 @@ extern int nr_items(struct my_list *list);
 
 /** Convert a float with no fractional part to an int */
 extern long d2int(double x, int whole);
+
+/** Test type compatibility, for NAME params & return values */
 extern int type_match1(struct id_rec *id, struct expression *exp);
+
+/** Get the identifier out of an expression */
 extern struct id_rec *exp_of_id(struct expression *exp);
+
+/** Test if an expression is a string or not */
 extern bool exp_of_string(struct expression *exp);
+
+/** Return the identifier in an expression in string form */
 extern char *exp_cmd(struct expression *exp);
+
+/** Search for a program line with a particular number */
 extern struct comal_line *search_line(long l, int exact);
+
+/** Get the number of bytes required to store a tokenised statement */
 extern int stat_size(int cmd);
+
+/** Output a run-time error to the user */
 extern void give_run_err(struct comal_line *line);
+
+/** */
 extern int type_size(enum VAL_TYPE t);
 extern void check_lval(struct expression *exp);
 extern int proclevel(struct comal_line *proc);
 extern struct comal_line *line_2line(struct comal_line *line);
 extern int line_2cmd(struct comal_line *line);
 extern struct comal_line *stat_dup(struct comal_line *stat);
-extern void trace_trace(void);
-extern void trace_reset(void);
 extern char *ltoa(long num, char *buf, int radix);
 
 #ifndef HAS_STRLWR

@@ -2261,7 +2261,6 @@ PUBLIC int exec_line(struct comal_line *line)
 
 	if (curenv->trace && curenv->running == RUNNING) {
 		puts_line(MSG_TRACE, curenv->curline);
-		trace_trace();
 	}
 
 	switch (line->cmd) {
