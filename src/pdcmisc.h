@@ -91,24 +91,59 @@ extern int stat_size(int cmd);
 /** Output a run-time error to the user */
 extern void give_run_err(struct comal_line *line);
 
-/** */
+/** Return the number of bytes to store a COMAL type */
 extern int type_size(enum VAL_TYPE t);
+
+/** Check that an expression is usable as an lvalue */
 extern void check_lval(struct expression *exp);
+
+/** Return the nesting level of a PROC or FUNC */
 extern int proclevel(struct comal_line *proc);
+
+/**
+ * Return the @em actual COMAL statement in a line.
+ * i.e. in most cases the line, but in case of a short form FOR, 
+ * IF, WHILE or REPEAT it returns the "body" of the short form
+ * structure statement.
+ */
 extern struct comal_line *line_2line(struct comal_line *line);
+
+/** Return the command for a program line */
 extern int line_2cmd(struct comal_line *line);
+
+/** Copy a program line */
 extern struct comal_line *stat_dup(struct comal_line *stat);
+
+/** Convert a long to a string in base 10 */
 extern char *ltoa(long num, char *buf, int radix);
 
 #ifndef HAS_STRLWR
+
+/** Convert a string to upper case in-place, for the current locale */
 extern void strupr(char *s);
+
+/** Convert a string to lower case in-place, for the current locale */
 extern void strlwr(char *s);
+
 #endif
 
+/** Remove a trailing string, if it's there */
 extern void remove_trailing(char *s, const char *trailing, const char *subst);
+
 #ifndef HAS_ROUND
+
+/**
+ * Round a float.
+ * +-0.5 rounds towards +infinity, i.e. we want floored and not symmetric MOD/DIV.
+ */
 extern double my_round(double x);
+
 #endif
+
+/**
+ * Get the fractional part of a float.
+ * For negative numbers this is ceil(x) - x, i.e. we want floored and not symmetric MOD/DIV.
+ */
 extern double my_frac(double x);
 
 #endif

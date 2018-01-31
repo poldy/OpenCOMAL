@@ -92,9 +92,6 @@ PRIVATE bool mod_register(struct comal_line *line, struct seg_des *seg, char *er
 	return true;
 }
 
-/*
- * Find an OpenComal module
- */
 struct mod_entry *mod_find(struct id_rec *id)
 {
 	struct mod_entry *walk=mod_root;
@@ -109,10 +106,6 @@ struct mod_entry *mod_find(struct id_rec *id)
 	return NULL;
 }
 
-/*
- * Find an OpenComal module in a Comal segment
- * Please note the absolutely confusing name of this function :-)
- */
 PUBLIC struct comal_line *mod_find_def(struct seg_des *seg, struct id_rec *id)
 {
 	struct comal_line *walk;
@@ -129,9 +122,6 @@ PRIVATE struct seg_des *mod_load(struct id_rec *id)
 	return NULL;
 }
 
-/*
- * USE a module
- */
 PUBLIC bool mod_use(struct seg_des *seg, struct id_rec *id, char *errtxt, struct comal_line **errline)
 {
 	struct comal_line *defline;
@@ -160,9 +150,6 @@ PUBLIC bool mod_use(struct seg_des *seg, struct id_rec *id, char *errtxt, struct
 	return mod_register(defline,modseg,errtxt,errline);
 }
 
-/*
- * Free the entire environment of loaded OpenComal modules
- */
 PUBLIC void mod_freeall()
 {
 	free_list((struct my_list *)mod_func_root);
@@ -171,9 +158,6 @@ PUBLIC void mod_freeall()
 	mod_root=NULL;
 }
 
-/*
- * Search a PROC or FUNC in the table of exported routines
- */
 PUBLIC struct comal_line *mod_search_routine(struct id_rec *id, int type)
 {
 	struct mod_func_entry *walk=mod_func_root;
@@ -188,9 +172,6 @@ PUBLIC struct comal_line *mod_search_routine(struct id_rec *id, int type)
 	return NULL;
 }
 
-/*
- * Initialize all registered modules
- */
 PUBLIC void mod_initall()
 {
 	struct mod_entry *walk=mod_root;

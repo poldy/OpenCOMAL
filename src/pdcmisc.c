@@ -563,12 +563,6 @@ PUBLIC int proclevel(struct comal_line *proc)
 	return i;
 }
 
-/*
- * This method returns the *actual* Comal statement in a line.
- * I.e. in most cases the line, but in case of a short form FOR, 
- * IF, WHILE or REPEAT it returns the "body" of the short form
- * structure statement.
- */
 PUBLIC struct comal_line *line_2line(struct comal_line *line)
 {
 	switch (line->cmd) {
