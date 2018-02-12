@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <setjmp.h>
-#if defined(__APPLE__) && defined(__MACH__)
+#ifdef __APPLE__
 #include <xlocale.h>
 #else
 #include <locale.h>

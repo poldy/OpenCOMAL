@@ -23,5 +23,6 @@
 #define DEFAULT_DIMBOTTOM	(1)
 #define SQASH_BUFSIZE		(32767)	/**< For save/load buffer */
 #define TEXT_BUFSIZE		(32767)	/**< For list/enter buffer */
+#define OCOMAL_PATH_MAX		(256)	/**< Because pgcc can't find PATH_MAX */
 
 #endif

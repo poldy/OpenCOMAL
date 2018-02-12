@@ -30,20 +30,37 @@ OBJ2:=pdcmain.o pdcmisc.o \
 OS:=pdclinux.o 
 
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
-CC:=../build/ccd-gcc
-CFLAGS+=-Wall -Wextra -DOS_LINUX -D_FORTIFY_SOURCE=2
+ifeq ($(REALCC),pgcc)
+	CC:=$(REALCC)
+else
+	CC:=../build/ccd-gcc
+endif
+ifeq ($(REALCC),pgcc)
+	CFLAGS+=-D_FORTIFY_SOURCE=2
+else
+	CFLAGS+=-Wall -Wextra -D_FORTIFY_SOURCE=2
+endif
 MKCATDEFS:=../tools/mkcatdefs
 ifdef DEBUG
 	CFLAGS+=-O0 -ggdb
 	#LDFLAGS+=-lefence
 else
-	CFLAGS+=-DNDEBUG -Os -flto
-	LDFLAGS+=-Os -flto
+	ifeq ($(REALCC),pgcc)
+		CFLAGS+=-DNDEBUG -fast -Mipa=fast,inline
+		LDFLAGS+=-fast -Mipa=fast,inline
+	else
+		CFLAGS+=-DNDEBUG -Os -flto
+		LDFLAGS+=-Os -flto
+	endif
 endif
 ifeq ($(REALCC),c++)
 	CFLAGS+=-Weffc++ -std=c++14
 else
-	CFLAGS+=-std=c11
+	ifeq ($(REALCC),pgcc)
+		CFLAGS+=-c11 -Xc
+	else
+		CFLAGS+=-std=c11
+	endif
 endif
 ifneq ($(OPSYS),macos)
 	-include /usr/share/hardening-includes/hardening.make

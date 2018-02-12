@@ -767,7 +767,7 @@ PUBLIC void sys_sys_exp(struct exp_list *exproot, void **result, enum
 
         cmd = exp_cmd(exproot->exp);
 
-#if !(defined(__APPLE__) && defined(__MACH__))
+#ifdef __APPLE__
         if (strcmp(cmd, "sbrk") == 0) {
                 if (exproot->next)
                         run_error(SYS_ERR,

@@ -156,7 +156,7 @@ PUBLIC int main(int argc, char *argv[])
         }
         if (locname != NULL) {
         	int utf8_suffixlen, lang_countrylen;
-#if defined(__APPLE__) && defined(__MACH__)
+#ifdef __APPLE__
         	const char *utf8_suffix = ".UTF-8", *latin_suffix = ".ISO8859-15";
 #else
         	const char *utf8_suffix = ".utf8", *latin_suffix = "@euro";
