@@ -75,6 +75,14 @@ else
 	CFLAGS+=$(shell ncursesw5-config --cflags)
 	TARG_LDFLAGS:=-lreadline -lm $(shell ncursesw5-config --libs)
 endif
+SOURCE_DATE_EPOCH=$(shell git log -l --pretty=%ct)
+DATE_FMT = %Y-%m-%d
+ifdef SOURCE_DATE_EPOCH
+	BUILD_DATE ?= $(shell date -u -d "@$(SOURCE_DATE_EPOCH)" "+$(DATE_FMT)"  2>/dev/null || date -u -r "$(SOURCE_DATE_EPOCH)" "+$(DATE_FMT)" 2>/dev/null || date -u "+$(DATE_FMT)")
+else
+	BUILD_DATE ?= $(shell date "+$(DATE_FMT)")
+endif
+CFLAGS+='-DBUILD_DATE="$(BUILD_DATE)"'
 
 .PHONY: all
 all: build $(TARG1) $(TARG2) ../bin/en.cat ../bin/ga.cat
