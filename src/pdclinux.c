@@ -83,7 +83,7 @@ PRIVATE void errw(const char *msg)
         exit(EXIT_FAILURE);
 }
 
-PRIVATE void int_handler(int signum)
+PRIVATE void int_handler(int signum __unused)
 {
 	escape = 1;
 }
@@ -641,7 +641,7 @@ PUBLIC char *sys_dir_string()
 			free(buf);
 			buf=0;
 		} else {
-			run_error(DIRS_ERR,strerror(errno));
+			run_error(DIRS_ERR, "%s", strerror(errno));
                 }
 	}
 }
@@ -662,7 +662,7 @@ PUBLIC void sys_dir(const char *pattern) {
 
 	if (!f) {
 		free(buf);
-                run_error(DIRS_ERR,strerror(errno));
+                run_error(DIRS_ERR, "%s", strerror(errno));
         }
 
 	sys_setpaged(1);
@@ -706,19 +706,19 @@ PUBLIC const char *sys_tab_string(long col)
 PUBLIC void sys_chdir(char *dir)
 {
 	if (chdir(dir)<0)
-		run_error(DIR_ERR,strerror(errno));
+		run_error(DIR_ERR, "%s", strerror(errno));
 }
 
 PUBLIC void sys_mkdir(char *dir)
 {
 	if (mkdir(dir,0777)<0)
-		run_error(DIR_ERR,strerror(errno));
+		run_error(DIR_ERR, "%s", strerror(errno));
 } 
 
 PUBLIC void sys_rmdir(char *dir)
 {
 	if (rmdir(dir)<0)
-		run_error(DIR_ERR,strerror(errno));
+		run_error(DIR_ERR, "%s", strerror(errno));
 }
 
 PUBLIC char *sys_key(long delay)
@@ -767,7 +767,7 @@ PUBLIC void sys_sys_exp(struct exp_list *exproot, void **result, enum
 
         cmd = exp_cmd(exproot->exp);
 
-#ifdef __APPLE__
+#ifndef __APPLE__
         if (strcmp(cmd, "sbrk") == 0) {
                 if (exproot->next)
                         run_error(SYS_ERR,

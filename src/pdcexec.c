@@ -37,7 +37,6 @@
 #include <fcntl.h>
 #include <assert.h>
 
-
 #ifdef MSDOS
 #include <io.h>
 #endif
@@ -735,7 +734,7 @@ PRIVATE void do_calc_fromto(struct two_exp *twoexp, long *from, long *to)
 			err = "Substring specifier start < 1";
 
 		if (err)
-			run_error(SUBSTR_ERR, err);
+			run_error(SUBSTR_ERR, "%s", err);
 	} else
 		*from = *to = 0;
 }

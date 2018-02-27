@@ -35,7 +35,7 @@ ISARRAY2(struct expression *f)
 	return (f && ISARRAY(f->e.exp));
 }
 
-PUBLIC void yyerror(const char *s)
+PUBLIC void yyerror(const char *s __unused)
 {
 	/* No action here */
 }

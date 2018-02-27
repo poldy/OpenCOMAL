@@ -28,19 +28,19 @@ PUBLIC const char *sys_interpreter()
 }
 
 
-PUBLIC const char *lex_sym(int sym)
+PUBLIC const char *lex_sym(int sym __unused)
 {
 	return "<Undefined>";
 }
 
 
-PUBLIC void line_list(char **buf, struct comal_line *line)
+PUBLIC void line_list(char **buf, struct comal_line *line __unused)
 {
 	**buf = '\0';
 }
 
 
-PUBLIC void comal_loop(int newstate)
+PUBLIC void comal_loop(int newstate __unused)
 {
 	my_printf(MSG_ERROR, true, "Aborting...");
 	longjmp(RESTART, QUIT);

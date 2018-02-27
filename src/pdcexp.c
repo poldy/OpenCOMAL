@@ -123,7 +123,7 @@ PUBLIC void *exp_lval(struct expression *exp, enum VAL_TYPE *type,
 			}
 
 			if (err)
-				run_error(ARRAY_ERR, err);
+				run_error(ARRAY_ERR, "%s", err);
 
 			DBG_PRINTF(true, "Array index=%ld",
 				  index);
@@ -136,7 +136,7 @@ PUBLIC void *exp_lval(struct expression *exp, enum VAL_TYPE *type,
 	}
 
 	if (err)
-		run_error(ARRAY_ERR, err);
+		run_error(ARRAY_ERR, "%s", err);
 
 	DBG_PRINTF(true, "Exp_lval returns %p for %s", lval,
 		  id->name);
@@ -1130,7 +1130,7 @@ PRIVATE void do_substr(struct string *tresult, struct string **result,
 		err = "Substring specifier end > string length";
 
 	if (err)
-		run_error(SUBSTR_ERR, err);
+		run_error(SUBSTR_ERR, "%s", err);
 
 	*result = STR_ALLOC(RUN_POOL, to - from + 1);
 	str_partcpy(*result, tresult, from, to);

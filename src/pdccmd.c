@@ -164,7 +164,7 @@ PRIVATE bool cmd_enter(struct comal_line *line)
 }
 
 
-PRIVATE bool cmd_new(struct comal_line *line)
+PRIVATE bool cmd_new(struct comal_line *line __unused)
 {
 	if (check_changed()) {
 		prog_new();
@@ -176,7 +176,7 @@ PRIVATE bool cmd_new(struct comal_line *line)
 }
 
 
-PUBLIC bool cmd_scan(struct comal_line *line)
+PUBLIC bool cmd_scan(struct comal_line *line __unused)
 {
 	prog_total_scan();
         return false;
@@ -269,7 +269,7 @@ PRIVATE bool cmd_auto(struct comal_line *line)
 }
 
 
-PRIVATE bool cmd_cont(struct comal_line *line)
+PRIVATE bool cmd_cont(struct comal_line *line __unused)
 {
 	if (curenv->running != HALTED)
 		run_error(CMD_ERR, "CONtinuation not possible");
@@ -277,7 +277,7 @@ PRIVATE bool cmd_cont(struct comal_line *line)
 }
 
 
-PRIVATE bool cmd_run(struct comal_line *line)
+PRIVATE bool cmd_run(struct comal_line *line __unused)
 {
 	mem_freepool(PARSE_POOL);
 
@@ -364,7 +364,7 @@ PRIVATE bool cmd_renumber(struct comal_line *line)
 }
 
 
-PRIVATE bool cmd_quit(struct comal_line *line)
+PRIVATE bool cmd_quit(struct comal_line *line __unused)
 {
 	if (check_changed_any())
 		longjmp(RESTART, QUIT);

@@ -87,7 +87,7 @@ extern void mem_freepool_private(struct mem_pool *pool);
 extern void mem_shiftmem(unsigned int frompool, struct mem_pool *topool);
 
 /** Print the size of all pools */
-extern void mem_debug(int level);
+extern void mem_debug(void);
 
 /** Allocate a new memory pool */
 extern struct mem_pool *pool_new();

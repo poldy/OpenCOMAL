@@ -16,7 +16,7 @@
 #define PDCEXEC_H
 
 /** Signal a run-time error  */
-extern void run_error(int error, const char *s, ...);
+extern void run_error(int error, const char *s, ...) __printflike(2, 3);
 
 /** Call a PROC/FUNC definition */
 extern void exec_call(struct expression *exp, int calltype, void **result,

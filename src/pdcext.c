@@ -207,7 +207,6 @@ PRIVATE void pop_all_inpfiles()
 
 PUBLIC int ext_sys_stat(struct exp_list *exproot)
 {
-	void *result;
 	struct string *name;
 	enum VAL_TYPE type;
 	bool *flag;
@@ -297,21 +296,11 @@ PUBLIC int ext_sys_stat(struct exp_list *exproot)
 
 		return 0;
 	} else if (strcmp(cmd, "memdump") == 0) {
-		if (!exproot->next)
-			run_error(SYS_ERR,
-				  "Too few parameters for SYS memdump");
-
-		if (exproot->next->next)
+		if (exproot->next)
 			run_error(SYS_ERR,
 				  "Too much parameters for SYS memdump");
 
-		calc_exp(exproot->next->exp, &result, &type);
-
-		if (type != V_INT)
-			run_error(TYPE_ERR, "Integer expected");
-
-		mem_debug((*(long *) result));
-		val_free(result, type);
+		mem_debug();
 
 		return 0;
 	} else if (strcmp(cmd,"listvars") == 0) {

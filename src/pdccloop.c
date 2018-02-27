@@ -127,7 +127,7 @@ PUBLIC void comal_loop(int newstate)
 }
 
 
-PUBLIC void pdc_go(int argc, char *argv[])
+PUBLIC void pdc_go(int argc __unused, char *argv[] __unused)
 {
 	int restart_err;
 

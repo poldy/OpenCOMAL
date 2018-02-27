@@ -344,7 +344,7 @@ PUBLIC void mem_shiftmem(unsigned _frompool, struct mem_pool *topool)
 		work->next->prev = work;
 }
 
-PUBLIC void mem_debug(int level)
+PUBLIC void mem_debug(void)
 {
 	int i;
 
