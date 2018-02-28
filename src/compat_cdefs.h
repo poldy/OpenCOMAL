@@ -39,4 +39,9 @@
 
 #endif  // __APPLE__
 
+#ifndef __my_nonnull
+#define __my_nonnull(...) \
+	__attribute__((__nonnull__(__VA_ARGS__)))
+#endif
+
 #endif
