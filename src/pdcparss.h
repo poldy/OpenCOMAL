@@ -15,6 +15,8 @@
 #ifndef PDCPARSS_H
 #define PDCPARSS_H
 
+#include "compat_cdefs.h"
+
 extern void yyerror(const char *s);
 extern int yyparse();
 

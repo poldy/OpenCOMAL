@@ -15,6 +15,8 @@
 #ifndef PDCMISC_H
 #define PDCMISC_H
 
+#include "compat_cdefs.h"
+
 /** Write a nl to the specified stream */
 extern void my_nl(int stream);
 

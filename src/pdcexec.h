@@ -15,6 +15,8 @@
 #ifndef PDCEXEC_H
 #define PDCEXEC_H
 
+#include "compat_cdefs.h"
+
 /** Signal a run-time error  */
 extern void run_error(int error, const char *s, ...) __printflike(2, 3);
 

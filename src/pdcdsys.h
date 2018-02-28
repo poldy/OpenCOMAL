@@ -108,17 +108,6 @@ extern void sys_mkdir(char *dir);
 /** Get one keypress */
 extern char *sys_key(long delay);
 
-/** Scan a line containing an statement that is an extension */
-extern int sys_call_scan(struct id_rec *id, struct exp_list *exproot,
-			 char *errtext);
-
-/**
- * Call a statement that is an extension
- * @todo Should I have used pdcext.c for all the statements I added?
- */
-extern bool sys_call(struct id_rec *id, struct exp_list *exproot,
-		    int calltype, void **result, enum VAL_TYPE *type);
-
 /** Evaluation a SYS(arg) expression */
 extern void sys_sys_exp(struct exp_list *exproot, void **result, enum
 			VAL_TYPE *type);

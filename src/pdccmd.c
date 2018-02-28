@@ -25,8 +25,8 @@
 #include "pdcenv.h"
 #include "msgnrs.h"
 #include "pdccmd.h"
+#include "compat_cdefs.h"
 #include <string.h>
-
 
 PRIVATE void cmd_list_horse(struct string *filename, long from, long to)
 {
@@ -53,7 +53,7 @@ PRIVATE void cmd_list_horse(struct string *filename, long from, long to)
 
 	while (work && work->ld->lineno <= to) {
 		if (sys_escape()) {
-			my_printf(MSG_DIALOG, true, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
+			my_printf(MSG_DIALOG, true, "%s", catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 			break;
 		}
 
@@ -164,7 +164,7 @@ PRIVATE bool cmd_enter(struct comal_line *line)
 }
 
 
-PRIVATE bool cmd_new(struct comal_line *line __unused)
+PRIVATE bool cmd_new(struct comal_line *line __my_unused)
 {
 	if (check_changed()) {
 		prog_new();
@@ -176,7 +176,7 @@ PRIVATE bool cmd_new(struct comal_line *line __unused)
 }
 
 
-PUBLIC bool cmd_scan(struct comal_line *line __unused)
+PUBLIC bool cmd_scan(struct comal_line *line __my_unused)
 {
 	prog_total_scan();
         return false;
@@ -269,7 +269,7 @@ PRIVATE bool cmd_auto(struct comal_line *line)
 }
 
 
-PRIVATE bool cmd_cont(struct comal_line *line __unused)
+PRIVATE bool cmd_cont(struct comal_line *line __my_unused)
 {
 	if (curenv->running != HALTED)
 		run_error(CMD_ERR, "CONtinuation not possible");
@@ -277,7 +277,7 @@ PRIVATE bool cmd_cont(struct comal_line *line __unused)
 }
 
 
-PRIVATE bool cmd_run(struct comal_line *line __unused)
+PRIVATE bool cmd_run(struct comal_line *line __my_unused)
 {
 	mem_freepool(PARSE_POOL);
 
@@ -364,7 +364,7 @@ PRIVATE bool cmd_renumber(struct comal_line *line)
 }
 
 
-PRIVATE bool cmd_quit(struct comal_line *line __unused)
+PRIVATE bool cmd_quit(struct comal_line *line __my_unused)
 {
 	if (check_changed_any())
 		longjmp(RESTART, QUIT);

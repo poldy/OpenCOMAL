@@ -2057,7 +2057,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 				esc = input_line(line, l, p);
 				i = line;
 			} else
-				run_error(ESCAPE_ERR, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
+				run_error(ESCAPE_ERR, "%s", catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 		}
 
 		type = work->exp->e.expid.id->type;

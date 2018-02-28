@@ -373,7 +373,7 @@ PUBLIC void *var_data(struct var_item *var)
 	return var->data.vref;
 }
 
-PRIVATE void sym_list_error(struct sym_item *sym __unused)
+PRIVATE void sym_list_error(struct sym_item *sym __my_unused)
 {
 }
 
@@ -384,11 +384,11 @@ PRIVATE void sym_list_var(struct sym_item *sym)
 	val_print(MSG_DIALOG,&var->data,var->type);
 }
 
-PRIVATE void sym_list_name(struct sym_item *sym __unused)
+PRIVATE void sym_list_name(struct sym_item *sym __my_unused)
 {
 }
 
-PRIVATE void sym_list_proc(struct sym_item *sym __unused)
+PRIVATE void sym_list_proc(struct sym_item *sym __my_unused)
 {
 }
 

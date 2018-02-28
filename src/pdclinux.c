@@ -74,7 +74,7 @@ PRIVATE struct {
 	
 };
 
-PRIVATE void errw(const char *msg) __dead
+PRIVATE __dead void errw(const char *msg)
 {
         if (is_visual_mode) {
                 endwin();
@@ -83,7 +83,7 @@ PRIVATE void errw(const char *msg) __dead
         exit(EXIT_FAILURE);
 }
 
-PRIVATE void int_handler(int signum __unused)
+PRIVATE void int_handler(int signum __my_unused)
 {
 	escape = 1;
 }
@@ -189,7 +189,7 @@ PRIVATE int my_getch()
 }
 
 
-PRIVATE int curses_getc(FILE *in __unused)
+PRIVATE int curses_getc(FILE *in __my_unused)
 {
 	return my_getch();
 }
@@ -496,7 +496,8 @@ PUBLIC void sys_cursor(FILE * f, long y, long x)
 
 PUBLIC int sys_curcol(void)
 {
-	int y, x;
+	int y __my_unused;
+        int x;
 
 	getyx(stdscr, y, x);
 	return x + 1;
@@ -505,7 +506,8 @@ PUBLIC int sys_curcol(void)
 
 PUBLIC int sys_currow(void)
 {
-	int y, x;
+	int y;
+        int x __my_unused;
 
 	getyx(stdscr, y, x);
 	return y + 1;
