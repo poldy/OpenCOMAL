@@ -19,7 +19,6 @@
 #include "pdcseg.h"
 #include "pdcexec.h"
 #include "pdcmod.h"
-#include <assert.h>
 
 
 /*
