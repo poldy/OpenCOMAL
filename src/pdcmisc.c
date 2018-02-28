@@ -630,9 +630,8 @@ PUBLIC void strlwr(char *s)
 
 #ifdef UNIX
 
-PUBLIC char *ltoa(long num, char *buf, int radix)
+PUBLIC char *ltoa(long num, char *buf)
 {
-        assert(radix == 10);
 	sprintf(buf, "%ld", num);
 
 	return buf;

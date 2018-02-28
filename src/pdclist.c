@@ -222,7 +222,7 @@ PUBLIC void list_exp(char **buf, struct expression *exp)
 		break;
 
 	case T_INTNUM:
-		list_text(buf, ltoa(exp->e.num, cvtbuf, 10));
+		list_text(buf, ltoa(exp->e.num, cvtbuf));
 		break;
 
 	case T_FLOAT:

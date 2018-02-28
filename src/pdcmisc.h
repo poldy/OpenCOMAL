@@ -115,7 +115,7 @@ extern int line_2cmd(struct comal_line *line);
 extern struct comal_line *stat_dup(struct comal_line *stat);
 
 /** Convert a long to a string in base 10 */
-extern char *ltoa(long num, char *buf, int radix);
+extern char *ltoa(long num, char *buf);
 
 #ifndef HAS_STRLWR
 
