@@ -189,7 +189,7 @@ PRIVATE int my_getch()
 }
 
 
-PRIVATE int curses_getc(FILE *in)
+PRIVATE int curses_getc(FILE *in __unused)
 {
 	return my_getch();
 }
@@ -398,7 +398,7 @@ PUBLIC bool sys_escape()
 	return false;
 }
 
-PRIVATE void do_put(int stream, const char *buf, long len)
+PRIVATE void do_put(int stream, const char *buf)
 {
 	if (stream == MSG_ERROR) {
 		CHECK(attron, A_STANDOUT);
@@ -420,7 +420,7 @@ PUBLIC void sys_put(int stream, const char *buf, long len)
 	if (len < 0)
 		len = strlen(buf);
 
-	if (ext_put(stream, buf, len)) {
+	if (ext_put(buf)) {
 		return;
 	}
 
@@ -429,7 +429,7 @@ PUBLIC void sys_put(int stream, const char *buf, long len)
 	if ((len % COLS) > 0)
 		buf_lines++;
 
-	do_put(stream, buf, len);
+	do_put(stream, buf);
 
 	if (paged) {
 		pagern -= buf_lines;
@@ -472,8 +472,6 @@ PUBLIC void sys_clrtoeol(FILE * f)
 {
 	if (f == NULL) {
 		CHECK(clrtoeol);
-	} else {
-		ext_clrtoeol(f);
 	}
 }
 
@@ -481,7 +479,6 @@ PUBLIC void sys_clrtoeol(FILE * f)
 PUBLIC void sys_cursor(FILE * f, long y, long x)
 {
 	if (f != NULL) {
-		ext_cursor(f, y, x);
 		return;
 	}
         if (y > LINES || x > COLS) {
@@ -515,7 +512,7 @@ PUBLIC int sys_currow(void)
 }
 
 
-PUBLIC void sys_nl(int stream)
+PUBLIC void sys_nl(void)
 {
 	if (!ext_nl()) {
 		CHECK(addch, '\n');
@@ -523,7 +520,7 @@ PUBLIC void sys_nl(int stream)
 }
 
 
-PUBLIC void sys_ht(int stream)
+PUBLIC void sys_ht(void)
 {
 	if (!ext_ht()) {
 		CHECK(addch, '\t');
@@ -546,7 +543,7 @@ PUBLIC void sys_zone(long size)
 
 PUBLIC bool sys_yn(int stream, const char *prompt)
 {
-	do_put(stream, prompt, strlen(prompt));
+	do_put(stream, prompt);
 
 	for (;;) {
 		char c;
@@ -564,8 +561,7 @@ PUBLIC bool sys_yn(int stream, const char *prompt)
 }
 
 
-PRIVATE bool do_get(int stream, char *line, int maxlen, const char *prompt,
-		   int cursor)
+PRIVATE bool do_get(int stream, char *line, int maxlen, const char *prompt)
 {
 	bool escape=false;
         char *l;
@@ -599,27 +595,13 @@ PUBLIC bool sys_get(int stream, char *line, int maxlen, const char *prompt)
 	if (ext_get(stream, line, maxlen, prompt))
 		return false;
 	else
-		return do_get(stream, line, maxlen, prompt, 1);
+		return do_get(stream, line, maxlen, prompt);
 }
 
 
-PUBLIC bool sys_edit(int stream, char line[], int maxlen, int cursor)
+PUBLIC bool sys_edit(int stream, char line[], int maxlen)
 {
-	return do_get(stream, line, maxlen, NULL, cursor);
-}
-
-
-PUBLIC int sys_call_scan(struct id_rec *id, struct exp_list *exproot,
-			 char *errtext)
-{
-	int rc = ext_call_scan(id, exproot, errtext);
-
-	if (rc == -1) {
-		snprintf(errtext, MAX_LINELEN, "PROCedure %s not found", id->name);
-		return 0;
-	}
-
-	return rc;
+	return do_get(stream, line, maxlen, NULL);
 }
 
 PUBLIC char *sys_dir_string() 
@@ -681,10 +663,6 @@ PUBLIC void sys_dir(const char *pattern) {
 PUBLIC const char *sys_unit_string() 
 {
 	return "C:"; /* :-) */
-}
-
-PUBLIC void sys_unit(char *unit)
-{
 }
 
 PUBLIC const char *sys_tab_string(long col)
@@ -751,14 +729,6 @@ PUBLIC char *sys_key(long delay)
 
 	return result;
 }
-
-
-PUBLIC bool sys_call(struct id_rec *id, struct exp_list *exproot, int
-		    calltype, void **result, enum VAL_TYPE *type)
-{
-	return ext_call(id, exproot, calltype, result, type);
-}
-
 
 PUBLIC void sys_sys_exp(struct exp_list *exproot, void **result, enum
 			VAL_TYPE *type)

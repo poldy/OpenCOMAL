@@ -87,7 +87,7 @@ PUBLIC struct comal_line *crunch_line(char *line)
 		remove_trailing(line,"\n","");
 		remove_trailing(line,"\r","");
 
-		if (sys_edit(MSG_DIALOG, line, MAX_LINELEN, errpos)) {
+		if (sys_edit(MSG_DIALOG, line, MAX_LINELEN)) {
 			my_printf(MSG_DIALOG, true, catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 			return NULL;
 		}

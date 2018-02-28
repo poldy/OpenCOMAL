@@ -315,10 +315,8 @@ PRIVATE bool scan_pass4(struct seg_des *seg, char *errtxt,
 					}
 				}
 
-				if (!procfound
-				    && !sys_call_scan(proccall->id,
-						      proccall->exproot,
-						      errtxt)) {
+				if (!procfound) {
+					snprintf(errtxt, MAX_LINELEN, "PROCedure %s not found", proccall->id->name);
 					*errline = curline;
 					return false;
 				}

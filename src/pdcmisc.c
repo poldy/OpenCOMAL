@@ -38,7 +38,7 @@ PUBLIC void my_nl(int stream)
 				  "Error when writing to SELECT OUTPUT file %s",
 				  strerror(errno));
 	} else
-		sys_nl(stream);
+		sys_nl();
 }
 
 
@@ -50,7 +50,7 @@ PUBLIC void my_ht(int stream)
 				  "Error when writing to SELECT OUTPUT file %s",
 				  strerror(errno));
 	} else
-		sys_ht(stream);
+		sys_ht();
 }
 
 

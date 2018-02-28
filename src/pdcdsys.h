@@ -60,11 +60,11 @@ extern int sys_curcol(void);
 /** Returns the current row of the text screen that the cursor is on */
 extern int sys_currow(void);
 
-/** Output a newline to the specified stream */
-extern void sys_nl(int stream);
+/** Output a newline */
+extern void sys_nl(void);
 
 /** Move the cursor to the next tab stop */
-extern void sys_ht(int stream);
+extern void sys_ht(void);
 
 /** Get the current tab stop interval */
 extern long sys_zone_num(void);
@@ -79,7 +79,7 @@ extern bool sys_yn(int stream, const char *s);
 extern bool sys_get(int stream, char *line, int maxlen, const char *prompt);
 
 /** Edit a line of text */
-extern bool sys_edit(int stream, char *line, int maxlen, int cursor);
+extern bool sys_edit(int stream, char *line, int maxlen);
 
 /** Get the current working directory */
 extern char *sys_dir_string();

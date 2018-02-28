@@ -427,15 +427,7 @@ PUBLIC void exec_call(struct expression *exp, int calltype, void **result,
 	if (!pfline) {
 		pfline=mod_search_routine(exp->e.expid.id,calltype);
 
-		/*
-		 * Or it might be an extension (pdcext.c)
-		 */
 		if (!pfline) {
-			if (sys_call
-		    	(exp->e.expid.id, exp->e.expid.exproot, calltype,
-		     	result, type))
-				return;
-
 			run_error(UNFUNC_ERR, "Unknown identifier %s",
 			  	exp->e.expid.id->name);
 		}
@@ -2328,9 +2320,7 @@ PUBLIC int exec_line(struct comal_line *line)
 		break;
 
 	case unitSYM:
-		calc_exp(line->lc.exp, (void **) &result, &type);
-		sys_unit(result->s);
-		mem_free(result);
+		// Ignored on UNIX
 		break;
 
 	case dirSYM:

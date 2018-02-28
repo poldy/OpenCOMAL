@@ -49,7 +49,7 @@ struct comal_line *find_func(struct comal_line *module, struct id_rec *fun)
 /*
  * Register an OpenComal module
  */
-PRIVATE bool mod_register(struct comal_line *line, struct seg_des *seg, char *errtext, struct comal_line **errline)
+PRIVATE bool mod_register(struct comal_line *line, char *errtext, struct comal_line **errline)
 {
 	struct comal_line *walk;
 	struct mod_entry *work=GETCORE(RUN_POOL,struct mod_entry);
@@ -117,15 +117,9 @@ PUBLIC struct comal_line *mod_find_def(struct seg_des *seg, struct id_rec *id)
 	return NULL;
 }
 
-PRIVATE struct seg_des *mod_load(struct id_rec *id) 
-{
-	return NULL;
-}
-
 PUBLIC bool mod_use(struct seg_des *seg, struct id_rec *id, char *errtxt, struct comal_line **errline)
 {
 	struct comal_line *defline;
-	struct seg_des *modseg=seg;
 
 	/*
 	 * If this module has already been 
@@ -139,15 +133,11 @@ PUBLIC bool mod_use(struct seg_des *seg, struct id_rec *id, char *errtxt, struct
 	defline=mod_find_def(seg,id);
                                 
 	if (!defline) {
-		modseg=mod_load(id);
-		assert(modseg == NULL);
-		if (!modseg) {
-			snprintf(errtxt,MAX_LINELEN,"Module %s can not be found",id->name);
-			return false;
-		}
+		snprintf(errtxt,MAX_LINELEN,"Module %s can not be found",id->name);
+		return false;
 	}
 
-	return mod_register(defline,modseg,errtxt,errline);
+	return mod_register(defline,errtxt,errline);
 }
 
 PUBLIC void mod_freeall()

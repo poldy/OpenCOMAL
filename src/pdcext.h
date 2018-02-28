@@ -22,20 +22,6 @@ extern void ext_init(void);
 extern void ext_tini(void);
 
 /**
- * Hook to SCAN any extensions.
- * Not currently used.
- */
-extern int ext_call_scan(struct id_rec *id, struct exp_list *exproot,
-			 char *errtext);
-
-/**
- * Hook to EXEC any extensions.
- * Not currently used.
- */
-extern bool ext_call(struct id_rec *id, struct exp_list *exproot,
-		    int calltype, void **result, enum VAL_TYPE *type);
-
-/**
  * Evaluate any SYS(???) expressions
  * Unless you require backward-compability with some other implementation,
  * this is the recommended way to extend the interpreter.
@@ -70,13 +56,7 @@ extern bool ext_ht(void);
 /** Handle writing a np after "SYS SYSOUT" */
 extern void ext_page(FILE *f);
 
-/** Handle clearing to EOL after "SYS SYSOUT" */
-extern void ext_clrtoeol(FILE *f);
-
-/** Handle moving the cursor after "SYS SYSOUT" */
-extern void ext_cursor(FILE *f, int y, int x);
-
-/** Handle output to a stream after "SYS SYSOUT" */
-extern bool ext_put(int stream, const char *buf, long len);
+/** Handle output after "SYS SYSOUT" */
+extern bool ext_put(const char *buf);
 
 #endif

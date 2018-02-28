@@ -44,21 +44,6 @@ PUBLIC void ext_tini()
 {
 }
 
-
-PUBLIC int ext_call_scan(struct id_rec *id, struct exp_list *exproot,
-			 char *errtext)
-{
-	return -1;
-}
-
-
-PUBLIC bool ext_call(struct id_rec *id, struct exp_list *exproot, int
-		    calltype, void **result, enum VAL_TYPE *type)
-{
-	return false;
-}
-
-
 PRIVATE bool *is_flag(char *cmd)
 {
 	extern bool show_exec;
@@ -377,20 +362,7 @@ PUBLIC void ext_page(FILE *f)
 	fputc('\f', f);
 }
 
-
-PUBLIC void ext_clrtoeol(FILE *f)
-{
-	assert(f != NULL);
-}
-
-
-PUBLIC void ext_cursor(FILE *f, int y, int x)
-{
-	assert(f != NULL);
-}
-
-
-PUBLIC bool ext_put(int stream, const char *buf, long len)
+PUBLIC bool ext_put(const char *buf)
 {
 	if (sys_outfile != NULL) {
 		fputs(buf, sys_outfile);

@@ -256,7 +256,7 @@ PRIVATE bool cmd_auto(struct comal_line *line)
 			snprintf(buf, MAX_LINELEN, "%9ld  ", nr);
 		}
 
-		if (sys_edit(MSG_DIALOG, buf, MAX_LINELEN, 11))
+		if (sys_edit(MSG_DIALOG, buf, MAX_LINELEN))
 			return false;
 
 		aline = crunch_line(buf);
@@ -327,7 +327,7 @@ PRIVATE bool cmd_edit(struct comal_line *line)
 		buf2 = buf;
 		line_list(&buf2, work);
 
-		if (sys_edit(MSG_DIALOG, buf, MAX_LINELEN, 10))
+		if (sys_edit(MSG_DIALOG, buf, MAX_LINELEN))
 			return false;
 
 		aline = crunch_line(buf);
