@@ -300,7 +300,7 @@ PUBLIC void mem_freepool_private(struct mem_pool *pool)
 		next = work->next;
 
 		if (work->marker != MEM_MARKER)
-			fatal("Invalid marker in mem_freepool(%d)", pool);
+			fatal("Invalid marker in mem_freepool(%p)", pool);
 
 		free(work);
 		work = next;

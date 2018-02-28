@@ -407,7 +407,7 @@ PRIVATE void sym_list_horse(struct sym_env *env)
 	
 	if (env->curproc) {
 		line_list(&buf, env->curproc);
-		my_printf(MSG_DIALOG,true,line);
+		my_printf(MSG_DIALOG,true,"%s",line);
 	} else
 		my_printf(MSG_DIALOG,true,"Global");
 

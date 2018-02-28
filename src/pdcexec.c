@@ -105,7 +105,7 @@ PUBLIC void run_error(int error, const char *s, ...)
 PRIVATE void exec_temphalt(const char *reason)
 {
 	puts_line(MSG_DIALOG, curenv->curline);
-	my_printf(MSG_DIALOG, true, reason);
+	my_printf(MSG_DIALOG, true, "%s", reason);
 
 	comal_loop(HALTED);
 }

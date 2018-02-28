@@ -54,7 +54,7 @@ extern struct expression *pars_exp_substr(struct expression *exp,
 extern struct expression *pars_exp_num(struct expression *numexp);
 extern struct expression *pars_exp_str(struct expression *strexp);
 extern struct expression *pars_exp_rnd(struct expression *exp1, struct expression *exp2);
-extern void pars_error(const char *s, ...);
+extern void pars_error(const char *s, ...) __printflike(1, 2);
 extern int pars_handle_error(void);
 
 #endif

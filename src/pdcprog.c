@@ -124,7 +124,7 @@ PUBLIC void prog_total_scan()
 		if (errline)
 			puts_line(MSG_ERROR, errline);
 
-		my_printf(MSG_ERROR, true, errtxt);
+		my_printf(MSG_ERROR, true, "%s", errtxt);
 	}
 }
 

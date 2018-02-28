@@ -196,7 +196,7 @@ PRIVATE bool cmd_save(struct comal_line *line)
 			curenv->name =
 			    my_strdup(MISC_POOL, line->lc.str->s);
 		} else
-			my_printf(MSG_DIALOG, true, curenv->name);
+			my_printf(MSG_DIALOG, true, "%s", curenv->name);
 
 		sqash_2file(curenv->name);
 		curenv->changed = false;
@@ -216,7 +216,7 @@ PRIVATE bool cmd_load(struct comal_line *line)
 			fn = line->lc.str->s;
 		else {
 			fn = curenv->name;
-			my_printf(MSG_DIALOG, true, fn);
+			my_printf(MSG_DIALOG, true, "%s", fn);
 		}
 
 		fn = my_strdup(MISC_POOL, fn);
@@ -388,7 +388,7 @@ PRIVATE void cmd_env_list()
 		my_printf(MSG_DIALOG, true, "Environment %s%s:",
 			  walk->env->envname,
 			  walk->env == curenv ? " [current]" : "");
-		my_printf(MSG_DIALOG, true, buf);
+		my_printf(MSG_DIALOG, true, "%s", buf);
 
 		walk = walk->next;
 

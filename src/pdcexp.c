@@ -489,7 +489,7 @@ PRIVATE void exp_unary(struct expression *expr, void **result,
 			s=sys_key(delay);
 		}
 
-		if (*s) my_printf(MSG_DIALOG,0,s);
+		if (*s) my_printf(MSG_DIALOG,0,"%s",s);
 
 		*result=str_make(RUN_POOL,s);
 		*type=V_STRING;

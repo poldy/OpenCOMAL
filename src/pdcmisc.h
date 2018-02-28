@@ -25,7 +25,7 @@ extern void my_ht(int stream);
 extern void my_put(int stream, const char *buf, long len);
 
 /** Write a formatted string to the specified stream */
-extern void my_printf(int stream, bool newline, const char *s, ...);
+extern void my_printf(int stream, bool newline, const char *s, ...) __printflike(3, 4);
 
 /** Optionally print a debug message */
 #ifdef NDEBUG
@@ -35,7 +35,7 @@ extern void my_printf(int stream, bool newline, const char *s, ...);
 #endif
 
 /** Abort execution of the current program and return to the command loop */
-extern void fatal(const char *s, ...);
+extern void fatal(const char *s, ...) __printflike(1, 2);
 
 /**
  * Reverse a list.

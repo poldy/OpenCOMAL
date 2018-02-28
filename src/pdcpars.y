@@ -2094,7 +2094,7 @@ optclosed	:	closedSYM
 
 PRIVATE void p_error(const char *s)
 	{
-		pars_error(s);
+		pars_error("%s", s);
 		yyclearin;
 	}
 	

@@ -181,7 +181,7 @@ PUBLIC void puts_line(int stream, struct comal_line *line)
 	if (line) {
 		buf2 = buf;
 		line_list(&buf2, line);
-		my_printf(stream, true, buf);
+		my_printf(stream, true, "%s", buf);
 	} else
 		my_printf(stream, true, "<NULL Line>");
 }
@@ -497,7 +497,7 @@ PUBLIC void give_run_err(struct comal_line *line)
 		if (line)
 			puts_line(MSG_ERROR, line);
 
-		my_printf(MSG_ERROR, true, curenv->errmsg);
+		my_printf(MSG_ERROR, true, "%s", curenv->errmsg);
 		mem_free(curenv->errmsg);
 		curenv->errmsg = NULL;
 		curenv->error = 0;
