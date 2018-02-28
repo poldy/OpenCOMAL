@@ -15,6 +15,8 @@
 #ifndef PDCEXT_H
 #define PDCEXT_H
 
+#include "compat_cdefs.h"
+
 /** Initialise all extensions */
 extern void ext_init(void);
 
@@ -54,7 +56,7 @@ extern bool ext_nl(void);
 extern bool ext_ht(void);
 
 /** Handle writing a np after "SYS SYSOUT" */
-extern void ext_page(FILE *f);
+extern void ext_page(FILE *f) __nonnull((1));
 
 /** Handle output after "SYS SYSOUT" */
 extern bool ext_put(const char *buf);

@@ -20,6 +20,8 @@
 #define __my_unused __unused
 #else
 
+#include <sys/cdefs.h>
+
 #ifndef __dead
 #define __dead \
         __attribute__((__noreturn__))
@@ -33,11 +35,6 @@
 #ifndef __my_unused
 #define __my_unused \
         __attribute__((unused))
-#endif
-
-#ifndef __nonnull
-#define __nonnull(x) \
-        __attribute__((__nonnull__(x)))
 #endif
 
 #endif  // __APPLE__
