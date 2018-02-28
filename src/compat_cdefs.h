@@ -10,7 +10,6 @@
 
 /** @file
  * Wrapper around BSD sys/cdefs.h annotations
- * @todo copy the definitions from libbsd for Linux
  */
 
 #ifndef COMPAT_CDEFS_H
@@ -34,6 +33,11 @@
 #ifndef __my_unused
 #define __my_unused \
         __attribute__((unused))
+#endif
+
+#ifndef __nonnull
+#define __nonnull(x) \
+        __attribute__((__nonnull__(x)))
 #endif
 
 #endif  // __APPLE__

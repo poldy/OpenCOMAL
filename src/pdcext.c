@@ -356,7 +356,7 @@ PUBLIC bool ext_ht(void)
 }
 
 
-PUBLIC void ext_page(FILE *f)
+PUBLIC void ext_page(FILE *f) __nonnull(1)
 {
 	assert(f != NULL);
 	fputc('\f', f);
