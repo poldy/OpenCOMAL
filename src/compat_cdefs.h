@@ -17,23 +17,25 @@
 #define COMPAT_CDEFS_H
 
 #ifdef __APPLE__
-
 #include <sys/cdefs.h>
 #define __my_unused __unused
-
 #else
 
-#include <bsd/sys/cdefs.h>
-#define __dead __dead2
+#ifndef __dead
+#define __dead \
+        __attribute__((__noreturn__))
+#endif
+
+#ifndef __printflike
+#define __printflike(x, y) \
+        __attribute((format(printf, (x), (y))))
+#endif
 
 #ifndef __my_unused
-# if LIBBSD_GCC_VERSION >= 0x0300
-#  define __my_unused __attribute__((unused))
-# else
-#  define __my_unused
-# endif
+#define __my_unused \
+        __attribute__((unused))
 #endif
 
-#endif
+#endif  // __APPLE__
 
 #endif
