@@ -74,7 +74,7 @@ PRIVATE struct {
 	
 };
 
-PRIVATE void errw(const char *msg)
+PRIVATE void errw(const char *msg) __dead
 {
         if (is_visual_mode) {
                 endwin();
