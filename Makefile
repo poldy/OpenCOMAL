@@ -20,7 +20,7 @@ msg:
 
 .PHONY: all
 all:
-	@cd src; $(MAKE) DEBUG=$(DEBUG) OPSYS=$(OPSYS) REALCC=$(REALCC)
+	+@cd src; $(MAKE) DEBUG=$(DEBUG) OPSYS=$(OPSYS) REALCC=$(REALCC)
 
 .PHONY: install
 install:
