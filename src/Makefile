@@ -49,8 +49,15 @@ else
 		CFLAGS+=-DNDEBUG -fast -Mipa=fast,inline
 		LDFLAGS+=-fast -Mipa=fast,inline
 	else
-		CFLAGS+=-DNDEBUG -Os -flto=jobserver
-		LDFLAGS+=-Os -flto=jobserver
+		CFLAGS+=-DNDEBUG -Os
+		LDFLAGS+=-Os
+		ifeq ($(OPSYS),macos)
+			CFLAGS+=-flto
+			LDFLAGS+=-flto
+		else
+			CFLAGS+=-flto=jobserver
+			LDFLAGS+=-flto=jobserver
+		endif
 	endif
 endif
 ifeq ($(REALCC),c++)
