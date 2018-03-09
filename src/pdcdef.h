@@ -46,15 +46,15 @@ struct string {
 };
 
 /** Allocate memory for a string */
-static inline struct string *
-STR_ALLOC(unsigned int p, long x)
+static inline __malloc struct string *
+STR_ALLOC(unsigned int p, size_t x)
 {
 	return (struct string *)mem_alloc(p, sizeof(struct string) + x);
 }
 
 /** Allocate memory for a string using the private allocation interface */
-static inline struct string *
-STR_ALLOC_PRIVATE(struct mem_pool *p, long x)
+static inline __malloc struct string *
+STR_ALLOC_PRIVATE(struct mem_pool *p, size_t x)
 {
 	return (struct string *)mem_alloc_private(p, sizeof(struct string) + x);
 }

@@ -29,7 +29,7 @@
 
 #ifndef __printflike
 #define __printflike(x, y) \
-        __attribute((format(printf, (x), (y))))
+        __attribute__((format(printf, (x), (y))))
 #endif
 
 #ifndef __my_unused
@@ -42,6 +42,11 @@
 #ifndef __my_nonnull
 #define __my_nonnull(...) \
 	__attribute__((__nonnull__(__VA_ARGS__)))
+#endif
+
+#ifndef __malloc
+#define __malloc \
+	__attribute__((__malloc__))
 #endif
 
 #endif

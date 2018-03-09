@@ -137,7 +137,7 @@ PUBLIC void *cell_alloc(unsigned pool)
 	return ++cell;
 }
 
-PUBLIC void *mem_alloc(unsigned pool, long size)
+PUBLIC void *mem_alloc(unsigned pool, size_t size)
 {
 	if (pool >= NR_FIXED_POOLS)
 		fatal("Invalid pool number in mem_alloc()");
@@ -145,7 +145,7 @@ PUBLIC void *mem_alloc(unsigned pool, long size)
 	return mem_alloc_private(&mem_pool[pool], size);
 }
 
-PUBLIC void *mem_alloc_private(struct mem_pool *pool, long size)
+PUBLIC void *mem_alloc_private(struct mem_pool *pool, size_t size)
 {
 	struct mem_block *p;
 

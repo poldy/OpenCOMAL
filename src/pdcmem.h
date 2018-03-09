@@ -15,6 +15,9 @@
 #ifndef PDCMEM_H
 #define PDCMEM_H
 
+#include <stddef.h>
+#include "compat_cdefs.h"
+
 #define NR_FIXED_POOLS		4
 
 #define PARSE_POOL		0
@@ -51,16 +54,16 @@ extern void mem_init(void);
 extern void mem_tini(void);
 
 /** Allocate a cell */
-extern void *cell_alloc(unsigned int pool);
+extern __malloc void *cell_alloc(unsigned int pool);
 
 /**
  * Private interface to allocate a memory block.
  * @see STR_ALLOC_PRIVATE
  */
-extern void *mem_alloc_private(struct mem_pool *pool, long size);
+extern __malloc void *mem_alloc_private(struct mem_pool *pool, size_t size);
 
 /** Allocate a memory block in a pool */
-extern void *mem_alloc(unsigned int pool, long size);
+extern __malloc void *mem_alloc(unsigned int pool, size_t size);
 
 /** Change the size of a memory block */
 extern void *mem_realloc(void *block, long newsize);
