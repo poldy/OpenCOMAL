@@ -1,6 +1,9 @@
 # OpenCOMAL
 
-(Tá [leagan Gaeilge](LÉIGHMÉ.md) den doiciméad seo ar fáil.)
+See the [Wiki](https://github.com/poldy/OpenCOMAL/wiki) for most of the
+documentation.
+
+(Tá [leagan Gaeilge](LÉIGHMÉ.md) den cáipéis seo ar fáil.)
 
 This is a patched version of [Jos Visser](http://www.josvisser.nl/)'s
 [OpenComal](http://www.josvisser.nl/opencomal/)
