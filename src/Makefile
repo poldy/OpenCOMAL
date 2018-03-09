@@ -30,58 +30,11 @@ OBJ2:=pdcmain.o pdcmisc.o \
 OS:=pdclinux.o 
 
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
-ifeq ($(REALCC),pgcc)
-	CC:=$(REALCC)
-else
-	CC:=../build/ccd-gcc
-endif
-ifeq ($(REALCC),pgcc)
-	CFLAGS+=-D_FORTIFY_SOURCE=2
-else
-	CFLAGS+=-Wall -Wextra -D_FORTIFY_SOURCE=2
-endif
+include $(REALCC).mk
 MKCATDEFS:=../tools/mkcatdefs
-ifdef DEBUG
-	CFLAGS+=-O0 -ggdb
-	#LDFLAGS+=-lefence
-else
-	ifeq ($(REALCC),pgcc)
-		CFLAGS+=-DNDEBUG -fast -Mipa=fast,inline
-		LDFLAGS+=-fast -Mipa=fast,inline
-	else
-		CFLAGS+=-DNDEBUG -Os
-		LDFLAGS+=-Os
-		ifeq ($(OPSYS),macos)
-			CFLAGS+=-flto
-			LDFLAGS+=-flto
-		else
-			CFLAGS+=-flto=jobserver
-			LDFLAGS+=-flto=jobserver
-		endif
-	endif
-endif
-ifeq ($(REALCC),c++)
-	CFLAGS+=-Weffc++ -std=c++14
-else
-	ifeq ($(REALCC),pgcc)
-		CFLAGS+=-c11 -Xc
-	else
-		CFLAGS+=-std=c11
-	endif
-endif
-ifneq ($(OPSYS),macos)
-	-include /usr/share/hardening-includes/hardening.make
-	CFLAGS += $(HARDENING_CFLAGS)
-	LDFLAGS += $(HARDENING_LDFLAGS)
-endif
+include $(OPSYS).mk
 MIN_CFLAGS:=$(CFLAGS)
-ifeq ($(OPSYS),macos)
-	CFLAGS+=-I/usr/local/opt/readline/include
-	TARG_LDFLAGS:=-L/usr/local/opt/readline/lib -lreadline -lncurses -liconv
-else
-	CFLAGS+=$(shell ncursesw5-config --cflags)
-	TARG_LDFLAGS:=-lreadline -lm $(shell ncursesw5-config --libs)
-endif
+CFLAGS+=$(TARG_CFLAGS)
 SOURCE_DATE_EPOCH=$(shell git log -l --pretty=%ct)
 DATE_FMT = %Y-%m-%d
 ifdef SOURCE_DATE_EPOCH
@@ -107,6 +60,8 @@ build:
 
 pdcpars.tab.c: pdcpars.y
 	bison -vd pdcpars.y
+
+pdcpars.tab.h: pdcpars.tab.c
 
 lex.yy.c: pdclex.l
 	flex pdclex.l
