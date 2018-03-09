@@ -97,6 +97,14 @@ static int insert(char *, int);
 static int nsearch(char *);
 static int hash(char *);
 
+/* Like strncpy, but guarantees that "dest" will be NUL-terminated.
+ * Copied from the main program.  */
+static inline char *term_strncpy(char *dest, const char *src, size_t n)
+{
+        strncpy(dest, src, n - 1);
+        dest[n - 1] = '\0';
+        return dest;
+}
 
 /*
  * NAME: main
@@ -155,7 +163,7 @@ main (int argc,
       fprintf (stderr, "mkcatdefs: header file name too long\n");
       exit (1);
     }
-    sprintf (outname, "%s", mname);
+    term_strncpy (outname, mname, PATH_MAX);
     if (strrchr(mname,'/'))
       mname = strrchr(mname,'/') + 1;
     if ((outfp = fopen (outname, "w")) == NULL) {
@@ -179,7 +187,7 @@ main (int argc,
 	}
       }
     }
-  } else sprintf (outname, "msg.h");
+  } else term_strncpy (outname, "msg.h", PATH_MAX);
   
   
   /* open new msg output file */
@@ -194,9 +202,9 @@ main (int argc,
     count = argc;
   for (i = 2; i < count; i++) {
     /* open input file */
-    sprintf (inname, "%s", argv[i]);
+    term_strncpy (inname, argv[i], PATH_MAX);
     if (strcmp(inname,"-") == 0) {
-      strcpy(inname,"stdin");
+      term_strncpy(inname,"stdin",PATH_MAX);
       descfile = stdin;       /* input from stdin if no source files */
       mkcatdefs(inname);
     } else	{
@@ -562,7 +570,7 @@ insert(char *tname,
   else {          /* symbol not defined yet so put it into symbol table */    
     ptr = (struct name *)calloc(sizeof(struct name), 1);
     ptr->regname = (char *)malloc(strlen(tname) + 1);
-    strcpy (ptr->regname, tname);
+    term_strncpy (ptr->regname, tname, strlen(tname) + 1);
     ptr->regnr = seqno;
     
     /* not first entry in tree so update branch pointer */
