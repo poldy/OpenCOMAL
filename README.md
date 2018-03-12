@@ -20,18 +20,22 @@ I took over the project because I am interested in practical
 methods for improving the quality of old projects (similar to the
 [ntpsec](https://www.ntpsec.org/) project, although I am still
 some way behind them). OpenComal is a nice size to run experiments
-on. One of the nice things about the COMAL language itself is
+on.
+
+One of the nice things about the COMAL language itself is
 that it has a vendor-neutral standard with several implementions.
 Lately I've also been trying to bring OpenComal closer to compliance
 with those standards:
 * [COMAL Kernel spec](http://datamuseum.dk/wiki/COMAL/standardization#TeleNova.2C_Nyn.C3.A4shamn.2C_Sweden._March_13_to_16.2C_1985)
 * [Common COMAL](https://computerarchive.org/files/computer/newsletters/comal-today/COMAL_Today_Issue_24.pdf), pages 21-46
-* [The "STANDARD" package](https://computerarchive.org/files/computer/newsletters/comal-today/COMAL_Today_Issue_27.pdf), pages 47-52
+* [The "Type Detector" package](samples/examples/computer.md)
+* [The "STANDARD" package](samples/examples/standard.md)
 
 One regression is that I removed support for platforms that I don't
 build and test, MS-DOS and Win32.
-I'd love to get a pull request re-enabling these.
-The last version containing the needed files is tagged as `last_dos_w32_version`.
+I am no longer interested in these systems, or pull requests for them.
+Just in case anyone wanted to fork,
+the last version containing the needed files is tagged as `last_dos_w32_version`.
 
 ### Does Jos Visser, the original author, endorse this fork?
 
@@ -49,7 +53,8 @@ backspace key first (kudos to Harald Arnesen for this hint).
 I'm reluctant to do this, unless the feature is in one of the above
 standards. I *am* interested in bug reports and pull requests
 though. I think OpenCOMAL definitely has a niche in retrocomputing
-and may possibly have one in education, e.g. for other domain experts
+and may possibly have one in education, e.g. for children, teenagers, or
+other domain experts
 that don't have time to learn Computer Science.
 
 ## Further Reading
