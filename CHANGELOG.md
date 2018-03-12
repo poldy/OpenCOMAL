@@ -34,15 +34,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   last version containing the files.
 
 ## [0.2.7]:
-- Started implementing the MODULE concept. See "[whitepaper1.txt](whitepaper1.txt)"
-  in the [doc/](.) directory for more information.
+- Started implementing the MODULE concept. See "[whitepaper1.txt](doc/whitepaper1.txt)"
+  in the [doc/](doc/) directory for more information.
 - Changed the meaning of "END" to remove the complete variable
   environment. Also made "END" executable as a command (so as to
   end an interrupted program".
 - Changed the OpenComal prompt to "(halted)$ " if the
   interpreter is in HALTED state (program was stopped but could
   be continued).
-- Added the STATIC command (also see "[whitepaper1.txt](whitepaper1.txt)".)
+- Added the STATIC command (also see "[whitepaper1.txt](doc/whitepaper1.txt)".)
 
 ## 0.2.6:
 - New sys_edit() for Win32 by Gary Lake.
@@ -178,4 +178,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - First free release of OpenComal
 
 [Unreleased]: https://github.com/poldy/OpenCOMAL/compare/v0.2.7-pre1...HEAD
-[0.2.7]: https://github.com/poldy/OpenCOMAL/compare/v0.2.6...v0.2.7
+[0.2.7]: https://github.com/poldy/OpenCOMAL/compare/v0.2.6...v0.2.7-pre1
