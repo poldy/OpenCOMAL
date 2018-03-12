@@ -26,10 +26,10 @@
      9250   PROC connect(widget$, name$) CLOSED
      9260     _$:=gtk$("gtk_server_connect "+widget$+" XmNactivateCallback "+name$)
      9270   ENDPROC
-     9280   FUNC callback$
+     9280   FUNC callback$ CLOSED
      9290     RETURN gtk$("gtk_server_callback wait")
      9300   ENDFUNC
-     9310   PROC gtk_exit
+     9310   PROC gtk_exit CLOSED
      9320     _$:=gtk$("gtk_server_exit")
      9330   ENDPROC
      9340 ENDMODULE
