@@ -401,13 +401,13 @@ PUBLIC bool sys_escape()
 PRIVATE void do_put(int stream, const char *buf)
 {
 	if (stream == MSG_ERROR) {
-		CHECK(attron, A_STANDOUT);
+		CHECK(standout);
         }
 
 	addlstr(buf);
 
 	if (stream == MSG_ERROR) {
-		CHECK(attroff, A_STANDOUT);
+		CHECK(standend);
         }
 
         CHECK(refresh);
@@ -472,6 +472,22 @@ PUBLIC void sys_clrtoeol(FILE * f)
 {
 	if (f == NULL) {
 		CHECK(clrtoeol);
+	}
+}
+
+
+PUBLIC void sys_rvson(FILE * f)
+{
+	if (f == NULL) {
+		CHECK(attron, A_REVERSE);
+	}
+}
+
+
+PUBLIC void sys_rvsoff(FILE * f)
+{
+	if (f == NULL) {
+		CHECK(attroff, A_REVERSE);
 	}
 }
 

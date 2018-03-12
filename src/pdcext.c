@@ -303,6 +303,22 @@ PUBLIC int ext_sys_stat(struct exp_list *exproot)
 		sys_clrtoeol(sel_outfile);
 
 		return 0;
+	} else if (strcmp(cmd,"rvson") == 0) {
+		if (exproot->next) {
+			run_error(SYS_ERR,"No parameters allowed for SYS rvson");
+		}
+
+		sys_rvson(sel_outfile);
+
+		return 0;
+	} else if (strcmp(cmd,"rvsoff") == 0) {
+		if (exproot->next) {
+			run_error(SYS_ERR,"No parameters allowed for SYS rvsoff");
+		}
+
+		sys_rvsoff(sel_outfile);
+
+		return 0;
 	}
 
 	return -1;

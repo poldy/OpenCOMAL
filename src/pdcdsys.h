@@ -45,6 +45,12 @@ extern void sys_page(FILE * f);
 /** Erase the current line to the right of the cursor to the end of the current line */
 extern void sys_clrtoeol(FILE * f);
 
+/** Turn on reverse video */
+extern void sys_rvson(FILE * f);
+
+/** Turn off reverse video */
+extern void sys_rvsoff(FILE * f);
+
 /** Pass a command to the OS command interpreter */
 extern int sys_system(char *cmd);
 

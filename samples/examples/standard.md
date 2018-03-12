@@ -1,3 +1,7 @@
+These PROCs and FUNCs were originally specified in
+[COMAL Today issue 27](https://computerarchive.org/files/computer/newsletters/comal-today/COMAL_Today_Issue_27.pdf),
+pages 47-52.
+
 *VERSION'STANDARD$*: displays version and author information.
 
 *FILE'EXISTS(filename$)*: Checks if the specified file (or

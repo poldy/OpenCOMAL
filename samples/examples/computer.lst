@@ -1,0 +1,37 @@
+     9000 MODULE computer
+     9010   EXPORT computer'comal
+     9020   EXPORT opencomal
+     9030   EXPORT computer'eol$
+     9040   EXPORT computer'drive$
+     9050   EXPORT computer'rvson
+     9060   EXPORT computer'rvsoff
+     9070   EXPORT computer'screen$
+     9080   //
+     9090   FUNC opencomal CLOSED
+     9100     RETURN 5
+     9110   ENDFUNC opencomal
+     9120   //
+     9130   FUNC computer'comal CLOSED
+     9140     RETURN opencomal
+     9150   ENDFUNC computer'comal
+     9160   //
+     9170   FUNC computer'eol$ CLOSED
+     9180     RETURN CHR$(10)
+     9190   ENDFUNC computer'eol$
+     9200   //
+     9210   FUNC computer'drive$(x) CLOSED
+     9220     RETURN "C:"
+     9230   ENDFUNC computer'drive$
+     9240   //
+     9250   PROC computer'rvson CLOSED
+     9260     SYS rvson
+     9270   ENDPROC computer'rvson
+     9280   //
+     9290   PROC computer'rvsoff CLOSED
+     9300     SYS rvsoff
+     9310   ENDPROC computer'rvsoff
+     9320   //
+     9330   FUNC computer'screen$ CLOSED
+     9340     RETURN "DS:"
+     9350   ENDFUNC computer'screen$
+     9360 ENDMODULE computer
