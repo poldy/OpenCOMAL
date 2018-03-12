@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Start translation of output messages, WIP.
 - Allow "USING" after "PRINT FILE" & "PRINT AT".
 - Added [gtk_server.lst](../samples/examples/gtk_server.lst) & [mbutton.lst](../samples/examples/mbutton.lst)
+- Add [computer.lst](../samples/examples/computer.lst)
 
 ### Changed
 - Many changes were made to align better with Common COMAL & pass the test suite.
@@ -23,12 +24,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Changed DIV, MOD to be floored rather than symmetric
 - Renamed LN to LOG and LOG to LOG10.
 - Change "PRINT FILE" & "INPUT FILE" to use text format, for compliance with Common COMAL.
+- Change builds to be [reproducible](https://reproducible-builds.org/).
 
 ### Removed
 - Temporarily removed support for MS-DOS and Win32, because I can't
-  build or test them. I'd love if someone updated the support and
-  sent in a pull request (git tag "[last_dos_w32_version](https://github.com/poldy/OpenCOMAL/releases/tag/last_dos_w32_version)" is the
-  last version containing the files).
+  build or test them.
+  I am no longer interested, but if anyone else wants to fork
+  git tag "[last_dos_w32_version](https://github.com/poldy/OpenCOMAL/releases/tag/last_dos_w32_version)" is the
+  last version containing the files.
 
 ## [0.2.7]:
 - Started implementing the MODULE concept. See "[whitepaper1.txt](whitepaper1.txt)"
