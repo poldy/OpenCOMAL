@@ -736,7 +736,7 @@ PUBLIC void prog_structure_scan()
 }
 
 
-PUBLIC int scan_nescessary(struct comal_line *line)
+PUBLIC int scan_necessary(struct comal_line *line)
 {
 	int i;
 	int cmd2 = line_2cmd(line);
@@ -780,7 +780,7 @@ PUBLIC bool assess_scan(struct comal_line *line)
 		msg = catgets(catdesc, ScanSet, ScanCurExec, "the current execution line");
         } else if (line == curenv->datalptr) {
 		msg = catgets(catdesc, ScanSet, ScanCurData, "the current DATA line");
-        } else if (scan_nescessary(line)) {
+        } else if (scan_necessary(line)) {
 		msg = catgets(catdesc, ScanSet, ScanStrucLine, "a program structure line");
         }
 	if (msg) {

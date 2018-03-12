@@ -46,7 +46,7 @@ PUBLIC void prog_addline(struct comal_line *line)
 	if (last) {
 		last->ld->next = line;
 
-		if (scan_nescessary(last) == STRUCTURE_START)
+		if (scan_necessary(last) == STRUCTURE_START)
 			line->ld->indent = last->ld->indent + INDENTION;
 		else
 			line->ld->indent = last->ld->indent;

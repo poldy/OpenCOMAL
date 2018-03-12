@@ -47,6 +47,8 @@ CFLAGS+='-DBUILD_DATE="$(BUILD_DATE)"'
 .PHONY: all
 all: build $(TARG1) $(TARG2) ../bin/en.cat ../bin/ga.cat
 
+$(OBJ1) $(OBJ2) $(OS): pdcpars.tab.h
+
 $(TARG1):  $(OBJ1) $(OS)
 	$(CC) -o $(TARG1) $(OBJ1) $(OS) $(LDFLAGS) $(TARG_LDFLAGS)
 

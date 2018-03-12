@@ -45,8 +45,8 @@
 #define EXTERN extern
 #endif
 
-#define NO_STRUCTURE	(0)	/**< return values from scan_nescessary */
-#define STRUCTURE_START	(1)	/**< return values from scan_nescessary */
+#define NO_STRUCTURE	(0)	/**< return values from scan_necessary */
+#define STRUCTURE_START	(1)	/**< return values from scan_necessary */
 #define STRUCTURE_END	(2)
 
 #define COMMAND(x)	(32767-x)	/**< to distinguish between statements & command from (e.q. RUN, DEL) */
