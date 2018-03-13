@@ -18,7 +18,10 @@
 /** Add a line to the current program, SCANning where necessary */
 extern void prog_addline(struct comal_line *line);
 
-/** Delete a line from the current program, i.e. the DEL command */
+/**
+ * Delete a line from the current program.
+ * This implements the DEL command.
+ */
 extern int prog_del(struct comal_line **root, long from, long to,
 		    int mainprog);
 

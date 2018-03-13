@@ -27,7 +27,7 @@ extern struct comal_line *crunch_line(char *line);
 /** Main loop of interpreter, get a line and parse or execute it */
 extern void comal_loop(int newstate);
 
-/** Entry point for development environment, including erorr handlers */
+/** Entry point for development environment, including error handlers */
 extern void pdc_go(int argc, char **argv);
 
 #endif
