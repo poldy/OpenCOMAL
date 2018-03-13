@@ -142,7 +142,7 @@ PRIVATE int my_getch_horse(wint_t *c, char *lc)
 	return ERR;
 }
 
-PRIVATE int my_getch()
+PRIVATE int my_getch(void)
 {
 	wint_t c;
 	int i;
@@ -211,7 +211,7 @@ PRIVATE void addlstr(const char *lstr)
 	CHECK(addwstr, wstr);
 }
 
-PRIVATE void curses_redisplay()
+PRIVATE void curses_redisplay(void)
 {
 	CHECK(move,gety,getx);
 	addlstr(rl_line_buffer);
@@ -220,14 +220,14 @@ PRIVATE void curses_redisplay()
 	CHECK(refresh);
 }
 
-PRIVATE int pre_input()
+PRIVATE int pre_input(void)
 {
 	rl_insert_text(edit_line);
 
 	return 0;
 }
 
-PRIVATE int startup()
+PRIVATE int startup(void)
 {
 	int i;
 	static int started_up=0;
@@ -320,11 +320,10 @@ PRIVATE void screen_tini(void)
         deinit_iconv();
 }
 
-PUBLIC void sys_init()
+PUBLIC void sys_init(void)
 {
         struct sigaction sa;
 
-	ext_init();
         sa.sa_handler = int_handler;
         sigemptyset(&sa.sa_mask);
         sa.sa_flags = SA_RESTART;
@@ -336,9 +335,8 @@ PUBLIC void sys_init()
 }
 
 
-PUBLIC void sys_tini()
+PUBLIC void sys_tini(void)
 {
-	ext_tini();
 	screen_tini();
 }
 
@@ -387,7 +385,7 @@ PUBLIC void sys_randomize(long seed)
 }
 
 
-PUBLIC bool sys_escape()
+PUBLIC bool sys_escape(void)
 {
 	if (escape) {
 		escape = 0;
@@ -622,7 +620,7 @@ PUBLIC bool sys_edit(int stream, char line[], int maxlen)
 	return do_get(stream, line, maxlen, NULL);
 }
 
-PUBLIC char *sys_dir_string() 
+PUBLIC char *sys_dir_string(void) 
 {
 	static int buf_size=1024;
 	static char *buf=0;
@@ -678,7 +676,7 @@ PUBLIC void sys_dir(const char *pattern) {
 	free(buf);
 }
 
-PUBLIC const char *sys_unit_string() 
+PUBLIC const char *sys_unit_string(void) 
 {
 	return "C:"; /* :-) */
 }

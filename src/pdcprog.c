@@ -95,7 +95,7 @@ PUBLIC int prog_del(struct comal_line **root, long from, long to, int
 }
 
 
-PUBLIC long prog_highest_line()
+PUBLIC long prog_highest_line(void)
 {
 	struct comal_line *work = curenv->progroot;
 	struct comal_line *last = NULL;
@@ -111,7 +111,7 @@ PUBLIC long prog_highest_line()
 	return last->ld->lineno;
 }
 
-PUBLIC void prog_total_scan()
+PUBLIC void prog_total_scan(void)
 {
 	char errtxt[MAX_LINELEN];
 	struct comal_line *errline = NULL;
@@ -129,7 +129,7 @@ PUBLIC void prog_total_scan()
 }
 
 
-PUBLIC void prog_new()
+PUBLIC void prog_new(void)
 {
 	clear_env(curenv);
 	mem_freepool_private(curenv->program_pool);
@@ -146,7 +146,7 @@ PUBLIC void prog_load(char *fn)
 }
 
 
-PUBLIC void prog_run()
+PUBLIC void prog_run(void)
 {
 	clean_runenv(curenv);
 

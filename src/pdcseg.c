@@ -139,7 +139,7 @@ PUBLIC struct seg_des *seg_dynamic_free(struct seg_des *seg)
 }
 
 
-PUBLIC void seg_allfree()
+PUBLIC void seg_allfree(void)
 {
 	struct seg_des *walk = curenv->segroot;
 	struct comal_line *curline = curenv->progroot;

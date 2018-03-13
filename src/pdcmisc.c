@@ -138,7 +138,7 @@ PUBLIC bool exp_list_of_nums(struct exp_list *root)
 }
 
 
-PUBLIC bool check_changed()
+PUBLIC bool check_changed(void)
 {
 	if (!curenv->changed)
 		return true;
@@ -147,7 +147,7 @@ PUBLIC bool check_changed()
 		      catgets(catdesc, MiscSet, MiscNotSaved, "Latest changes have not yet been saved! Proceed? "));
 }
 
-PUBLIC bool check_changed_any()
+PUBLIC bool check_changed_any(void)
 {
 	struct env_list *walk = env_root;
 	int any_changes = 0;

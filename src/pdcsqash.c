@@ -24,8 +24,8 @@
 PRIVATE void sqash_exp(struct expression *exp);
 PRIVATE void sqash_horse(struct comal_line *line);
 
-PRIVATE struct expression *expand_exp();
-PRIVATE struct comal_line *expand_horse();
+PRIVATE struct expression *expand_exp(void);
+PRIVATE struct comal_line *expand_horse(void);
 
 
 PRIVATE char *sqash_buf;
@@ -34,7 +34,7 @@ PRIVATE unsigned sqash_i;
 PRIVATE int sqash_file;
 
 
-PRIVATE void sqash_flush()
+PRIVATE void sqash_flush(void)
 {
 	if (sqash_i > 0) {
 		if (write(sqash_file, sqash_buf, sqash_i) <= 0) {
@@ -619,7 +619,7 @@ PUBLIC void sqash_2file(char *fname)
 /* EXPAND Part */
 /***************/
 
-PRIVATE void expand_read()
+PRIVATE void expand_read(void)
 {
         int status;
 
@@ -636,7 +636,7 @@ PRIVATE void expand_read()
 }
 
 
-PRIVATE char expand_getc()
+PRIVATE char expand_getc(void)
 {
 	char c;
 
@@ -659,7 +659,7 @@ PRIVATE void expand_get(void *data, unsigned size)
 }
 
 
-PRIVATE char expand_peekc()
+PRIVATE char expand_peekc(void)
 {
 	char c;
 
@@ -679,7 +679,7 @@ PRIVATE void expand_check(char c)
 }
 
 
-PRIVATE long expand_getlong()
+PRIVATE long expand_getlong(void)
 {
 	long l;
 
@@ -689,7 +689,7 @@ PRIVATE long expand_getlong()
 }
 
 
-PRIVATE int expand_getint()
+PRIVATE int expand_getint(void)
 {
 	int i;
 
@@ -744,7 +744,7 @@ PRIVATE void expand_getdouble(struct dubbel *d)
 
 
 
-PRIVATE struct id_rec *expand_getid()
+PRIVATE struct id_rec *expand_getid(void)
 {
 	struct id_rec *id;
 	char *s = expand_getstr2(SQ_ID);
@@ -759,7 +759,7 @@ PRIVATE struct id_rec *expand_getid()
 }
 
 
-PRIVATE struct exp_list *expand_explist()
+PRIVATE struct exp_list *expand_explist(void)
 {
 	struct exp_list *root = NULL;
 	struct exp_list *work;
@@ -780,7 +780,7 @@ PRIVATE struct exp_list *expand_explist()
 	return (struct exp_list *)my_reverse(root);
 }
 
-PRIVATE struct id_list *expand_idlist()
+PRIVATE struct id_list *expand_idlist(void)
 {
 	struct id_list *root = NULL;
 	struct id_list *work;
@@ -818,7 +818,8 @@ PRIVATE void expand_twoexp(struct two_exp *work)
 		fatal("Internal twoexp expand error #1");
 }
 
-PRIVATE struct two_exp *expand_alloc_twoexp() {
+PRIVATE struct two_exp *expand_alloc_twoexp(void)
+{
 	char c=expand_peekc();
 	struct two_exp *work;
 
@@ -838,7 +839,7 @@ PRIVATE struct two_exp *expand_alloc_twoexp() {
 #define EXP_ALLOC(x)	exp=(struct expression *)mem_alloc_private(curenv->program_pool,sizeof(struct expression)-sizeof(union exp_data)+sizeof(x))
 #define EXP_ALLOC0	exp=(struct expression *)mem_alloc_private(curenv->program_pool,sizeof(struct expression)-sizeof(union exp_data))
 
-PRIVATE struct expression *expand_exp()
+PRIVATE struct expression *expand_exp(void)
 {
 	char c = expand_getc();
 	struct expression *exp = NULL;
@@ -1026,7 +1027,7 @@ PRIVATE void expand_input(struct comal_line *line)
 }
 
 
-PRIVATE struct print_list *expand_printlist()
+PRIVATE struct print_list *expand_printlist(void)
 {
 	struct print_list *root = NULL;
 	struct print_list *work;
@@ -1092,7 +1093,7 @@ PRIVATE void expand_print(struct comal_line *line)
 }
 
 
-PRIVATE struct assign_list *expand_assign()
+PRIVATE struct assign_list *expand_assign(void)
 {
 	struct assign_list *work;
 	struct assign_list *root = NULL;
@@ -1115,7 +1116,7 @@ PRIVATE struct assign_list *expand_assign()
 }
 
 
-PRIVATE struct when_list *expand_whenlist()
+PRIVATE struct when_list *expand_whenlist(void)
 {
 	struct when_list *work;
 	struct when_list *root = NULL;
@@ -1135,7 +1136,7 @@ PRIVATE struct when_list *expand_whenlist()
 }
 
 
-PRIVATE struct parm_list *expand_parmlist()
+PRIVATE struct parm_list *expand_parmlist(void)
 {
 	struct parm_list *root = NULL;
 	struct parm_list *work;
@@ -1157,7 +1158,7 @@ PRIVATE struct parm_list *expand_parmlist()
 }
 
 
-PRIVATE struct import_list *expand_importlist()
+PRIVATE struct import_list *expand_importlist(void)
 {
 	struct import_list *root = NULL;
 	struct import_list *work;
@@ -1178,7 +1179,7 @@ PRIVATE struct import_list *expand_importlist()
 }
 
 
-PRIVATE struct comal_line *expand_horse()
+PRIVATE struct comal_line *expand_horse(void)
 {
 	struct comal_line *line;
 	char c = expand_getc();

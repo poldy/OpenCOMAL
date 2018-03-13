@@ -20,7 +20,7 @@
 /** yacc error handler, no action */
 extern void yyerror(const char *s);
 
-extern int yyparse();
+extern int yyparse(void);
 
 /** Action to store one item in an expression list */
 extern struct exp_list *pars_explist_item(struct expression *exp,

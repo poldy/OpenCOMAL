@@ -26,7 +26,7 @@
 #include "msgnrs.h"
 #include "pdccloop.h"
 
-PUBLIC const char *sys_interpreter()
+PUBLIC const char *sys_interpreter(void)
 {
 	return "OpenComal";
 }

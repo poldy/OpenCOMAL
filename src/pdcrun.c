@@ -22,7 +22,7 @@ PUBLIC int yydebug = 0;		/* To replace YACC's yydebug */
 PUBLIC bool show_exec = false;	/* To replace PDCLIST.C's show_exec */
 
 
-PUBLIC const char *sys_interpreter()
+PUBLIC const char *sys_interpreter(void)
 {
 	return "OpenComalRun";
 }
@@ -46,7 +46,7 @@ PUBLIC void comal_loop(int newstate __my_unused)
 	longjmp(RESTART, QUIT);
 }
 
-PRIVATE char *get_runfilename()
+PRIVATE char *get_runfilename(void)
 {
 	char buf[128];
 

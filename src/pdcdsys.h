@@ -88,13 +88,13 @@ extern bool sys_get(int stream, char *line, int maxlen, const char *prompt);
 extern bool sys_edit(int stream, char *line, int maxlen);
 
 /** Get the current working directory */
-extern char *sys_dir_string();
+extern char *sys_dir_string(void);
 
 /** Print a directory listing */
 extern void sys_dir(const char *pattern);
 
 /** Get the drive letter/number */
-extern const char *sys_unit_string();
+extern const char *sys_unit_string(void);
 
 /** Return a string containing enough spaces to get to a column */
 extern const char *sys_tab_string(long col);

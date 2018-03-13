@@ -319,7 +319,7 @@ PUBLIC void pars_error(const char *s, ...)
 }
 
 
-PUBLIC int pars_handle_error()
+PUBLIC int pars_handle_error(void)
 {
 	int i = pars_error_happened;
 

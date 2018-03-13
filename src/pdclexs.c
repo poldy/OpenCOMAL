@@ -214,7 +214,7 @@ PRIVATE struct {
 	0, 0, "<undefined>"}
 };
 
-PUBLIC int lex_string_flatten()
+PUBLIC int lex_string_flatten(void)
 {
 	PRIVATE char finalstring[255];
 
@@ -279,7 +279,7 @@ PUBLIC int lex_string_flatten()
 }
 
 
-PUBLIC int lex_floatnum()
+PUBLIC int lex_floatnum(void)
 {
 	char *endptr;
 
@@ -293,7 +293,7 @@ PUBLIC int lex_floatnum()
 }
 
 
-PUBLIC int lex_intnum()
+PUBLIC int lex_intnum(void)
 {
 	char *c = yytext;
 
@@ -330,7 +330,7 @@ PUBLIC int lex_id(int sym)
 }
 
 
-PUBLIC int lex_rem()
+PUBLIC int lex_rem(void)
 {
 	remove_trailing(yytext,"\r\n","\n");
 	yylval.str = str_make(PARSE_POOL, yytext + 2);

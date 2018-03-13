@@ -17,12 +17,6 @@
 
 #include "compat_cdefs.h"
 
-/** Initialise all extensions */
-extern void ext_init(void);
-
-/** Cleanup after all extensions */
-extern void ext_tini(void);
-
 /**
  * Evaluate any SYS(???) expressions
  * Unless you require backward-compability with some other implementation,

@@ -20,7 +20,7 @@
 
 /* #define PDCLEX_DEBUG 1 */
 
-PRIVATE int pdc_input();	/* Definition for FLEX */
+PRIVATE int pdc_input(void);	/* Definition for FLEX */
 
 #ifdef FLEX
 #undef YY_INPUT
@@ -123,7 +123,7 @@ exp			[Ee][\-\+]?{number}+
 .						pars_error("Unexpected character 0x%02x",*yytext);
 %%
 
-PUBLIC int yywrap()
+PUBLIC int yywrap(void)
 	{
 		return 1;
 	}
@@ -142,7 +142,7 @@ PRIVATE void pdc_unput(char c)
 	}
 
 
-PRIVATE int pdc_input2()
+PRIVATE int pdc_input2(void)
 	{
 		if (unputsp>0) return unputstack[--unputsp];
 	
@@ -152,7 +152,7 @@ PRIVATE int pdc_input2()
 	}
 
 
-PRIVATE int pdc_input()
+PRIVATE int pdc_input(void)
 	{
 		char c=pdc_input2();
 
@@ -163,7 +163,7 @@ PRIVATE int pdc_input()
 		return c;
 	}
 
-PUBLIC int lex_pos()
+PUBLIC int lex_pos(void)
 	{
 		return lineptr-unputsp-1+3-yyleng;
 	}
@@ -186,7 +186,7 @@ PUBLIC void lex_unput(char c)
 	}
 
 
-PUBLIC int lex_leng()
+PUBLIC int lex_leng(void)
 	{
 		return yyleng;
 	}

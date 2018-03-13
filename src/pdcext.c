@@ -34,16 +34,6 @@ PRIVATE struct inpfile_stkent *inpfile_root = NULL;
 PRIVATE FILE *sys_inpfile = NULL;
 PRIVATE FILE *sys_outfile = NULL;
 
-
-PUBLIC void ext_init()
-{
-}
-
-
-PUBLIC void ext_tini()
-{
-}
-
 PRIVATE bool *is_flag(char *cmd)
 {
 	extern bool show_exec;
@@ -156,7 +146,7 @@ PUBLIC int ext_syss_exp(struct exp_list *exproot, struct string
 }
 
 
-PRIVATE void push_inpfile()
+PRIVATE void push_inpfile(void)
 {
 	struct inpfile_stkent *work = (struct inpfile_stkent *)mem_alloc(MISC_POOL, sizeof(*work));
 
@@ -166,7 +156,7 @@ PRIVATE void push_inpfile()
 }
 
 
-PRIVATE void pop_inpfile()
+PRIVATE void pop_inpfile(void)
 {
 	struct inpfile_stkent *work = inpfile_root;
 
@@ -179,7 +169,7 @@ PRIVATE void pop_inpfile()
 }
 
 
-PRIVATE void pop_all_inpfiles()
+PRIVATE void pop_all_inpfiles(void)
 {
 	while (inpfile_root) {
 		pop_inpfile();

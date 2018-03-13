@@ -33,9 +33,9 @@ extern struct comal_line *mod_find_def(struct seg_des *seg, struct id_rec *id);
 extern struct comal_line *mod_search_routine(struct id_rec *id, int type);
 
 /** Free the entire environment of loaded OpenComal modules */
-extern void mod_freeall();
+extern void mod_freeall(void);
 
 /** Initialize all registered modules */
-extern void mod_initall();
+extern void mod_initall(void);
 
 #endif

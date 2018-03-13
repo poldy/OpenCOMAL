@@ -32,7 +32,7 @@ PUBLIC struct comal_line c_line;
 
 PRIVATE void p_error(const char *msg);
 
-extern int yylex();
+extern int yylex(void);
 
 %}
 

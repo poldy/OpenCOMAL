@@ -40,10 +40,10 @@ extern const char *lex_sym(int sym);
 extern const char *lex_opsym(int sym);
 
 /* These are defined in pdclex.l */
-extern int lex_leng();
+extern int lex_leng(void);
 extern void lex_unput(char c);
-extern int yylex();
-extern int lex_pos();
+extern int yylex(void);
+extern int lex_pos(void);
 extern void lex_setinput(char *line);
 
 #endif

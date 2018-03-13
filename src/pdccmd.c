@@ -371,7 +371,7 @@ PRIVATE bool cmd_quit(struct comal_line *line __my_unused)
         return false;
 }
 
-PRIVATE void cmd_env_list()
+PRIVATE void cmd_env_list(void)
 {
 	struct env_list *walk = env_root;
 	char buf[MAX_LINELEN];

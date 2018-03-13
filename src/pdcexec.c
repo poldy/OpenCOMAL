@@ -915,7 +915,7 @@ PRIVATE void exec_assign(struct comal_line *line)
 }
 
 
-PRIVATE void exec_end()
+PRIVATE void exec_end(void)
 {
 	if (curenv->running != RUNNING && !sys_yn(MSG_DIALOG, catgets(catdesc, ExecSet, ExecSure, "Are you sure? "))) {
 		return;
@@ -2510,7 +2510,7 @@ PUBLIC int exec_line(struct comal_line *line)
 }
 
 
-PRIVATE int exec_seq3()
+PRIVATE int exec_seq3(void)
 {
 	int retcode = 0;
 
@@ -2528,7 +2528,7 @@ PRIVATE int exec_seq3()
 }
 
 
-PRIVATE int exec_seq2()
+PRIVATE int exec_seq2(void)
 {
 	jmp_buf save_err;
 	static int ret;

@@ -688,7 +688,7 @@ INDENT(int x)
 	return (x >= INDENTION * MAX_INDENT ? INDENTION * MAX_INDENT : x);
 }
 
-PUBLIC void prog_structure_scan()
+PUBLIC void prog_structure_scan(void)
 {
 	int indent = 0;
 	struct comal_line *curline = curenv->progroot;

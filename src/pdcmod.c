@@ -139,7 +139,7 @@ PUBLIC bool mod_use(struct seg_des *seg, struct id_rec *id, char *errtxt, struct
 	return mod_register(defline,errtxt,errline);
 }
 
-PUBLIC void mod_freeall()
+PUBLIC void mod_freeall(void)
 {
 	free_list((struct my_list *)mod_func_root);
 	free_list((struct my_list *)mod_root);
@@ -161,7 +161,7 @@ PUBLIC struct comal_line *mod_search_routine(struct id_rec *id, int type)
 	return NULL;
 }
 
-PUBLIC void mod_initall()
+PUBLIC void mod_initall(void)
 {
 	struct mod_entry *walk=mod_root;
 

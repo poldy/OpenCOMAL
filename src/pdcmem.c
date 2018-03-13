@@ -70,7 +70,7 @@ PRIVATE void pool_init(struct mem_pool *pool)
 	pool->root = NULL;
 }
 
-PUBLIC void mem_init()
+PUBLIC void mem_init(void)
 {
 	int i;
 
@@ -91,7 +91,7 @@ PRIVATE void cell_tini(unsigned pool)
 }
 
 
-PUBLIC void mem_tini()
+PUBLIC void mem_tini(void)
 {
 	int i;
 
@@ -353,7 +353,7 @@ PUBLIC void mem_debug(void)
 			  mem_pool[i].size);
 }
 
-PUBLIC struct mem_pool *pool_new()
+PUBLIC struct mem_pool *pool_new(void)
 {
 	struct mem_pool *work = GETCORE(MISC_POOL, struct mem_pool);
 

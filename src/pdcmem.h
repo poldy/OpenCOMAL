@@ -93,6 +93,6 @@ extern void mem_shiftmem(unsigned int frompool, struct mem_pool *topool);
 extern void mem_debug(void);
 
 /** Allocate a new memory pool */
-extern struct mem_pool *pool_new();
+extern struct mem_pool *pool_new(void);
 
 #endif
