@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Start translation of output messages, WIP.
 - Allow "USING" after "PRINT FILE" & "PRINT AT".
 - Added [gtk_server.lst](../samples/examples/gtk_server.lst) & [mbutton.lst](../samples/examples/mbutton.lst)
+- Add [computer.lst](../samples/examples/computer.lst)
 
 ### Changed
 - Many changes were made to align better with Common COMAL & pass the test suite.
@@ -23,23 +24,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Changed DIV, MOD to be floored rather than symmetric
 - Renamed LN to LOG and LOG to LOG10.
 - Change "PRINT FILE" & "INPUT FILE" to use text format, for compliance with Common COMAL.
+- Change builds to be [reproducible](https://reproducible-builds.org/).
+- Switch license to GPL3. My reading of clause 9 of the GPL2 and the phrase "covered by the GPL" without a version number in src/header is that this is allowed. Prompted by the fact that we link against readline, which is under GPL3. If I'm wrong, this can be reverted (commit b61deb0) and we can switch to another line editing library.
 
 ### Removed
-- Temporarily removed support for MS-DOS and Win32, because I can't
-  build or test them. I'd love if someone updated the support and
-  sent in a pull request (git tag "[last_dos_w32_version](https://github.com/poldy/OpenCOMAL/releases/tag/last_dos_w32_version)" is the
-  last version containing the files).
+- Removed support for MS-DOS and Win32, because I can't
+  build or test them.
+  I am no longer interested, but if anyone else wants to fork
+  git tag "[last_dos_w32_version](https://github.com/poldy/OpenCOMAL/releases/tag/last_dos_w32_version)" is the
+  last version containing the files.
 
 ## [0.2.7]:
-- Started implementing the MODULE concept. See "[whitepaper1.txt](whitepaper1.txt)"
-  in the [doc/](.) directory for more information.
+- Started implementing the MODULE concept. See "[whitepaper1.txt](doc/whitepaper1.txt)"
+  in the [doc/](doc/) directory for more information.
 - Changed the meaning of "END" to remove the complete variable
   environment. Also made "END" executable as a command (so as to
   end an interrupted program".
 - Changed the OpenComal prompt to "(halted)$ " if the
   interpreter is in HALTED state (program was stopped but could
   be continued).
-- Added the STATIC command (also see "[whitepaper1.txt](whitepaper1.txt)".)
+- Added the STATIC command (also see "[whitepaper1.txt](doc/whitepaper1.txt)".)
 
 ## 0.2.6:
 - New sys_edit() for Win32 by Gary Lake.
@@ -175,4 +179,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - First free release of OpenComal
 
 [Unreleased]: https://github.com/poldy/OpenCOMAL/compare/v0.2.7-pre1...HEAD
-[0.2.7]: https://github.com/poldy/OpenCOMAL/compare/v0.2.6...v0.2.7
+[0.2.7]: https://github.com/poldy/OpenCOMAL/compare/v0.2.6...v0.2.7-pre1

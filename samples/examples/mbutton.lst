@@ -13,7 +13,7 @@
       120   REPEAT
       130     event$:=callback$
       140   UNTIL event$="activateCB"
-      150 ENDPROC event_loop
+      150 ENDPROC
       160 MODULE gtk_server
       170   EXPORT gtk$
       180   EXPORT gtk_init
@@ -32,20 +32,20 @@
       310     INPUT FILE f#: response$
       320     CLOSE FILE f#
       330     RETURN response$
-      340   ENDFUNC gtk$
+      340   ENDFUNC
       350   PROC gtk_init CLOSED
       360     OS "gtk-server -fifo=/tmp/comal -detach"
-      370   ENDPROC gtk_init
+      370   ENDPROC
       380   FUNC toplevel$ CLOSED
       390     RETURN gtk$("gtk_server_toplevel")
-      400   ENDFUNC toplevel$
+      400   ENDFUNC
       410   PROC connect(widget$, name$) CLOSED
       420     _$:=gtk$("gtk_server_connect "+widget$+" XmNactivateCallback "+name$)
-      430   ENDPROC connect
-      440   FUNC callback$
+      430   ENDPROC
+      440   FUNC callback$ CLOSED
       450     RETURN gtk$("gtk_server_callback wait")
-      460   ENDFUNC callback$
-      470   PROC gtk_exit
+      460   ENDFUNC
+      470   PROC gtk_exit CLOSED
       480     _$:=gtk$("gtk_server_exit")
-      490   ENDPROC gtk_exit
-      500 ENDMODULE gtk_server
+      490   ENDPROC
+      500 ENDMODULE
