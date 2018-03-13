@@ -29,7 +29,7 @@ PRIVATE struct comal_line *expand_horse();
 
 
 PRIVATE char *sqash_buf;
-PRIVATE int sqash_hwm;
+PRIVATE unsigned sqash_hwm;
 PRIVATE unsigned sqash_i;
 PRIVATE int sqash_file;
 
@@ -621,14 +621,17 @@ PUBLIC void sqash_2file(char *fname)
 
 PRIVATE void expand_read()
 {
-	sqash_hwm = read(sqash_file, sqash_buf, SQASH_BUFSIZE);
+        int status;
 
-	if (sqash_hwm < 0) {
+	status = read(sqash_file, sqash_buf, SQASH_BUFSIZE);
+
+	if (status < 0) {
 		close(sqash_file);
 		run_error(SQASH_ERR, "Error when reading from file: %s",
 			  strerror(errno));
 	}
 
+        sqash_hwm = status;
 	sqash_i = 0;
 }
 
@@ -649,7 +652,7 @@ PRIVATE char expand_getc()
 
 PRIVATE void expand_get(void *data, unsigned size)
 {
-	int i;
+	unsigned i;
 
 	for (i = 0; i < size; i++)
 		*((char *)data + i) = expand_getc();

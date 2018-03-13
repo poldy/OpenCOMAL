@@ -55,7 +55,7 @@ PRIVATE bool is_visual_mode = false;
 PRIVATE long zone = 1;
 
 PRIVATE struct {
-	int curses_key;
+	wint_t curses_key;
 	int internal_key;
 	const char *function;
 } my_keymap[] = {
