@@ -319,10 +319,6 @@ PUBLIC struct var_item *var_newvar(enum VAL_TYPE type,
 	return work;
 }
 
-
-/*
- * Create a new var entry for a REF variable
- */
 PUBLIC struct var_item *var_refvar(struct var_item *lvar, enum VAL_TYPE type, long strlen, void *vref)
 {
 	struct var_item *work;
@@ -360,11 +356,6 @@ PUBLIC struct name_rec *name_new(struct sym_env *env,
 	return work;
 }
 
-/*
- * Return a pointer to the data araa of a variable. If this
- * variable is a REFerence variable, this function takes that
- * into account...
- */
 PUBLIC void *var_data(struct var_item *var)
 {
 	if (!var->ref)
@@ -440,9 +431,6 @@ PRIVATE void sym_list_horse(struct sym_env *env)
 	}
 }
 
-/*
- * Print a symbol environment 
- */
 PUBLIC void sym_list(struct sym_env *env, int recurse)
 {
 	if (!env) return;

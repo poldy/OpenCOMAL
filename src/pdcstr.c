@@ -106,9 +106,6 @@ PUBLIC struct string *str_ncpy(struct string *s1, struct string *s2, long n)
 	return s1;
 }
 
-/*
- * This routine copies a substring of string 2 to string 1
- */
 PUBLIC struct string *str_partcpy(struct string *s1, struct string *s2,
 				  long from, long to)
 {
@@ -123,9 +120,6 @@ PUBLIC struct string *str_partcpy(struct string *s1, struct string *s2,
 	return s1;
 }
 
-/*
- * This routine copies string 2 to a substring of string 1
- */
 PUBLIC struct string *str_partcpy2(struct string *s1, struct string *s2,
 				  long from, long to)
 {
