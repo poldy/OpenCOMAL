@@ -26,6 +26,7 @@ One of the nice things about the COMAL language itself is
 that it has a vendor-neutral standard with several implementions.
 Lately I've also been trying to bring OpenComal closer to compliance
 with those standards:
+
 * [COMAL Kernel spec](http://datamuseum.dk/wiki/COMAL/standardization#TeleNova.2C_Nyn.C3.A4shamn.2C_Sweden._March_13_to_16.2C_1985)
 * [Common COMAL](https://computerarchive.org/files/computer/newsletters/comal-today/COMAL_Today_Issue_24.pdf), pages 21-46
 * [The "Type Detector" package](samples/examples/computer.md)
@@ -39,8 +40,9 @@ the last version containing the needed files is tagged as `last_dos_w32_version`
 
 ### Does Jos Visser, the original author, endorse this fork?
 
-I don't know. He did not answer the previous maintainer's e-mail
-and I never sent him one. Legally there should not
+I don't know.
+Emails sent to his address no longer seem to be read.
+Legally there should not
 be any problem because OpenComal is licensed under the GPL.
 
 ### I do not see a new line number after entering `auto`. Is this wrong?
