@@ -25,7 +25,7 @@ NotSaved "Latest changes have not yet been saved! Proceed? "
 EnvUnsaved "Environment %s contains unsaved changes!"
 Proceed "Proceed? "
 
-$set Linux
+$set UNIX
 No "No\n"
 Yes "Yes\n"
 

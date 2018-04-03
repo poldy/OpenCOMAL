@@ -8,7 +8,7 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal SYS routines for LINUX */
+/* OpenComal SYS routines for UNIX */
 
 #define _XOPEN_SOURCE 700
 #define _DARWIN_C_SOURCE 1
@@ -24,6 +24,7 @@
 
 #include <signal.h>
 #include <string.h>
+#define NCURSES_OPAQUE 1
 #include <curses.h>
 #include <time.h>
 #include <sys/stat.h>
@@ -263,7 +264,9 @@ PRIVATE void init_ncurses(void)
         is_visual_mode = true;
         if (has_colors()) {
                 CHECK(start_color);
+#ifdef NCURSES_VERSION
                 CHECK(use_default_colors);
+#endif
         }
 	CHECK(scrollok, stdscr, TRUE);
         CHECK(idlok, stdscr, TRUE);
@@ -273,7 +276,9 @@ PRIVATE void init_ncurses(void)
         CHECK(nonl);
         CHECK(intrflush, NULL, FALSE);
         curs_set(2);
+#ifdef NCURSES_VERSION
 	set_tabsize(zone);
+#endif
 }
 
 PRIVATE void init_readline(void)
@@ -552,7 +557,9 @@ PUBLIC long sys_zone_num(void)
 
 PUBLIC void sys_zone(long size)
 {
+#ifdef NCURSES_VERSION
 	set_tabsize(size);
+#endif
 	zone = size;
 }
 
@@ -567,10 +574,10 @@ PUBLIC bool sys_yn(int stream, const char *prompt)
 		c = my_getch();
 
 		if (sys_escape() || c == 'n' || c == 'N') {
-			addlstr(catgets(catdesc, LinuxSet, LinuxNo, "No\n"));
+			addlstr(catgets(catdesc, UNIXSet, UNIXNo, "No\n"));
 			return false;
 		} else if (c == 'y' || c == 'Y') {
-			addlstr(catgets(catdesc, LinuxSet, LinuxYes, "Yes\n"));
+			addlstr(catgets(catdesc, UNIXSet, UNIXYes, "Yes\n"));
 			return true;
 		}
 	}

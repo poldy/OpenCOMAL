@@ -21,6 +21,6 @@
 
 #include "pdcdsys.h"
 
-#include "pdclinux.h"
+#include "pdcunix.h"
 
 #endif

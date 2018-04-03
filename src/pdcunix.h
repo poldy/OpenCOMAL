@@ -9,22 +9,29 @@
  */
 
 /** @file
- * OpenComal header file for Linux
+ * OpenComal header file for UNIX
+ *
+ * This module should depend on the following interfaces *only*:
+ *
+ * - ISO C11
+ * - <a href="http://pubs.opengroup.org/onlinepubs/9699919799/">X/Open 7, incorporating POSIX 2008</a>
+ * - <a href="https://publications.opengroup.org/c094">X/Open Curses, Issue 7</a>
+ *
+ * Testing has been done on Linux and macOS.
  */
 
-#ifndef PDCLINUX_H
-#define PDCLINUX_H
+#ifndef PDCUNIX_H
+#define PDCUNIX_H
 
 #define HUGE_POINTER		/**< no need for this in real OS's */
 #define O_BINARY 	0
 
-#define HOST_OS		"Linux"
+#define HOST_OS		"UNIX"
 #define HOST_OS_CODE	1	/**< Change when adding another OS! */
 #define VERSION		"0.2"
 #define CLI		""	/**< Command Line Interpreter */
 
 #define UNIX
-#define LINUX
 #define FLEX
 
 #define HAS_ROUND

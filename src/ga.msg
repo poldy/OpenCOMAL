@@ -27,7 +27,7 @@ NotSaved "Níl na hathraithe is déanaí sábháilte! Lean ar aghaidh? "
 EnvUnsaved "Tá athraithe neamh-sábháilte i dtimpeallacht %s!"
 Proceed "Lean ar aghaidh? "
 
-$set Linux
+$set UNIX
 No "Ní hea\n"
 Yes "Sea\n"
 

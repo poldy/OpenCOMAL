@@ -12,7 +12,7 @@
 #
 
 SOURCES:=lex.yy.c pdccloop.c pdccmd.c pdcenv.c pdcexec.c pdcexp.c pdcext.c \
-	pdcfree.c pdcid.c pdclexs.c pdclinux.c pdclist.c pdcmain.c pdcmem.c \
+	pdcfree.c pdcid.c pdclexs.c pdcunix.c pdclist.c pdcmain.c pdcmem.c \
 	pdcmisc.c pdcpars.tab.c pdcparss.c pdcprog.c pdcrun.c pdcscan.c \
 	pdcseg.c pdcsqash.c pdcstr.c pdcsym.c pdcval.c pdcmod.c
 
@@ -27,7 +27,7 @@ OBJ2:=pdcmain.o pdcmisc.o \
 	pdcid.o  pdcscan.o pdcenv.o pdcsym.o pdcexec.o pdcfree.o \
 	pdcexp.o pdcmem.o pdcsqash.o pdcstr.o pdcprog.o pdcext.o pdcseg.o \
 	pdcval.o pdcrun.o pdcmod.o
-OS:=pdclinux.o 
+OS:=pdcunix.o 
 
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
 include $(REALCC).mk
