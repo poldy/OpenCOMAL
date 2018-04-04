@@ -13,10 +13,10 @@
       130 PROC convert(f$, t$)
       140   CASE SYS$(host) OF
       150   WHEN "MsDos"
-      160     OS "dir *"+f$+" >temp"
+      160     PASS "dir *"+f$+" >temp"
       170   WHEN "Linux"
-      180     OS "ls *"+f$+" >temp"
-      190     OS "echo Finito >>temp"
+      180     PASS "ls *"+f$+" >temp"
+      190     PASS "echo Finito >>temp"
       200   OTHERWISE
       210     PRINT "Unknown host"
       220     STOP

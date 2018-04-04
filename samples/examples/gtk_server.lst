@@ -18,7 +18,7 @@
      9170     RETURN response$
      9180   ENDFUNC
      9190   PROC gtk_init CLOSED
-     9200     OS "gtk-server -fifo=/tmp/comal -detach"
+     9200     PASS "gtk-server -fifo=/tmp/comal -detach"
      9210   ENDPROC
      9220   FUNC toplevel$ CLOSED
      9230     RETURN gtk$("gtk_server_toplevel")

@@ -1,10 +1,10 @@
-       10 // OS sample program
+       10 // PASS sample program
        20 //
        30 CASE SYS$(host) OF
        40 WHEN "MsDos"
-       50   OS "ver"
+       50   PASS "ver"
        60 WHEN "Linux"
-       70   OS "uname -a"
+       70   PASS "uname -a"
        80 OTHERWISE
        90   PRINT "Unknown host"
       100   STOP

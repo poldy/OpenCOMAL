@@ -34,7 +34,7 @@
       330     RETURN response$
       340   ENDFUNC
       350   PROC gtk_init CLOSED
-      360     OS "gtk-server -fifo=/tmp/comal -detach"
+      360     PASS "gtk-server -fifo=/tmp/comal -detach"
       370   ENDPROC
       380   FUNC toplevel$ CLOSED
       390     RETURN gtk$("gtk_server_toplevel")

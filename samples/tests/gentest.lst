@@ -16,10 +16,10 @@
       160 PROC genrun(f$)
       170   CASE SYS$(host) OF
       180   WHEN "MsDos"
-      190     OS "dir *"+f$+" >temp"
+      190     PASS "dir *"+f$+" >temp"
       200   WHEN "Linux"
-      210     OS "ls *"+f$+" >temp"
-      220     OS "echo Finito >>temp"
+      210     PASS "ls *"+f$+" >temp"
+      220     PASS "echo Finito >>temp"
       230   OTHERWISE
       240     PRINT "Unknown host"
       250     STOP
