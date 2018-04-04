@@ -486,6 +486,9 @@ PRIVATE void exp_unary(struct expression *expr, void **result,
 				delay=(long)**(long **)result;
 
 			cell_free(*result);
+			if (delay > 25) {
+				run_error(PARM_ERR, "Parameter is outside the range -1..25");
+			}
 			s=sys_key(delay);
 		}
 
