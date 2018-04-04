@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   I am no longer interested, but if anyone else wants to fork
   git tag "[last_dos_w32_version](https://github.com/poldy/OpenCOMAL/releases/tag/last_dos_w32_version)" is the
   last version containing the files.
+- Removed "OS", "QUIT" and "RENUMBER" aliases for Common COMAL statements.
 
 ## [0.2.7]:
 - Started implementing the MODULE concept. See "[whitepaper1.txt](doc/whitepaper1.txt)"
