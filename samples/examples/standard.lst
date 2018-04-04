@@ -14,6 +14,7 @@
      9130   EXPORT quicksortnum
      9140   EXPORT center
      9150   EXPORT center'at
+     9155   EXPORT waitkey
      9160   EXPORT yes
      9170   EXPORT version'standard$
      9180   
@@ -56,8 +57,8 @@
      9550           CLOSE FILE f#
      9560           PRINT 
      9570           RETURN 
-     9580           // ELIF reply$>""  //any key to pause
-     9590           // waitkey
+     9580         ELIF reply$>""  //any key to pause
+     9590           waitkey
      9600         ENDIF
      9610       ENDWHILE
      9620       CLOSE FILE f#
@@ -235,4 +236,15 @@
     11340       ENDIF
     11350     UNTIL ok
     11360   ENDPROC
-    11370 ENDMODULE
+    11365   
+    11370   PROC waitkey CLOSED
+    11380     r:=CURROW; c:=CURCOL; msg$:=" << Press a key to continue >> "
+    11390     SYS rvson
+    11400     PRINT msg$,
+    11410     SYS rvsoff
+    11420     pause
+    11430     IF r=CURROW AND CURCOL<c THEN r:-1  // screen scrolled
+    11440     PRINT AT r,c: SPC$(LEN(msg$)),  // overwrites msg
+    11450     CURSOR r,c  // back to where we started
+    11460   ENDPROC
+    11470 ENDMODULE
