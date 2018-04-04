@@ -605,8 +605,6 @@ PUBLIC struct comal_line *stat_dup(struct comal_line *stat)
 	return work;
 }
 
-#ifndef EVIL32
-
 PUBLIC void strupr(char *s)
 {
 	while (*s) {
@@ -625,29 +623,12 @@ PUBLIC void strlwr(char *s)
 	}
 }
 
-#endif
-
-#ifdef UNIX
-
 PUBLIC char *ltoa(long num, char *buf)
 {
 	sprintf(buf, "%ld", num);
 
 	return buf;
 }
-
-PUBLIC bool eof(int f)
-{
-	char dummy;
-
-	if (read(f, &dummy, 1) == 0)
-		return true;
-
-	lseek(f, -1L, SEEK_CUR);
-
-	return false;
-}
-#endif
 
 PUBLIC void remove_trailing(char *s, const char *trailer, const char *subst) 
 {

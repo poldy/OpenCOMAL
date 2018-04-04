@@ -17,8 +17,6 @@
 #include "pdcmisc.h"
 #include "pdcsqash.h"
 #include "pdcexec.h"
-#include <fcntl.h>
-#include <sys/stat.h>
 #include <string.h>
 
 PRIVATE void sqash_exp(struct expression *exp);
@@ -31,14 +29,14 @@ PRIVATE struct comal_line *expand_horse(void);
 PRIVATE char *sqash_buf;
 PRIVATE unsigned sqash_hwm;
 PRIVATE unsigned sqash_i;
-PRIVATE int sqash_file;
+PRIVATE FILE *sqash_file;
 
 
 PRIVATE void sqash_flush(void)
 {
 	if (sqash_i > 0) {
-		if (write(sqash_file, sqash_buf, sqash_i) <= 0) {
-			close(sqash_file);
+		if (fwrite(sqash_buf, 1, sqash_i, sqash_file) <= 0) {
+			fclose(sqash_file);
 			run_error(SQASH_ERR,
 				  "Error when writing to file: %s",
 				  strerror(errno));
@@ -581,10 +579,9 @@ PUBLIC void sqash_2file(char *fname)
 	const char *s;
 
 	sqash_file =
-	    open(fname, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY,
-		 S_IRUSR | S_IWUSR);
+	    fopen(fname, "wb");
 
-	if (sqash_file < 0)
+	if (sqash_file == NULL)
 		run_error(OPEN_ERR, "File open error: %s",
 			  strerror(errno));
 
@@ -609,7 +606,7 @@ PUBLIC void sqash_2file(char *fname)
 
 	mem_free(sqash_buf);
 
-	if (close(sqash_file) < 0)
+	if (fclose(sqash_file) == EOF)
 		run_error(CLOSE_ERR, "Error closing file: %s",
 			  strerror(errno));
 }
@@ -623,10 +620,10 @@ PRIVATE void expand_read(void)
 {
         int status;
 
-	status = read(sqash_file, sqash_buf, SQASH_BUFSIZE);
+	status = fread(sqash_buf, 1, SQASH_BUFSIZE, sqash_file);
 
 	if (status < 0) {
-		close(sqash_file);
+		fclose(sqash_file);
 		run_error(SQASH_ERR, "Error when reading from file: %s",
 			  strerror(errno));
 	}
@@ -1049,7 +1046,6 @@ PRIVATE struct print_list *expand_printlist(void)
 PRIVATE void expand_print(struct comal_line *line)
 {
 	struct print_rec *p = &line->lc.printrec;
-	int type;
 
 	if (expand_peekc() == SQ_MODIFIER) {
 		expand_getc();
@@ -1078,6 +1074,8 @@ PRIVATE void expand_print(struct comal_line *line)
 			fatal("Print modifier incorrect (expand)");
 		}
 		if (expand_peekc() == SQ_MODIFIER) {
+	                int type;
+
 			expand_getc();
 			type = expand_getint();
 			if (type == usingSYM) {
@@ -1380,9 +1378,9 @@ PUBLIC struct comal_line *expand_fromfile(char *fname)
 	const char *s;
 	extern bool eof(int file);
 
-	sqash_file = open(fname, O_RDONLY | O_BINARY);
+	sqash_file = fopen(fname, "rb");
 
-	if (sqash_file < 0)
+	if (sqash_file == NULL)
 		run_error(OPEN_ERR, "File open error: %s",
 			  strerror(errno));
 
@@ -1432,13 +1430,13 @@ PUBLIC struct comal_line *expand_fromfile(char *fname)
 	if (strcmp(checkstr, SQ_COPYRIGHT_MSG) != 0)
 		fatal("Internal sqash/expand error #7");
 
-	if (!eof(sqash_file) || sqash_i < sqash_hwm)
+	if (!feof(sqash_file) || sqash_i < sqash_hwm)
 		fatal("Internal sqash/expand error #8");
 
 	mem_free(checkstr);
 	mem_free(sqash_buf);
 
-	if (close(sqash_file) < 0)
+	if (fclose(sqash_file) == EOF)
 		run_error(CLOSE_ERR, "Error closing file: %s",
 			  strerror(errno));
 

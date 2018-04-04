@@ -37,10 +37,6 @@
 #include <fcntl.h>
 #include <assert.h>
 
-#ifdef MSDOS
-#include <io.h>
-#endif
-
 #define FLOATUSING_MAX 32
 
 PRIVATE void *return_result;	/* For comms of FUNC results */

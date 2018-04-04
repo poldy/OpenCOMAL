@@ -31,7 +31,6 @@
 #define VERSION		"0.2"
 #define CLI		""	/**< Command Line Interpreter */
 
-#define UNIX
 #define FLEX
 
 #define HAS_ROUND
