@@ -56,6 +56,9 @@ range of the array starting with element <first> and ending with
 one sorts numeric arrays. The above PROC will correctly sort numeric
 arrays also if each number has the same number of digits.
 
+*WAITKEY*: Pauses the program, prints a message telling the user to press a key
+to continue, then erases the continue message and continues the program.
+
 *YES(prompt$)*: Used to get a YES or NO answer. For example:
 ```
 IF yes("Quit now?") THEN END
