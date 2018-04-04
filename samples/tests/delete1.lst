@@ -1,4 +1,4 @@
-       10 // DEL sample program
+       10 // DELETE sample program
        20 //
        30 SELECT OUTPUT "sel.out"
        40 PRINT "Hello"  // is moved into file
