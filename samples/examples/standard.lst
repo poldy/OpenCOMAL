@@ -17,6 +17,7 @@
      9155   EXPORT waitkey
      9160   EXPORT yes
      9170   EXPORT version'standard$
+     9175   EXPORT pause
      9180   
      9190   FUNC version'standard$ CLOSED
      9200     RETURN " 1.17 Standard package by Lindsay & Warman"
@@ -247,4 +248,8 @@
     11440     PRINT AT r,c: SPC$(LEN(msg$)),  // overwrites msg
     11450     CURSOR r,c  // back to where we started
     11460   ENDPROC
-    11470 ENDMODULE
+    11470
+    11480   PROC pause CLOSED
+    11490     _$:=INKEY$(-1)
+    11500   ENDPROC
+    11510 ENDMODULE
