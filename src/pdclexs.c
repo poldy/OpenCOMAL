@@ -153,14 +153,12 @@ PRIVATE struct {
 	orSYM, 0, "OR"}, {
 	orthenSYM, 0, "OR THEN"}, {
 	tsrnSYM, _ORD, "ORD"}, {
-	osSYM, 0, "OS"}, {
 	otherwiseSYM, 0, "OTHERWISE"}, {
 	pageSYM, 0, "PAGE"}, {
 	osSYM, 0, "PASS"}, {
 	rnSYM, _PI, "PI"}, {
 	printSYM, 0, "PRINT"}, {
 	procSYM, 0, "PROC"}, {
-	quitSYM, 0, "QUIT"}, {
 	quitSYM, 0, "BYE"}, {
 	tnrnSYM, _RAD, "RAD"}, {
 	randomizeSYM, 0, "RANDOMIZE"}, {
@@ -168,7 +166,6 @@ PRIVATE struct {
 	readSYM, 0, "READ"}, {
 	read_onlySYM, 0, "READ ONLY"}, {
 	refSYM, 0, "REF"}, {
-	renumberSYM, 0, "RENUMBER"}, {
 	renumberSYM, 0, "RENUM"}, {
 	repeatSYM, 0, "REPEAT"}, {
 	reportSYM, 0, "REPORT"}, {
@@ -366,7 +363,7 @@ PUBLIC const char *lex_opsym(int sym)
 	case divSYM:
 		return " DIV ";
 	case eorSYM:
-		return " EOR ";
+                return " EOR ";
 	case inSYM:
 		return " IN ";
 	case modSYM:
