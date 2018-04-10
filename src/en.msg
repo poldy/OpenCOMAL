@@ -19,6 +19,7 @@ $set Exec
 Stopped "OpenComal's warp engines answered full stop"
 Sure "Are you sure? "
 InputEsc "Escape from INPUT"
+CantExit "Can't EXIT in direct mode (use BYE to leave OpenCOMAL)"
 
 $set Misc
 NotSaved "Latest changes have not yet been saved! Proceed? "
