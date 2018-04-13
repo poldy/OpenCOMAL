@@ -35,6 +35,9 @@
 
 #include <readline/readline.h>
 #include <readline/history.h>
+#undef RETURN
+
+#include "mem.h"
 
 #define HALFDELAY 2
 
@@ -634,7 +637,7 @@ PUBLIC char *sys_dir_string(void)
 
 	while (true) {
 		if (!buf) {
-                        buf=(char *)malloc(buf_size);
+                        buf=(char *)ALLOC(buf_size);
                 }
 
 		if (getcwd(buf,buf_size)!=NULL) {
@@ -643,8 +646,7 @@ PUBLIC char *sys_dir_string(void)
 
 		if (errno==ERANGE) { /* buffer too small */
 			buf_size+=1024;
-			free(buf);
-			buf=0;
+			FREE(buf);
 		} else {
 			run_error(DIRS_ERR, "%s", strerror(errno));
                 }
@@ -660,13 +662,13 @@ PUBLIC void sys_dir(const char *pattern) {
 	
 	upattern = str_ltou(pattern);
 	l=strlen(upattern);
-	buf=(char *)malloc(8+l);
+	buf=(char *)ALLOC(8+l);
 	term_strncpy(buf,"ls -l ",8);
 	strncat(buf,upattern,l);
 	f=popen(buf,"r");
 
 	if (!f) {
-		free(buf);
+		FREE(buf);
                 run_error(DIRS_ERR, "%s", strerror(errno));
         }
 
@@ -680,7 +682,7 @@ PUBLIC void sys_dir(const char *pattern) {
 	sys_setpaged(0);
 	sys_setutf8(false);
 	pclose(f);
-	free(buf);
+	FREE(buf);
 }
 
 PUBLIC const char *sys_unit_string(void) 

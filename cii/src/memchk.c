@@ -1,4 +1,4 @@
-static char rcsid[] = "$Id$";
+#define _XOPEN_SOURCE 700
 #include <stdlib.h>
 #include <string.h>
 #include "assert.h"
@@ -32,7 +32,14 @@ static struct descriptor {
 	const char *file;
 	int line;
 } *htab[2048];
-static struct descriptor freelist = { &freelist };
+static struct descriptor freelist = {
+        &freelist,
+        NULL,
+        NULL,
+        0,
+        NULL,
+        0
+};
 static struct descriptor *find(const void *ptr) {
 	struct descriptor *bp = htab[hash(ptr, htab)];
 	while (bp && bp->ptr != ptr)
@@ -78,7 +85,7 @@ static struct descriptor *dalloc(void *ptr, long size,
 	static struct descriptor *avail;
 	static int nleft;
 	if (nleft <= 0) {
-		avail = malloc(NDESCRIPTORS*sizeof (*avail));
+		avail = (struct descriptor *)malloc(NDESCRIPTORS*sizeof (*avail));
 		if (avail == NULL)
 			return NULL;
 		nleft = NDESCRIPTORS;

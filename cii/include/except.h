@@ -18,7 +18,7 @@ enum { Except_entered=0, Except_raised,
        Except_handled,   Except_finalized };
 extern Except_Frame *Except_stack;
 extern const Except_T Assert_Failed;
-void Except_raise(const T *e, const char *file,int line);
+void __dead Except_raise(const T *e, const char *file,int line);
 #ifdef WIN32
 #include <windows.h>
 

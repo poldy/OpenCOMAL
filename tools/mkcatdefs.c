@@ -63,6 +63,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "mem.h"
+
 #ifndef NL_TEXTMAX
 #define NL_TEXTMAX 8192
 #endif
@@ -568,8 +570,8 @@ insert(char *tname,
   if (rslt == 0)  /* found the symbol already defined */
     return (-1);
   else {          /* symbol not defined yet so put it into symbol table */    
-    ptr = (struct name *)calloc(sizeof(struct name), 1);
-    ptr->regname = (char *)malloc(strlen(tname) + 1);
+    ptr = (struct name *)CALLOC(sizeof(struct name), 1);
+    ptr->regname = (char *)ALLOC(strlen(tname) + 1);
     term_strncpy (ptr->regname, tname, strlen(tname) + 1);
     ptr->regnr = seqno;
     

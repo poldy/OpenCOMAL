@@ -12,6 +12,7 @@
 
 #define _XOPEN_SOURCE 700
 
+#include "mem.h"
 #include "pdcglob.h"
 #include "pdcexec.h"
 #include "pdcmisc.h"
@@ -156,7 +157,7 @@ PUBLIC void *mem_alloc_private(struct mem_pool *pool, size_t size)
         if (size < sizeof(void *)) {
                 size = sizeof(void *);  // Because mem_free() will dereference my_list->next
         }
-	p = (struct mem_block *)calloc(1, size + sizeof(struct mem_block));
+        p = (struct mem_block *)CALLOC(1, size + sizeof(struct mem_block));
 
 	if (!p)
 		mem_error("allocating", size);
@@ -253,7 +254,7 @@ PUBLIC void *mem_free(void *m)
 		memblock->pool->root = memblock->next;
 
 	memblock->pool->size -= memblock->size;
-	free(memblock);
+	FREE(memblock);
 
 	return result;
 }
@@ -302,7 +303,7 @@ PUBLIC void mem_freepool_private(struct mem_pool *pool)
 		if (work->marker != MEM_MARKER)
 			fatal("Invalid marker in mem_freepool(%p)", pool);
 
-		free(work);
+		FREE(work);
 		work = next;
 	}
 

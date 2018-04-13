@@ -1,4 +1,6 @@
 /* $Id$ */
+#ifndef ASSERT_INCLUDED
+#define ASSERT_INCLUDED
 #undef assert
 #ifdef NDEBUG
 #define assert(e) ((void)0)
@@ -6,4 +8,5 @@
 #include "except.h"
 extern void assert(int e);
 #define assert(e) ((void)((e)||(RAISE(Assert_Failed),0)))
+#endif
 #endif

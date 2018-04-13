@@ -157,15 +157,20 @@ PUBLIC int main(int argc, char *argv[])
         if (locname != NULL) {
         	int utf8_suffixlen, lang_countrylen;
 #ifdef __APPLE__
-        	const char *utf8_suffix = ".UTF-8", *latin_suffix = ".ISO8859-15";
+        	const char *utf8_suffix = ".UTF-8";
 #else
-        	const char *utf8_suffix = ".utf8", *latin_suffix = "@euro";
+        	const char *utf8_suffix = ".utf8";
 #endif
 
                 utf8_suffixlen = strlen(utf8_suffix);
                 lang_countrylen = strlen(locname) - utf8_suffixlen;
                 if (strncmp(locname + lang_countrylen, utf8_suffix, utf8_suffixlen) == 0) {
         		char nlocname[LOCNAME_MAX];
+#ifdef __APPLE__
+        	        const char *latin_suffix = ".ISO8859-15";
+#else
+        	        const char *latin_suffix = "@euro";
+#endif
 
                         term_strncpy(nlocname, locname, lang_countrylen + 1);
                         strncat(nlocname, latin_suffix, LOCNAME_MAX - lang_countrylen - 1);

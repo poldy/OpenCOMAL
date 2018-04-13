@@ -1,4 +1,4 @@
-static char rcsid[] = "$Id$" "\n$Id$";
+#define _XOPEN_SOURCE 700
 #include <stdlib.h>
 #include <stdio.h>
 #include "assert.h"

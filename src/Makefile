@@ -15,6 +15,7 @@ SOURCES:=lex.yy.c pdccloop.c pdccmd.c pdcenv.c pdcexec.c pdcexp.c pdcext.c \
 	pdcfree.c pdcid.c pdclexs.c pdcunix.c pdclist.c pdcmain.c pdcmem.c \
 	pdcmisc.c pdcpars.tab.c pdcparss.c pdcprog.c pdcrun.c pdcscan.c \
 	pdcseg.c pdcsqash.c pdcstr.c pdcsym.c pdcval.c pdcmod.c
+SOURCES_CII:=../cii/src/except.c
 
 TARG1:=../bin/opencomal
 OBJ1:=pdcpars.tab.o lex.yy.o pdcmain.o pdcmisc.o pdccmd.o  pdclexs.o  \
@@ -28,11 +29,21 @@ OBJ2:=pdcmain.o pdcmisc.o \
 	pdcexp.o pdcmem.o pdcsqash.o pdcstr.o pdcprog.o pdcext.o pdcseg.o \
 	pdcval.o pdcrun.o pdcmod.o
 OS:=pdcunix.o 
+OBJ_CII:=../cii/src/except.o
+
+ifdef DEBUG
+	SOURCES_CII+=../cii/src/memchk.c ../cii/src/assert.c
+	OBJ_CII+=../cii/src/memchk.o ../cii/src/assert.o
+else
+	SOURCES_CII+=../cii/src/mem.c
+	OBJ_CII+=../cii/src/mem.o
+endif
 
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
 include $(REALCC).mk
 MKCATDEFS:=../tools/mkcatdefs
 include $(OPSYS).mk
+CFLAGS+=-I../cii/include -I.
 MIN_CFLAGS:=$(CFLAGS)
 CFLAGS+=$(TARG_CFLAGS)
 SOURCE_DATE_EPOCH=$(shell git log -l --pretty=%ct)
@@ -49,24 +60,26 @@ all: build $(TARG1) $(TARG2) ../bin/en.cat ../bin/ga.cat
 
 $(OBJ1) $(OBJ2) $(OS): pdcpars.tab.h
 
-$(TARG1):  $(OBJ1) $(OS)
-	$(CC) -o $(TARG1) $(OBJ1) $(OS) $(LDFLAGS) $(TARG_LDFLAGS)
+$(TARG1):  $(OBJ1) $(OS) $(OBJ_CII)
+	$(CC) -o $(TARG1) $(OBJ1) $(OS) $(OBJ_CII) $(LDFLAGS) $(TARG_LDFLAGS)
 
-$(TARG2):  $(OBJ2) $(OS)
-	$(CC) -o $(TARG2) $(OBJ2) $(OS) $(LDFLAGS) $(TARG_LDFLAGS)
+$(TARG2):  $(OBJ2) $(OS) $(OBJ_CII)
+	$(CC) -o $(TARG2) $(OBJ2) $(OS) $(OBJ_CII) $(LDFLAGS) $(TARG_LDFLAGS)
 
 .PHONY: build
 build:		
 	../tools/bumpbuild BUILD
 	../tools/genversion
 
+YFLAGS:=-vd -b pdcpars
 pdcpars.tab.c: pdcpars.y
-	bison -vd pdcpars.y
+	$(YACC) $(YFLAGS) pdcpars.y
 
 pdcpars.tab.h: pdcpars.tab.c
 
+LFLAGS:=-X
 lex.yy.c: pdclex.l
-	flex pdclex.l
+	$(LEX) $(LFLAGS) pdclex.l
 
 ifeq ($(OPSYS),macos)
 ../bin/%.cat: %.tmp
@@ -78,7 +91,7 @@ ifeq ($(OPSYS),macos)
 mkcatdefs.o: ../tools/mkcatdefs.c
 	$(CC) $(MIN_CFLAGS) -c $^
 
-$(MKCATDEFS): mkcatdefs.o
+$(MKCATDEFS): mkcatdefs.o $(OBJ_CII)
 	$(CC) $(LDFLAGS) -o $@ $^
 	strip $@
 
@@ -96,7 +109,7 @@ pdcpars.tab.o: msgnrs.h
 
 .PHONY: almostclean
 almostclean:	
-	$(RM) *.o *.obj *.map *.OBJ *~ *.d
+	$(RM) *.o *.obj *.map *.OBJ *~ *.d $(OBJ_CII)
 	$(RM) lex.yy.c pdcpars.tab.* pdcpars.output
 	$(RM) pdcpars.c pdclex.c pdcpars.h
 

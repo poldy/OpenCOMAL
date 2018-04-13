@@ -1,9 +1,10 @@
-static char rcsid[] = "$Id$";
+#define _XOPEN_SOURCE 700
 #include <stdlib.h>
 #include <stddef.h>
 #include "assert.h"
 #include "except.h"
 #include "mem.h"
+#include "compat_cdefs.h"
 const Except_T Mem_Failed = { "Allocation failed" };
 void *Mem_alloc(long nbytes, const char *file, int line){
 	void *ptr;
@@ -33,7 +34,7 @@ void *Mem_calloc(long count, long nbytes,
 		}
 	return ptr;
 }
-void Mem_free(void *ptr, const char *file, int line) {
+void Mem_free(void *ptr, const char *file __my_unused, int line __my_unused) {
 	if (ptr)
 		free(ptr);
 }

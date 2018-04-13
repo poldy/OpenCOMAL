@@ -54,10 +54,11 @@ PUBLIC void run_error(int error, const char *s, ...)
 {
 	char *buf;
 	char buf2[MAX_LINELEN];
-	va_list ap;
 
 	mem_free(curenv->lasterrmsg);
         if (s != NULL) {
+	        va_list ap;
+
 	        va_start(ap, s);
 	        vsnprintf(buf2, MAX_LINELEN, s, ap);
 	        va_end(ap);
@@ -700,9 +701,9 @@ PRIVATE void do_num_array_assign(struct var_item *to, struct var_item *from)
 
 PRIVATE void do_calc_fromto(struct two_exp *twoexp, long *from, long *to)
 {
-	const char *err = NULL;
-
 	if (twoexp) {
+	        const char *err = NULL;
+
 		if (twoexp->exp1)
 			*from = calc_intexp(twoexp->exp1);
 		else
@@ -2010,7 +2011,6 @@ PRIVATE bool input_line(char *s, long len, const char *p)
 PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp_list *lvalroot, int pr_sep)
 {
 	struct exp_list *work = lvalroot;
-	enum VAL_TYPE type;
 	char line[MAX_LINELEN];
 	char field[MAX_LINELEN];
 	char *j;
@@ -2041,6 +2041,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 	while (work) {
 		void *data;
 		int must_free_mem;
+	        enum VAL_TYPE type;
 
 		while (esc) {
 			if (curenv->running == RUNNING) {
