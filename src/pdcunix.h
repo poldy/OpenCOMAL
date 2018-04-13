@@ -28,7 +28,7 @@
 
 #define HOST_OS		"UNIX"
 #define HOST_OS_CODE	1	/**< Change when adding another OS! */
-#define VERSION		"0.2"
+#define VERSION		"0.3"
 #define CLI		""	/**< Command Line Interpreter */
 
 #define FLEX

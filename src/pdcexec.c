@@ -1021,7 +1021,7 @@ PRIVATE int exec_exit(struct comal_line *line)
 {
 	if (curenv->running != RUNNING)
 		run_error(DIRECT_ERR,
-			  "Can't EXIT in direct mode (use QUIT to leave OpenComal)");
+			  "%s", catgets(catdesc, ExecSet, ExecCantExit, "Can't EXIT in direct mode (use BYE to leave OpenCOMAL)"));
 
 	if (!line->lc.exp || calc_logexp(line->lc.exp))
 		return exitSYM;
