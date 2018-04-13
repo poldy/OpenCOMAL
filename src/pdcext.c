@@ -270,6 +270,7 @@ PUBLIC int ext_sys_stat(struct exp_list *exproot)
 				  strerror(errno));
 
 		return 0;
+#ifndef NDEBUG
 	} else if (strcmp(cmd, "memdump") == 0) {
 		if (exproot->next)
 			run_error(SYS_ERR,
@@ -278,6 +279,7 @@ PUBLIC int ext_sys_stat(struct exp_list *exproot)
 		mem_debug();
 
 		return 0;
+#endif
 	} else if (strcmp(cmd,"listvars") == 0) {
 		if (exproot->next)
 			run_error(SYS_ERR,"No parameters allowed for SYS listvars");

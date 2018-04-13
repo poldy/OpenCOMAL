@@ -39,6 +39,9 @@ else
 	OBJ_CII+=../cii/src/mem.o
 endif
 
+.PHONY: all
+all: build $(TARG1) $(TARG2) ../bin/en.cat ../bin/ga.cat
+
 # I recommend using c++ for compile-time warnings only, and building for release with the C compiler
 include $(REALCC).mk
 MKCATDEFS:=../tools/mkcatdefs
@@ -54,9 +57,6 @@ else
 	BUILD_DATE ?= $(shell date "+$(DATE_FMT)")
 endif
 CFLAGS+='-DBUILD_DATE="$(BUILD_DATE)"'
-
-.PHONY: all
-all: build $(TARG1) $(TARG2) ../bin/en.cat ../bin/ga.cat
 
 $(OBJ1) $(OBJ2) $(OS): pdcpars.tab.h
 
@@ -80,30 +80,6 @@ pdcpars.tab.h: pdcpars.tab.c
 LFLAGS:=-X
 lex.yy.c: pdclex.l
 	$(LEX) $(LFLAGS) pdclex.l
-
-ifeq ($(OPSYS),macos)
-../bin/%.cat: %.tmp
-	LANG=en_GB.ISO8859-15 gencat $@ $^
-
-%.tmp: %.msg
-	LANG=en_GB.ISO8859-15 $(MKCATDEFS) msgnrs.h $(filter-out $(MKCATDEFS),$^) > $@
-
-mkcatdefs.o: ../tools/mkcatdefs.c
-	$(CC) $(MIN_CFLAGS) -c $^
-
-$(MKCATDEFS): mkcatdefs.o $(OBJ_CII)
-	$(CC) $(LDFLAGS) -o $@ $^
-	strip $@
-
-msgnrs.h: en.tmp
-
-en.tmp: $(MKCATDEFS)
-else
-../bin/%.cat: %.msg
-	LANG=ga_IE@euro gencat -H msgnrs.h -o $@ $^
-
-msgnrs.h: ../bin/en.cat
-endif
 
 pdcpars.tab.o: msgnrs.h
 

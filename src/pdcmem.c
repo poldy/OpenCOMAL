@@ -67,7 +67,9 @@ PRIVATE void pool_init(struct mem_pool *pool)
 {
 	pool->id = poolcount;
 	poolcount++;
+#ifndef NDEBUG
 	pool->size = 0;
+#endif
 	pool->root = NULL;
 }
 
@@ -166,8 +168,10 @@ PUBLIC void *mem_alloc_private(struct mem_pool *pool, size_t size)
 	p->pool = pool;
 	p->next = pool->root;
 	p->prev = NULL;
+#ifndef NDEBUG
 	p->size = size;
 	pool->size += size;
+#endif
 	pool->root = p;
 
 	if (p->next)
@@ -191,8 +195,10 @@ PUBLIC void *mem_realloc(void *block, long newsize)
 	if (!memblock)
 		mem_error("reallocating", newsize);
 
+#ifndef NDEBUG
 	memblock->pool->size += newsize - memblock->size;
 	memblock->size = newsize;
+#endif
 
 	if (memblock->next)
 		memblock->next->prev = memblock;
@@ -253,7 +259,9 @@ PUBLIC void *mem_free(void *m)
 	else
 		memblock->pool->root = memblock->next;
 
+#ifndef NDEBUG
 	memblock->pool->size -= memblock->size;
+#endif
 	FREE(memblock);
 
 	return result;
@@ -308,7 +316,9 @@ PUBLIC void mem_freepool_private(struct mem_pool *pool)
 	}
 
 	pool->root = NULL;
+#ifndef NDEBUG
 	pool->size = 0;
+#endif
 
 	if (pool->id == RUN_POOL) {
 		cell_freepool(INT_CPOOL);
@@ -338,13 +348,16 @@ PUBLIC void mem_shiftmem(unsigned _frompool, struct mem_pool *topool)
 	work->next = topool->root;
 	topool->root = frompool->root;
 	frompool->root = NULL;
+#ifndef NDEBUG
 	topool->size += frompool->size;
 	frompool->size = 0;
+#endif
 
 	if (work->next)
 		work->next->prev = work;
 }
 
+#ifndef NDEBUG
 PUBLIC void mem_debug(void)
 {
 	int i;
@@ -353,6 +366,7 @@ PUBLIC void mem_debug(void)
 		my_printf(MSG_DEBUG, true, "poolsize[%d]=%ld", i,
 			  mem_pool[i].size);
 }
+#endif
 
 PUBLIC struct mem_pool *pool_new(void)
 {

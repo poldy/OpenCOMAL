@@ -36,13 +36,17 @@ struct mem_block {
 	struct mem_block *next;
 	struct mem_block *prev;
 	int marker;
+#ifndef NDEBUG
 	long size;
+#endif
 	struct mem_pool *pool;
 };
 
 /** A pool of related allocated memory blocks */
 struct mem_pool {
+#ifndef NDEBUG
 	long size;
+#endif
 	struct mem_block *root;
 	int id;
 };
@@ -89,8 +93,10 @@ extern void mem_freepool_private(struct mem_pool *pool);
 /** Move a memory block from one pool to another */
 extern void mem_shiftmem(unsigned int frompool, struct mem_pool *topool);
 
+#ifndef NDEBUG
 /** Print the size of all pools */
 extern void mem_debug(void);
+#endif
 
 /** Allocate a new memory pool */
 extern struct mem_pool *pool_new(void);
