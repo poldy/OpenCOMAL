@@ -106,16 +106,6 @@ PUBLIC void mem_tini(void)
 }
 
 
-PRIVATE void mem_error(const char *action, long size)
-{
-	if (curenv->running == RUNNING)
-		run_error(MEM_ERR, "Out of memory while %s %ld bytes",
-			  action, size);
-	else
-		fatal("Out of memory while %s %ld bytes", action, size);
-}
-
-
 PUBLIC void *cell_alloc(unsigned pool)
 {
 	CELL_HDR *c = cell_hdr[pool];
@@ -161,9 +151,6 @@ PUBLIC void *mem_alloc_private(struct mem_pool *pool, size_t size)
         }
         p = (struct mem_block *)CALLOC(1, size + sizeof(struct mem_block));
 
-	if (!p)
-		mem_error("allocating", size);
-
 	p->marker = MEM_MARKER;
 	p->pool = pool;
 	p->next = pool->root;
@@ -189,11 +176,7 @@ PUBLIC void *mem_realloc(void *block, long newsize)
 
 	--memblock;
 
-	memblock =
-	    (struct mem_block *)realloc(memblock, newsize + sizeof(struct mem_block));
-
-	if (!memblock)
-		mem_error("reallocating", newsize);
+	RESIZE(memblock, newsize + sizeof(struct mem_block));
 
 #ifndef NDEBUG
 	memblock->pool->size += newsize - memblock->size;
