@@ -22,7 +22,7 @@
 #include "pdcext.h"
 #include "version.h"
 #include <string.h>
-#include <assert.h>
+#include "assert.h"
 
 struct inpfile_stkent {
 	struct inpfile_stkent *next;

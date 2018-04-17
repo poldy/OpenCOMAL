@@ -35,7 +35,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <fcntl.h>
-#include <assert.h>
+#include "assert.h"
 
 #define FLOATUSING_MAX 32
 
