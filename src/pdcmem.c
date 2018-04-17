@@ -176,7 +176,7 @@ PUBLIC void *mem_realloc(void *block, long newsize)
 
 	--memblock;
 
-	RESIZE(memblock, newsize + sizeof(struct mem_block));
+	memblock = (struct mem_block *)Mem_resize(memblock, newsize + sizeof(struct mem_block), __FILE__, __LINE__);
 
 #ifndef NDEBUG
 	memblock->pool->size += newsize - memblock->size;
