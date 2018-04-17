@@ -700,7 +700,9 @@ PRIVATE void exp_binary_i(int op, void **result, enum VAL_TYPE *type,
 	switch (op) {
 	case powerSYM:
 		*result =
-		    val_float(pow((double) *i1, (double) *i2), i1, type);
+		    val_float(pow((double) *i1, (double) *i2), NULL, type);
+                cell_free(i1);
+                cell_free(i2);
 		break;
 
 	case divideSYM:
