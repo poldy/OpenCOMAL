@@ -149,13 +149,13 @@ PUBLIC int main(int argc, char *argv[])
 #else
                         fprintf(stderr, "usage: %s [-dy] [-m <msg-catalog>] ...\n", argv[0]);
 #endif
-                        return EXIT_FAILURE;
+                        RETURN EXIT_FAILURE;
                 }
 
                 latin_loc = duplocale(LC_GLOBAL_LOCALE);
                 if (latin_loc == (locale_t)0) {
                         perror("duplocale");
-                        return EXIT_FAILURE;
+                        RETURN EXIT_FAILURE;
                 }
                 if (locname != NULL) {
                         int utf8_suffixlen, lang_countrylen;
