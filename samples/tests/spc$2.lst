@@ -3,7 +3,7 @@
        30 FUNC hex$ EXTERNAL "hex.prc"
        40 //
        50 FUNC my_spc$(n#) CLOSED
-       60   IF SYS$(host)="Linux" THEN
+       60   IF SYS$(host)="UNIX" THEN
        70     PRINT hex$(SYS(sbrk))
        80   ENDIF
        90   IF n#=0 THEN RETURN ""

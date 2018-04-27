@@ -1,5 +1,5 @@
        10 org$:=DIR$
-       20 IF SYS$(host)="Linux" THEN CHDIR "/tmp"
+       20 IF SYS$(host)="UNIX" THEN CHDIR "/tmp"
        30 PRINT "Directory of ";DIR$
        40 DIR 
        50 MKDIR "a"

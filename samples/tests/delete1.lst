@@ -9,7 +9,7 @@
        90 CASE SYS$(host) OF
       100 WHEN "MsDos"
       110   PASS "dir sel.out >temp"
-      120 WHEN "Linux"
+      120 WHEN "UNIX"
       130   PASS "ls -l sel.out >temp"
       140 OTHERWISE
       150   PRINT "Unknown host"

@@ -3,7 +3,7 @@
        30 CASE SYS$(host) OF
        40 WHEN "MsDos"
        50   PASS "ver"
-       60 WHEN "Linux"
+       60 WHEN "UNIX"
        70   PASS "uname -a"
        80 OTHERWISE
        90   PRINT "Unknown host"

@@ -17,7 +17,7 @@
       170   CASE SYS$(host) OF
       180   WHEN "MsDos"
       190     PASS "dir *"+f$+" >temp"
-      200   WHEN "Linux"
+      200   WHEN "UNIX"
       210     PASS "ls *"+f$+" >temp"
       220     PASS "echo Finito >>temp"
       230   OTHERWISE
