@@ -1,4 +1,4 @@
-static char rcsid[] = "$Id$";
+#define _XOPEN_SOURCE 700
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,6 +7,7 @@ static char rcsid[] = "$Id$";
 #include <float.h>
 #include <ctype.h>
 #include <math.h>
+#include "compat_cdefs.h"
 #include "assert.h"
 #include "except.h"
 #include "fmt.h"
@@ -20,7 +21,7 @@ struct buf {
 #define pad(n,c) do { int nn = (n); \
 	while (nn-- > 0) \
 		put((c), cl); } while (0)
-static void cvt_s(int code, va_list_box *box,
+static void cvt_s(int code __my_unused, va_list_box *box,
 	int put(int c, void *cl), void *cl,
 	unsigned char flags[], int width, int precision) {
 	char *str = va_arg(box->ap, char *);
@@ -28,7 +29,7 @@ static void cvt_s(int code, va_list_box *box,
 	Fmt_puts(str, strlen(str), put, cl, flags,
 		width, precision);
 }
-static void cvt_d(int code, va_list_box *box,
+static void cvt_d(int code __my_unused, va_list_box *box,
 	int put(int c, void *cl), void *cl,
 	unsigned char flags[], int width, int precision) {
 	int val = va_arg(box->ap, int);
@@ -49,7 +50,7 @@ static void cvt_d(int code, va_list_box *box,
 	Fmt_putd(p, (buf + sizeof buf) - p, put, cl, flags,
 		width, precision);
 }
-static void cvt_u(int code, va_list_box *box,
+static void cvt_u(int code __my_unused, va_list_box *box,
 	int put(int c, void *cl), void *cl,
 	unsigned char flags[], int width, int precision) {
 	unsigned m = va_arg(box->ap, unsigned);
@@ -61,7 +62,7 @@ static void cvt_u(int code, va_list_box *box,
 	Fmt_putd(p, (buf + sizeof buf) - p, put, cl, flags,
 		width, precision);
 }
-static void cvt_o(int code, va_list_box *box,
+static void cvt_o(int code __my_unused, va_list_box *box,
 	int put(int c, void *cl), void *cl,
 	unsigned char flags[], int width, int precision) {
 	unsigned m = va_arg(box->ap, unsigned);
@@ -73,7 +74,7 @@ static void cvt_o(int code, va_list_box *box,
 	Fmt_putd(p, (buf + sizeof buf) - p, put, cl, flags,
 		width, precision);
 }
-static void cvt_x(int code, va_list_box *box,
+static void cvt_x(int code __my_unused, va_list_box *box,
 	int put(int c, void *cl), void *cl,
 	unsigned char flags[], int width, int precision) {
 	unsigned m = va_arg(box->ap, unsigned);
@@ -85,7 +86,7 @@ static void cvt_x(int code, va_list_box *box,
 	Fmt_putd(p, (buf + sizeof buf) - p, put, cl, flags,
 		width, precision);
 }
-static void cvt_p(int code, va_list_box *box,
+static void cvt_p(int code __my_unused, va_list_box *box,
 	int put(int c, void *cl), void *cl,
 	unsigned char flags[], int width, int precision) {
 	unsigned long m = (unsigned long)va_arg(box->ap, void*);
@@ -98,19 +99,19 @@ static void cvt_p(int code, va_list_box *box,
 	Fmt_putd(p, (buf + sizeof buf) - p, put, cl, flags,
 		width, precision);
 }
-static void cvt_c(int code, va_list_box *box,
+static void cvt_c(int code __my_unused, va_list_box *box,
 	int put(int c, void *cl), void *cl,
-	unsigned char flags[], int width, int precision) {
+	unsigned char flags[], int width, int precision __my_unused) {
 	if (width == INT_MIN)
 		width = 0;
 	if (width < 0) {
-		flags['-'] = 1;
+		flags[(int)'-'] = 1;
 		width = -width;
 	}
-	if (!flags['-'])
+	if (!flags[(int)'-'])
 		pad(width - 1, ' ');
 	put((unsigned char)va_arg(box->ap, int), cl);
-	if ( flags['-'])
+	if ( flags[(int)'-'])
 		pad(width - 1, ' ');
 }
 static void cvt_f(int code, va_list_box *box,
@@ -151,7 +152,7 @@ static T cvt[256] = {
  /* 112-119 */ cvt_p, 0, 0, cvt_s,     0, cvt_u,     0,     0,
  /* 120-127 */ cvt_x, 0, 0,     0,     0,     0,     0,     0
 };
-char *Fmt_flags = "-+ 0";
+const char *Fmt_flags = "-+ 0";
 static int outc(int c, void *cl) {
 	FILE *f = (FILE *)cl;
 	return putc(c, f);
@@ -182,21 +183,21 @@ void Fmt_puts(const char *str, int len,
 	if (width == INT_MIN)
 		width = 0;
 	if (width < 0) {
-		flags['-'] = 1;
+		flags[(int)'-'] = 1;
 		width = -width;
 	}
 	if (precision >= 0)
-		flags['0'] = 0;
+		flags[(int)'0'] = 0;
 	if (precision >= 0 && precision < len)
 		len = precision;
-	if (!flags['-'])
+	if (!flags[(int)'-'])
 		pad(width - len, ' ');
 	{
 		int i;
 		for (i = 0; i < len; i++)
 			put((unsigned char)*str++, cl);
 	}
-	if ( flags['-'])
+	if ( flags[(int)'-'])
 		pad(width - len, ' ');
 }
 void Fmt_fmt(int put(int c, void *), void *cl,
@@ -327,17 +328,17 @@ void Fmt_putd(const char *str, int len,
 	if (width == INT_MIN)
 		width = 0;
 	if (width < 0) {
-		flags['-'] = 1;
+		flags[(int)'-'] = 1;
 		width = -width;
 	}
 	if (precision >= 0)
-		flags['0'] = 0;
+		flags[(int)'0'] = 0;
 	if (len > 0 && (*str == '-' || *str == '+')) {
 		sign = *str++;
 		len--;
-	} else if (flags['+'])
+	} else if (flags[(int)'+'])
 		sign = '+';
-	else if (flags[' '])
+	else if (flags[(int)' '])
 		sign = ' ';
 	else
 		sign = 0;
@@ -352,10 +353,10 @@ void Fmt_putd(const char *str, int len,
 	  	n = len;
 	  if (sign)
 	  	n++;
-	  if (flags['-']) {
+	  if (flags[(int)'-']) {
 	  	if (sign)
 			put(sign, cl);
-	  } else if (flags['0']) {
+	  } else if (flags[(int)'0']) {
 	  	if (sign)
 			put(sign, cl);
 	  	pad(width - n, '0');
@@ -370,6 +371,6 @@ void Fmt_putd(const char *str, int len,
 	  	for (i = 0; i < len; i++)
 	  		put((unsigned char)*str++, cl);
 	  }
-	  if (flags['-'])
+	  if (flags[(int)'-'])
 	  	pad(width - n, ' '); }
 }

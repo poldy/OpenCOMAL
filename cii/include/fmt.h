@@ -11,7 +11,7 @@ typedef struct va_list_box {
 typedef void (*T)(int code, va_list_box *box,
 	int put(int c, void *cl), void *cl,
 	unsigned char flags[256], int width, int precision);
-extern char *Fmt_flags;
+extern const char *Fmt_flags;
 extern const Except_T Fmt_Overflow;
 extern void Fmt_fmt (int put(int c, void *cl), void *cl,
 	const char *fmt, ...);

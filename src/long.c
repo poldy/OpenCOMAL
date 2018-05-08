@@ -1,10 +1,11 @@
 #define _XOPEN_SOURCE 700
 
 #include <limits.h>
+#include "compat_cdefs.h"
 
 #include "long.h"
 
-void cvt_D(int code, va_list_box *box,
+void cvt_D(int code __my_unused, va_list_box *box,
 	int put(int c, void *cl), void *cl,
 	unsigned char flags[], int width, int precision) {
 	long val = va_arg(box->ap, long);
