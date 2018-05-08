@@ -1122,7 +1122,7 @@ PRIVATE int exec_for(struct comal_line *line)
 			dstep = -dstep;
 
 		DBG_PRINTF(true,
-			  "FOR from %lf to %lf step %lf",
+			  "FOR from %f to %f step %f",
 			  *(double *) lval, dto, dstep);
 	} else {
 		val_copy(&lto, eresult, V_INT, etype);
@@ -1157,7 +1157,7 @@ PRIVATE int exec_for(struct comal_line *line)
 				        *(long *) lval);
                         } else {
 			        DBG_PRINTF(true,
-				        "FOR loop, lval=%p, %lf", lval,
+				        "FOR loop, lval=%p, %f", lval,
 				        *(double *) lval);
 		        }
                 }
@@ -2083,7 +2083,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 
 		switch (type) {
 		case V_INT:
-			nr = sscanf(i, "%D%n", (long *) field, &n);
+			nr = sscanf(i, "%ld%n", (long *) field, &n);
 			i += n;
 			break;
 
