@@ -28,6 +28,8 @@
 #include "compat_cdefs.h"
 #include <string.h>
 
+#include "fmt.h"
+
 PRIVATE void cmd_list_horse(struct string *filename, long from, long to)
 {
 	char buf[MAX_LINELEN];
@@ -61,7 +63,7 @@ PRIVATE void cmd_list_horse(struct string *filename, long from, long to)
 		line_list(&buf2, work);
 
 		if (listfile)
-			fprintf(listfile, "%s\n", buf);
+			Fmt_fprint(listfile, "%s\n", buf);
 		else
 			my_printf(MSG_DIALOG, true, "%s", buf);
 
@@ -253,7 +255,7 @@ PRIVATE bool cmd_auto(struct comal_line *line)
 			buf2 = buf;
 			line_list(&buf2, work);
 		} else {
-			snprintf(buf, MAX_LINELEN, "%9ld  ", nr);
+			Fmt_sfmt(buf, MAX_LINELEN, "%9D  ", nr);
 		}
 
 		if (sys_edit(MSG_DIALOG, buf, MAX_LINELEN))

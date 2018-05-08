@@ -114,7 +114,7 @@ PUBLIC void clean_runenv(struct comal_env *env)
 	 * Close all open files
 	 */
 	while (fwalk) {
-		DBG_PRINTF(true, "Closing comal file %ld",
+		DBG_PRINTF(true, "Closing comal file %D",
 			  fwalk->cfno);
 
 		fclose(fwalk->hfptr);

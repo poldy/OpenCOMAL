@@ -35,7 +35,9 @@
 #include <time.h>
 #include <ctype.h>
 #include <fcntl.h>
+
 #include "assert.h"
+#include "fmt.h"
 
 #define FLOATUSING_MAX 32
 
@@ -57,11 +59,11 @@ PUBLIC void run_error(int error, const char *s, ...)
 
 	mem_free(curenv->lasterrmsg);
         if (s != NULL) {
-	        va_list ap;
+	        va_list_box box;
 
-	        va_start(ap, s);
-	        vsnprintf(buf2, MAX_LINELEN, s, ap);
-	        va_end(ap);
+	        va_start(box.ap, s);
+	        Fmt_vsfmt(buf2, MAX_LINELEN, s, &box);
+	        va_end(box.ap);
 	        curenv->lasterrmsg = my_strdup(MISC_POOL, buf2);
         } else {
                 curenv->lasterrmsg = NULL;
@@ -73,12 +75,12 @@ PUBLIC void run_error(int error, const char *s, ...)
 	buf = (char *)mem_alloc(MISC_POOL, MAX_LINELEN);
 
 	if (curenv->running == RUNNING) {
-		snprintf(buf, MAX_LINELEN, "Error %d: \"%s\" at line %ld", error, buf2,
+		Fmt_sfmt(buf, MAX_LINELEN, "Error %d: \"%s\" at line %D", error, buf2,
 			curenv->curline->ld->lineno);
 		curenv->errline = curenv->curline;
 		curenv->lasterrline = curenv->curline->ld->lineno;
 	} else {
-		snprintf(buf, MAX_LINELEN, "Error %d: \"%s\"", error, buf2);
+		Fmt_sfmt(buf, MAX_LINELEN, "Error %d: \"%s\"", error, buf2);
 		curenv->errline = NULL;
 		curenv->lasterrline = 0;
 	}
@@ -1140,7 +1142,7 @@ PRIVATE int exec_for(struct comal_line *line)
 			lstep = -lstep;
 
 		DBG_PRINTF(true,
-			  "FOR from %ld to %ld step %ld",
+			  "FOR from %D to %D step %D",
 			  *(long *) lval, lto, lstep);
 	}
 
@@ -1151,7 +1153,7 @@ PRIVATE int exec_for(struct comal_line *line)
                 if (comal_debug) {
 		        if (ltype == V_INT) {
 			        DBG_PRINTF(true,
-				        "FOR loop, lval=%p, %ld", lval,
+				        "FOR loop, lval=%p, %D", lval,
 				        *(long *) lval);
                         } else {
 			        DBG_PRINTF(true,
@@ -1266,7 +1268,7 @@ PRIVATE void exec_open(struct comal_line *line)
 	frec->cfno = calc_intexp(o->filenum);
 
 	if (fsearch(frec->cfno))
-		run_error(OPEN_ERR, "File %ld already open", frec->cfno);
+		run_error(OPEN_ERR, "File %D already open", frec->cfno);
 
 	frec->mode = o->type;
 	frec->read_only = false;
@@ -1289,7 +1291,7 @@ PRIVATE void exec_open(struct comal_line *line)
 		frec->reclen = calc_intexp(o->reclen);
 
 		if (frec->reclen <= 0)
-			run_error(OPEN_ERR, "Invalid record length %ld",
+			run_error(OPEN_ERR, "Invalid record length %D",
 				  frec->reclen);
 
 		if (o->read_only) {
@@ -1354,12 +1356,12 @@ PRIVATE void exec_close(struct comal_line *line)
 
 		while (walk) {
 			DBG_PRINTF(true,
-				  "Closing Comal file %ld",
+				  "Closing Comal file %D",
 				  walk->cfno);
 
 			if (fclose(walk->hfptr) == EOF)
 				run_error(CLOSE_ERR,
-					  "Close error on file %ld: %s",
+					  "Close error on file %D: %s",
 					  walk->cfno, strerror(errno));
 
 			walk = (struct file_rec *)mem_free(walk);
@@ -1381,12 +1383,12 @@ PRIVATE void exec_close(struct comal_line *line)
 			}
 
 			if (!walk)
-				run_error(CLOSE_ERR, "File %ld not open",
+				run_error(CLOSE_ERR, "File %D not open",
 					  fno);
 
 			if (fclose(walk->hfptr) == EOF)
 				run_error(CLOSE_ERR,
-					  "CLOSE error on file %ld: %s",
+					  "CLOSE error on file %D: %s",
 					  walk->cfno, strerror(errno));
 			else {
 				if (last)
@@ -1409,7 +1411,7 @@ PRIVATE struct file_rec *pos_file(struct two_exp *r)
 	struct file_rec *f = fsearch(cfno);
 
 	if (!f)
-		run_error(POS_ERR, "File %ld not open", cfno);
+		run_error(POS_ERR, "File %D not open", cfno);
 
 	if (f->mode == randomSYM) {
 		long recno;
@@ -1425,7 +1427,7 @@ PRIVATE struct file_rec *pos_file(struct two_exp *r)
 				  "Random file record number must be >=1");
 
 		DBG_PRINTF(true,
-			  "Positioning file %ld (host=%p) to record %ld, offset %ld",
+			  "Positioning file %D (host=%p) to record %D, offset %D",
 			  f->cfno, f->hfptr, recno,
 			  (recno - 1) * f->reclen);
 
@@ -1482,7 +1484,7 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 
                 if (!(*type == V_STRING && r == 0)) {
 			DBG_PRINTF(true,
-				  "Reading %ld bytes from file %ld (host %p)",
+				  "Reading %D bytes from file %D (host %p)",
 				  size, f->cfno, f->hfptr);
 
 			if (f->mode == randomSYM) {
@@ -1639,7 +1641,7 @@ PRIVATE void write1(struct file_rec *f, void *data, enum VAL_TYPE type,
 
 	if (w != EOF) {
 		DBG_PRINTF(true,
-			  "Writing %ld bytes to file %ld (host %p)",
+			  "Writing %D bytes to file %D (host %p)",
 			  size, f->cfno, f->hfptr);
 
 		if (type == V_STRING) {
@@ -1774,7 +1776,7 @@ PRIVATE char *format_using(char *u, char *p)
 		width++;
 	}
 
-	snprintf(p, FLOATUSING_MAX, "%%%d.%dlf", width, prec);
+	Fmt_sfmt(p, FLOATUSING_MAX, "%%%d.%dlf", width, prec);
 	return s;
 }
 
@@ -2081,7 +2083,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 
 		switch (type) {
 		case V_INT:
-			nr = sscanf(i, "%ld%n", (long *) field, &n);
+			nr = sscanf(i, "%D%n", (long *) field, &n);
 			i += n;
 			break;
 

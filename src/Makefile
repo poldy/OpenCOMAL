@@ -14,26 +14,28 @@
 SOURCES:=lex.yy.c pdccloop.c pdccmd.c pdcenv.c pdcexec.c pdcexp.c pdcext.c \
 	pdcfree.c pdcid.c pdclexs.c pdcunix.c pdclist.c pdcmain.c pdcmem.c \
 	pdcmisc.c pdcpars.tab.c pdcparss.c pdcprog.c pdcrun.c pdcscan.c \
-	pdcseg.c pdcsqash.c pdcstr.c pdcsym.c pdcval.c pdcmod.c
-SOURCES_CII:=../cii/src/except.c
+	pdcseg.c pdcsqash.c pdcstr.c pdcsym.c pdcval.c pdcmod.c long.c
+SOURCES_CII:=../cii/src/except.c ../cii/src/fmt.c
 
 TARG1:=../bin/opencomal
 OBJ1:=pdcpars.tab.o lex.yy.o pdcmain.o pdcmisc.o pdccmd.o  pdclexs.o  \
 	pdcid.o  pdcscan.o pdcparss.o pdcenv.o pdcsym.o pdcexec.o pdclist.o \
 	pdcfree.o pdcexp.o pdcmem.o pdcsqash.o pdcstr.o pdcprog.o pdcext.o \
-	pdcseg.o pdcval.o pdccloop.o pdcmod.o
+	pdcseg.o pdcval.o pdccloop.o pdcmod.o long.o
 
 TARG2:=../bin/opencomalrun
 OBJ2:=pdcmain.o pdcmisc.o \
 	pdcid.o  pdcscan.o pdcenv.o pdcsym.o pdcexec.o pdcfree.o \
 	pdcexp.o pdcmem.o pdcsqash.o pdcstr.o pdcprog.o pdcext.o pdcseg.o \
-	pdcval.o pdcrun.o pdcmod.o
+	pdcval.o pdcrun.o pdcmod.o long.o
 OS:=pdcunix.o 
-OBJ_CII:=../cii/src/except.o
+OBJ_CII:=../cii/src/except.o ../cii/src/fmt.o
 
 ifdef DEBUG
 	SOURCES_CII+=../cii/src/memchk.c ../cii/src/assert.c
 	OBJ_CII+=../cii/src/memchk.o ../cii/src/assert.o
+	CFLAGS+=-fsanitize=undefined
+	LDFLAGS+=-fsanitize=undefined
 else
 	SOURCES_CII+=../cii/src/mem.c
 	OBJ_CII+=../cii/src/mem.o

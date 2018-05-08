@@ -38,6 +38,7 @@
 #undef RETURN
 
 #include "mem.h"
+#include "fmt.h"
 
 #define HALFDELAY 2
 
@@ -83,7 +84,7 @@ PRIVATE __dead void errw(const char *msg)
         if (is_visual_mode) {
                 endwin();
         }
-        fprintf(stderr, "%s\n", msg);
+        Fmt_fprint(stderr, "%s\n", msg);
         exit(EXIT_FAILURE);
 }
 

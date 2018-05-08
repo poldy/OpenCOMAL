@@ -153,20 +153,20 @@ static T cvt[256] = {
 };
 char *Fmt_flags = "-+ 0";
 static int outc(int c, void *cl) {
-	FILE *f = cl;
+	FILE *f = (FILE *)cl;
 	return putc(c, f);
 }
 static int insert(int c, void *cl) {
-	struct buf *p = cl;
+	struct buf *p = (struct buf *)cl;
 	if (p->bp >= p->buf + p->size)
 		RAISE(Fmt_Overflow);
 	*p->bp++ = c;
 	return c;
 }
 static int append(int c, void *cl) {
-	struct buf *p = cl;
+	struct buf *p = (struct buf *)cl;
 	if (p->bp >= p->buf + p->size) {
-		RESIZE(p->buf, 2*p->size);
+		p->buf = (char *)Mem_resize(p->buf, 2 * p->size, __FILE__, __LINE__);
 		p->bp = p->buf + p->size;
 		p->size *= 2;
 	}
@@ -251,10 +251,11 @@ char *Fmt_vstring(const char *fmt, va_list_box *box) {
 	struct buf cl;
 	assert(fmt);
 	cl.size = 256;
-	cl.buf = cl.bp = ALLOC(cl.size);
+	cl.buf = cl.bp = (char *)ALLOC(cl.size);
 	Fmt_vfmt(append, &cl, fmt, box);
 	append(0, &cl);
-	return RESIZE(cl.buf, cl.bp - cl.buf);
+	cl.buf = (char *)Mem_resize(cl.buf, cl.bp - cl.buf, __FILE__, __LINE__);
+	return cl.buf;
 }
 void Fmt_vfmt(int put(int c, void *cl), void *cl,
 	const char *fmt, va_list_box *box) {

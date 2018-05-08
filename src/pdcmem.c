@@ -143,7 +143,7 @@ PUBLIC void *mem_alloc_private(struct mem_pool *pool, size_t size)
 	struct mem_block *p;
 
 	DBG_PRINTF(false,
-		  "Mem_alloc block in pool %d, size %ld", pool->id,
+		  "Mem_alloc block in pool %d, size %D", pool->id,
 		  size);
 
         if (size < sizeof(void *)) {
@@ -346,7 +346,7 @@ PUBLIC void mem_debug(void)
 	int i;
 
 	for (i = 0; i < NR_FIXED_POOLS; i++)
-		my_printf(MSG_DEBUG, true, "poolsize[%d]=%ld", i,
+		my_printf(MSG_DEBUG, true, "poolsize[%d]=%D", i,
 			  mem_pool[i].size);
 }
 #endif

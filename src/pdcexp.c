@@ -22,11 +22,12 @@
 #include "pdcstr.h"
 #include "pdcval.h"
 
-
 #include <math.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
+
+#include "fmt.h"
 
 #ifdef HAS_ROUND
 extern double round(double x);
@@ -125,7 +126,7 @@ PUBLIC void *exp_lval(struct expression *exp, enum VAL_TYPE *type,
 			if (err)
 				run_error(ARRAY_ERR, "%s", err);
 
-			DBG_PRINTF(true, "Array index=%ld",
+			DBG_PRINTF(true, "Array index=%D",
 				  index);
 
 			vdata=(union var_data *)var_data(*varp);
@@ -431,9 +432,9 @@ PRIVATE struct string *my_str(void **result, enum VAL_TYPE *type)
 	char buf[30];
 
 	if (*type == V_INT) {
-		snprintf(buf, 30, "%ld", **(long **) result);
+		Fmt_sfmt(buf, 30, "%D", **(long **) result);
 	} else {
-		snprintf(buf, 30, "%G", **(double **) result);
+		Fmt_sfmt(buf, 30, "%G", **(double **) result);
 	}
 
 	*type = V_STRING;

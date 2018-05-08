@@ -28,6 +28,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 
+#include "fmt.h"
 
 PUBLIC void my_nl(int stream)
 {
@@ -68,15 +69,15 @@ PUBLIC void my_put(int stream, const char *buf, long len)
 PUBLIC void my_printf(int stream, bool newline, const char *s, ...)
 {
 	char buf[MAX_LINELEN];
-	va_list ap;
+	va_list_box box;
 
         if (s == NULL) {
                 return;
         }
 
-	va_start(ap, s);
-	vsnprintf(buf, MAX_LINELEN, s, ap);
-	va_end(ap);
+	va_start(box.ap, s);
+	Fmt_vsfmt(buf, MAX_LINELEN, s, &box);
+	va_end(box.ap);
 	my_put(stream, buf, -1L);
 
 	if (newline)
@@ -87,11 +88,11 @@ PUBLIC void my_printf(int stream, bool newline, const char *s, ...)
 PUBLIC void fatal(const char *s, ...)
 {
 	char buf[140];
-	va_list ap;
+	va_list_box box;
 
-	va_start(ap, s);
-	vsnprintf(buf, 140, s, ap);
-	va_end(ap);
+	va_start(box.ap, s);
+	Fmt_vsfmt(buf, 140, s, &box);
+	va_end(box.ap);
 	my_printf(MSG_ERROR, true, "FATAL error: %s", buf);
 
 	longjmp(RESTART, ERR_FATAL);
@@ -272,7 +273,7 @@ PUBLIC struct comal_line *search_line(long l, int exact)
 {
 	struct comal_line *work = curenv->progroot;
 
-	DBG_PRINTF(true, "Searching line %ld", l);
+	DBG_PRINTF(true, "Searching line %D", l);
 
 	while (work && work->ld->lineno < l)
 		work = work->ld->next;
@@ -625,7 +626,7 @@ PUBLIC void strlwr(char *s)
 
 PUBLIC char *ltoa(long num, char *buf)
 {
-	sprintf(buf, "%ld", num);
+	Fmt_sfmt(buf, 64, "%D", num);
 
 	return buf;
 }

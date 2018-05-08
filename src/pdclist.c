@@ -19,6 +19,8 @@
 #include "pdclist.h"
 #include <string.h>
 
+#include "fmt.h"
+
 PUBLIC bool show_exec = false;
 
 PRIVATE void list_horse(char **buf, struct comal_line *line);
@@ -887,7 +889,7 @@ PRIVATE void list_horse(char **buf, struct comal_line *line)
 PUBLIC void line_list(char **buf, struct comal_line *line)
 {
 	if (!line) {
-		sprintf(*buf,"<no line>");
+		Fmt_sfmt(*buf, MAX_LINELEN, "<no line>");
 		(*buf) += 10;
 		return;
 	}
@@ -895,7 +897,7 @@ PUBLIC void line_list(char **buf, struct comal_line *line)
 	if (line->ld) {
 		int i;
 
-		sprintf(*buf, "%9ld  ", line->ld->lineno);
+		Fmt_sfmt(*buf, MAX_LINELEN, "%9D  ", line->ld->lineno);
 		(*buf) += 10;
 
 		for (i = 0; i < line->ld->indent; i++)

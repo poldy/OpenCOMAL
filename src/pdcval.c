@@ -20,6 +20,8 @@
 #include "pdcexp.h"
 #include "pdcval.h"
 
+#include "fmt.h"
+
 PRIVATE void val_print_array(int stream, struct var_item *var) 
 {
 	long n=var->array->nritems;
@@ -48,11 +50,11 @@ PUBLIC void val_print(int stream, void *result, enum VAL_TYPE type)
 
 	switch (type) {
 	case V_INT:
-		snprintf(buf, 64, "%ld", *(long *) result);
+		Fmt_sfmt(buf, 64, "%D", *(long *) result);
 		break;
 
 	case V_FLOAT:
-		snprintf(buf, 64, "%g", *(double *) result);
+		Fmt_sfmt(buf, 64, "%g", *(double *) result);
 		break;
 
 	case V_STRING:

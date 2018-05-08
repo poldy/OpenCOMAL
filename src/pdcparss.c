@@ -21,6 +21,8 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
+#include "fmt.h"
+
 PRIVATE int pars_error_happened = 0;
 PRIVATE char pars_errtxt[MAX_LINELEN];
 
@@ -306,16 +308,16 @@ PUBLIC struct expression *pars_exp_str(struct expression *strexp)
 
 PUBLIC void pars_error(const char *s, ...)
 {
-	va_list ap;
+	va_list_box box;
 
 	if (pars_error_happened)
 		return;
 
-	va_start(ap, s);
+	va_start(box.ap, s);
 
 	pars_error_happened = lex_pos();
-	vsnprintf(pars_errtxt, MAX_LINELEN, s, ap);
-	va_end(ap);
+	Fmt_vsfmt(pars_errtxt, MAX_LINELEN, s, &box);
+	va_end(box.ap);
 }
 
 

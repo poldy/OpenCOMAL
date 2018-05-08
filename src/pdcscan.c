@@ -25,6 +25,8 @@
 
 #include <string.h>
 
+#include "fmt.h"
+
 #define SCAN_STACK_SIZE		(MAX_INDENT)
 
 PRIVATE struct {
@@ -316,7 +318,7 @@ PRIVATE bool scan_pass4(struct seg_des *seg, char *errtxt,
 				}
 
 				if (!procfound) {
-					snprintf(errtxt, MAX_LINELEN, "PROCedure %s not found", proccall->id->name);
+					Fmt_sfmt(errtxt, MAX_LINELEN, "PROCedure %s not found", proccall->id->name);
 					*errline = curline;
 					return false;
 				}
@@ -477,7 +479,7 @@ PRIVATE bool do_special1(struct scan_entry *p, struct comal_line *theline,
 	case PROCFUNC:
 		if (routine_search_horse
 		    (theline->lc.pfrec.id, theline->cmd, *procroot)) {
-			snprintf(errtxt, MAX_LINELEN, "%s %s multiply defined",
+			Fmt_sfmt(errtxt, MAX_LINELEN, "%s %s multiply defined",
 				lex_sym(theline->cmd),
 				theline->lc.pfrec.id->name);
 			*errline = curline;
@@ -581,7 +583,7 @@ PUBLIC bool scan_scan(struct seg_des *seg, char *errtxt,
 		skip_processing = 0;
 
 		if (scan_sp == MAX_INDENT) {
-			snprintf(errtxt, MAX_LINELEN,
+			Fmt_sfmt(errtxt, MAX_LINELEN,
 				"Too much control structure nesting (max. %d)",
 				MAX_INDENT);
 			*errline = curline;
@@ -602,7 +604,7 @@ PUBLIC bool scan_scan(struct seg_des *seg, char *errtxt,
 			 * Check whether this symbol should only occur at indent 0
 			 */
 			if (p->atindent0 && scan_sp!=0) {
-				snprintf(errtxt,MAX_LINELEN,"Can not have %s here",lex_sym(p->sym));
+				Fmt_sfmt(errtxt,MAX_LINELEN,"Can not have %s here",lex_sym(p->sym));
 				*errline=curline;
 				return false;
 			}
@@ -619,7 +621,7 @@ PUBLIC bool scan_scan(struct seg_des *seg, char *errtxt,
 					if (sym != p->expectsym1
 					    && sym != p->expectsym2) {
 						if (sym != -1)
-							snprintf(errtxt,
+							Fmt_sfmt(errtxt,
                                                                 MAX_LINELEN,
 								"%s expected, not %s",
 								lex_sym
@@ -628,7 +630,7 @@ PUBLIC bool scan_scan(struct seg_des *seg, char *errtxt,
 								(theline->
 								 cmd));
 						else
-							snprintf(errtxt,
+							Fmt_sfmt(errtxt,
                                                                 MAX_LINELEN,
 								"Unexpected %s",
 								lex_sym
@@ -653,7 +655,7 @@ PUBLIC bool scan_scan(struct seg_des *seg, char *errtxt,
 	}
 
 	if (scan_sp) {
-		snprintf(errtxt, MAX_LINELEN, "%d open control structure%s at EOP\n",
+		Fmt_sfmt(errtxt, MAX_LINELEN, "%d open control structure%s at EOP\n",
 			scan_sp, scan_sp == 1 ? "" : "s");
 		return false;
 	}

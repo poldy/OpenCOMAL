@@ -20,6 +20,7 @@
 #include "pdcexec.h"
 #include "pdcmod.h"
 
+#include "fmt.h"
 
 /*
  * The root of the loaded module table
@@ -72,7 +73,7 @@ PRIVATE bool mod_register(struct comal_line *line, char *errtext, struct comal_l
 				fun=find_func(line,idwalk->id);
 
 				if (!fun) {
-					snprintf(errtext,MAX_LINELEN,"Can not find PROC/FUNC %s in MODULE %s",
+					Fmt_sfmt(errtext,MAX_LINELEN,"Can not find PROC/FUNC %s in MODULE %s",
 						idwalk->id->name,line->lc.pfrec.id->name);
 					*errline=walk;
 					return false;
@@ -132,7 +133,7 @@ PUBLIC bool mod_use(struct seg_des *seg, struct id_rec *id, char *errtxt, struct
 	defline=mod_find_def(seg,id);
                                 
 	if (!defline) {
-		snprintf(errtxt,MAX_LINELEN,"Module %s can not be found",id->name);
+		Fmt_sfmt(errtxt,MAX_LINELEN,"Module %s can not be found",id->name);
 		return false;
 	}
 
