@@ -1776,7 +1776,7 @@ PRIVATE char *format_using(char *u, char *p)
 		width++;
 	}
 
-	Fmt_sfmt(p, FLOATUSING_MAX, "%%%d.%dlf", width, prec);
+	Fmt_sfmt(p, FLOATUSING_MAX, "%%%d.%df", width, prec);
 	return s;
 }
 
@@ -2088,7 +2088,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 			break;
 
 		case V_FLOAT:
-			nr = sscanf(i, "%lf%n", (double *) field, &n);
+			nr = sscanf(i, "%f%n", (double *) field, &n);
 			i += n;
 			break;
 
