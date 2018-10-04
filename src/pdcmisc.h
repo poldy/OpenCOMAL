@@ -30,11 +30,7 @@ extern void my_put(int stream, const char *buf, long len);
 extern void my_printf(int stream, bool newline, const char *s, ...) __printflike(3, 4);
 
 /** Optionally print a debug message */
-#ifdef NDEBUG
-#define DBG_PRINTF(...)
-#else
-#define DBG_PRINTF(...) { if (comal_debug) { my_printf(MSG_DEBUG, __VA_ARGS__); } }
-#endif
+#define DBG_PRINTF(...) VLG((comal_debug, __VA_ARGS__))
 
 /** Abort execution of the current program and return to the command loop */
 extern void fatal(const char *s);

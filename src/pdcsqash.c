@@ -12,15 +12,17 @@
 
 #define _XOPEN_SOURCE 700
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#define L_DEFAULT_HANDLER my_printf
+#define L_DEFAULT_PARAMS MSG_DEBUG
+#include "nana.h"
+
 #include "pdcglob.h"
 #include "pdcid.h"
 #include "pdcmisc.h"
 #include "pdcsqash.h"
 #include "pdcexec.h"
 #include <string.h>
-
-#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
-#include "nana.h"
 
 PRIVATE void sqash_exp(struct expression *exp);
 PRIVATE void sqash_horse(struct comal_line *line);

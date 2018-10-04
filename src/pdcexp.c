@@ -12,6 +12,11 @@
 
 #define _XOPEN_SOURCE 700
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#define L_DEFAULT_HANDLER my_printf
+#define L_DEFAULT_PARAMS MSG_DEBUG
+#include "nana.h"
+
 #include "pdcglob.h"
 #include "pdcerr.h"
 #include "pdcmisc.h"
@@ -28,9 +33,6 @@
 #include <stdio.h>
 
 #include "fmt.h"
-
-#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
-#include "nana.h"
 
 #ifdef HAS_ROUND
 extern double round(double x);

@@ -12,6 +12,11 @@
 
 #define _XOPEN_SOURCE 700
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#define L_DEFAULT_HANDLER my_printf
+#define L_DEFAULT_PARAMS MSG_DEBUG
+#include "nana.h"
+
 #include "pdcglob.h"
 #include "pdclexs.h"
 #include "pdcexp.h"
@@ -38,9 +43,6 @@
 
 #include "assert.h"
 #include "fmt.h"
-
-#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
-#include "nana.h"
 
 #define FLOATUSING_MAX 32
 

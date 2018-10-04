@@ -12,6 +12,11 @@
 
 #define _XOPEN_SOURCE 700
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#define L_DEFAULT_HANDLER my_printf
+#define L_DEFAULT_PARAMS MSG_DEBUG
+#include "nana.h"
+
 #include "pdcglob.h"
 #include "pdclexs.h"
 #include "pdcparss.h"
@@ -19,9 +24,6 @@
 #include "pdcseg.h"
 #include "pdcsym.h"
 #include "pdcfree.h"
-
-#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
-#include "nana.h"
 
 PRIVATE void free_exp(struct expression *exp);
 PRIVATE void free_horse(struct comal_line *line);
