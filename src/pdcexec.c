@@ -39,6 +39,9 @@
 #include "assert.h"
 #include "fmt.h"
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#include "nana.h"
+
 #define FLOATUSING_MAX 32
 
 PRIVATE void *return_result;	/* For comms of FUNC results */
@@ -497,8 +500,7 @@ PUBLIC void exec_call(struct expression *exp, int calltype, void **result,
 	env = sym_freeenv(env, 0);
 
 	if (aliasenv) {
-		if (aliasenv!=env) 
-			fatal("exec_call internal error #1");
+          IP(aliasenv==env, "exec_call internal error #1");
 
 		sym_freeenv(aliasenv,0);
 	}
@@ -522,8 +524,7 @@ PRIVATE void do_call(struct expression *exp, int calltype)
 
 	exec_call(exp, calltype, &val, &type);
 
-	if (val != 0)
-		fatal("Internal error in do_call(), pdcexec.c");
+	IP(val == 0, "Internal error in do_call(), pdcexec.c");
 }
 
 
@@ -685,14 +686,11 @@ PRIVATE void do_num_array_assign(struct var_item *to, struct var_item *from)
 {
 	void *from_data,*to_data;
 
-	if (!from->array || !to->array)
-		fatal("do_num_array_assign internal error #1");
+	IP(from->array && to->array, "do_num_array_assign internal error #1");
 
-	if (from->array->nritems!=to->array->nritems)
-		fatal("do_num_array_assign internal error #2");
+	IP(from->array->nritems==to->array->nritems, "do_num_array_assign internal error #2");
 
-	if (from->type!=to->type)
-		fatal("do_num_array_assign internal error #3");
+	IP(from->type==to->type, "do_num_array_assign internal error #3");
 
 	from_data=var_data(from);
 	to_data=var_data(to);
@@ -817,7 +815,7 @@ PRIVATE void do_str_array_assign(struct var_item *lvar, void *rval, enum VAL_TYP
 			from++;
 		}
 	} else 
-		fatal("do_str_array_assign internal error #1");
+          IP(false, "do_str_array_assign internal error #1");
 
 	if (rtype==V_STRING && must_free_mem) mem_free(str);
 	
@@ -856,15 +854,13 @@ PRIVATE void do_assign2(struct expression *lval, void *rval,
 	else if (lval->optype == T_SID || lval->optype == T_SARRAY) 
 		if (ltype==V_ARRAY)
 			do_str_array_assign(lvar,rval,rtype,must_free_mem);
-		else if (rtype == V_STRING)
-			if (ltype!=V_STRING)
-				fatal("do_assign2 internal error #4");
-			else
-				do_str_assign((struct string **)lvalptr, lval->e.expsid.twoexp, strl, (struct string *)rval, must_free_mem);
-		else
+		else if (rtype == V_STRING) {
+                  IP(ltype==V_STRING, "do_assign2 internal error #4");
+                  do_str_assign((struct string **)lvalptr, lval->e.expsid.twoexp, strl, (struct string *)rval, must_free_mem);
+		} else
 			run_error(TYPE_ERR,"Type mismatch in assignment (string expected)");
 	else
-		fatal("do_assign2 internal error #3");
+          IP(false, "do_assign2 internal error #3");
 }
 
 
@@ -889,8 +885,7 @@ PRIVATE void do_assign1(struct expression *lval, int op,
 			break;
 
 		default:
-			fatal
-			    ("Assign2 complex assignop switch default action");
+                  IP(false, "Assign2 complex assignop switch default action");
 		}
 
 		exp.e.twoexp.exp1 = lval;
@@ -1304,7 +1299,7 @@ PRIVATE void exec_open(struct comal_line *line)
 		break;
 
 	default:
-		fatal("open filemode switch default action");
+          IP(false, "open filemode switch default action");
 	}
 
 	fname = str_ltou(name->s);
@@ -1479,7 +1474,7 @@ PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
 			break;
 
 		default:
-			fatal("read1 type switch default action");
+                  IP(false, "read1 type switch default action");
 		}
 
                 if (!(*type == V_STRING && r == 0)) {
@@ -1622,7 +1617,7 @@ PRIVATE void write1(struct file_rec *f, void *data, enum VAL_TYPE type,
 			size = 0;
 		break;
 	default:
-		fatal("write1 type switch default action");
+          IP(false, "write1 type switch default action");
 	}
 
 	if (f->mode == randomSYM) {
@@ -1867,7 +1862,7 @@ PRIVATE void exec_print(struct comal_line *line)
 			print_file(p->modifier->twoexp,
 				   p->printroot, p->pr_sep, p->modifier->c_using);
 		} else {
-			fatal("Bad print_rec.modifier.type");
+                  IP(false, "Bad print_rec.modifier.type");
 		}
 	} else {
 		print_maybe_using(p);
@@ -2124,7 +2119,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 			break;
 
 		default:
-			fatal("In input_con; default switch reached");
+                  IP(false, "In input_con; default switch reached");
 			break;
 		}
 
@@ -2502,7 +2497,7 @@ PUBLIC int exec_line(struct comal_line *line)
 		break;
 	
 	default:
-		fatal("exec_line default action");
+          IP(false, "exec_line default action");
 	}
 
 	return 0;

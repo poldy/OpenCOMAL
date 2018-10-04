@@ -33,12 +33,15 @@ OBJ_CII:=../cii/src/except.o ../cii/src/fmt.o
 
 ifdef DEBUG
 	SOURCES_CII+=../cii/src/memchk.c ../cii/src/assert.c
+	SOURCES_NANA:=../nana/I.c
 	OBJ_CII+=../cii/src/memchk.o ../cii/src/assert.o
+	OBJ_NANA:=../nana/I.o
 	CFLAGS+=-fsanitize=undefined
 	LDFLAGS+=-fsanitize=undefined
 else
 	SOURCES_CII+=../cii/src/mem.c
 	OBJ_CII+=../cii/src/mem.o
+	CFLAGS+=-DWITHOUT_NANA
 endif
 
 .PHONY: all
@@ -48,7 +51,7 @@ all: build $(TARG1) $(TARG2) ../bin/en.cat ../bin/ga.cat
 include $(REALCC).mk
 MKCATDEFS:=../tools/mkcatdefs
 include $(OPSYS).mk
-CFLAGS+=-I../cii/include -I.
+CFLAGS+=-I../cii/include -I. -I../nana
 MIN_CFLAGS:=$(CFLAGS)
 CFLAGS+=$(TARG_CFLAGS)
 SOURCE_DATE_EPOCH=$(shell git log -l --pretty=%ct)
@@ -62,11 +65,11 @@ CFLAGS+='-DBUILD_DATE="$(BUILD_DATE)"'
 
 $(OBJ1) $(OBJ2) $(OS): pdcpars.tab.h
 
-$(TARG1):  $(OBJ1) $(OS) $(OBJ_CII)
-	$(CC) -o $(TARG1) $(OBJ1) $(OS) $(OBJ_CII) $(LDFLAGS) $(TARG_LDFLAGS)
+$(TARG1):  $(OBJ1) $(OS) $(OBJ_CII) $(OBJ_NANA)
+	$(CC) -o $(TARG1) $(OBJ1) $(OS) $(OBJ_CII) $(OBJ_NANA) $(LDFLAGS) $(TARG_LDFLAGS)
 
-$(TARG2):  $(OBJ2) $(OS) $(OBJ_CII)
-	$(CC) -o $(TARG2) $(OBJ2) $(OS) $(OBJ_CII) $(LDFLAGS) $(TARG_LDFLAGS)
+$(TARG2):  $(OBJ2) $(OS) $(OBJ_CII) $(OBJ_NANA)
+	$(CC) -o $(TARG2) $(OBJ2) $(OS) $(OBJ_CII) $(OBJ_NANA) $(LDFLAGS) $(TARG_LDFLAGS)
 
 .PHONY: build
 build:		
@@ -87,7 +90,7 @@ pdcpars.tab.o: msgnrs.h
 
 .PHONY: almostclean
 almostclean:	
-	$(RM) *.o *.obj *.map *.OBJ *~ *.d $(OBJ_CII)
+	$(RM) *.o *.obj *.map *.OBJ *~ *.d $(OBJ_CII) $(OBJ_NANA)
 	$(RM) lex.yy.c pdcpars.tab.* pdcpars.output
 	$(RM) pdcpars.c pdclex.c pdcpars.h
 

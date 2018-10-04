@@ -29,6 +29,9 @@
 
 #include "fmt.h"
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#include "nana.h"
+
 #ifdef HAS_ROUND
 extern double round(double x);
 #define ROUND round
@@ -70,8 +73,7 @@ PUBLIC void *exp_lval(struct expression *exp, enum VAL_TYPE *type,
 	if (exp->optype == T_EXP_IS_NUM || exp->optype == T_EXP_IS_STRING)
 		exp = exp->e.exp;
 
-	if (exp->optype != T_ID && exp->optype != T_SID && exp->optype != T_ARRAY && exp->optype != T_SARRAY)
-		fatal("Exp_lval() internal error #1");
+	IP(exp->optype == T_ID || exp->optype == T_SID || exp->optype == T_ARRAY || exp->optype == T_SARRAY, "Exp_lval() internal error #1");
 
 	id = exp->e.expid.id;
 	exproot = exp->e.expid.exproot;
@@ -230,7 +232,7 @@ PRIVATE void exp_const(struct expression *exp, void **result,
 		break;
 	
 	default:
-		fatal("exp_const default action");
+          IP(false, "exp_const default action");
 	}
 }
 
@@ -595,7 +597,7 @@ PRIVATE void exp_unary(struct expression *expr, void **result,
 		break;
 
 	default:
-		fatal("calc_exp unary default action");
+          IP(false, "calc_exp unary default action");
 	}
 
 	if (dfunc) {
@@ -668,7 +670,7 @@ PRIVATE void exp_binary_s(int op, void **result, enum VAL_TYPE *type,
 		*result=s2;
 		*type=V_STRING;
 	} else
-		fatal("exp_binary_s illegal non-relop");
+          IP(false, "exp_binary_s illegal non-relop");
 }
 
 
@@ -751,7 +753,7 @@ PRIVATE void exp_binary_i(int op, void **result, enum VAL_TYPE *type,
 		break;
 
 	default:
-		fatal("exp_binary_i non-relop switch default action");
+          IP(false, "exp_binary_i non-relop switch default action");
 	}
 
 	if (*result == NULL) {
@@ -816,7 +818,7 @@ PRIVATE void exp_binary_f(int op, void **result, enum VAL_TYPE *type,
 		break;
 
 	default:
-		fatal("exp_binary_f non-relop switch default action");
+          IP(false, "exp_binary_f non-relop switch default action");
 	}
 
 	*type = V_FLOAT;
@@ -832,7 +834,7 @@ PRIVATE bool logval(void *value, enum VAL_TYPE type)
 	else if (type == V_FLOAT)
 		return *(double *) value != 0;
 	else
-		fatal("Logval of non-num type");
+          IP(false, "Logval of non-num type");
 
 	/* NOTREACHED */
 	return false;
@@ -877,7 +879,7 @@ PRIVATE bool exp_binary_l(int op, struct expression *exp1,
 		return (i1 && !i2) || (i2 && !i1);
 
 	default:
-		fatal("exp_binary_l relop switch default action");
+          IP(false, "exp_binary_l relop switch default action");
 	}
 
 	/* NOTREACHED */
@@ -919,7 +921,7 @@ PRIVATE void exp_rnd(struct expression *exp, double **result,
 
 		d=ROUND((d2-d1)*d+d1);
 	} else
-		fatal("exp_rnd internal error #1");
+          IP(false, "exp_rnd internal error #1");
 
 	*result = (double *)cell_alloc(FLOAT_CPOOL);
 	**result = d;
@@ -975,8 +977,7 @@ PRIVATE void exp_binary(struct expression *exp, void **result,
 				break;
 
 			default:
-				fatal
-				    ("exp_binary subexp type default action");
+                          IP(false, "exp_binary subexp type default action");
 			}
 
 			(*func) (exp->op, result, type, result1, result2);
@@ -1244,15 +1245,14 @@ PUBLIC void calc_exp(struct expression *exp, void **result,
 {
 	int i;
 
-	if (!exp)
-		fatal("Calc_exp finds (null) expression");
+	IP(exp, "Calc_exp finds (null) expression");
 
 	for (i = 0; exptab[i].type && exptab[i].type != exp->optype; i++);
 
 	if (exptab[i].type)
 		exptab[i].func(exp, result, type);
 	else
-		fatal("calc_exp, optype does not occur in table");
+          IP(false, "calc_exp, optype does not occur in table");
 }
 
 
@@ -1269,7 +1269,7 @@ PUBLIC long calc_intexp(struct expression *exp)
 	else if (type == V_FLOAT)
 		num = d2int(*(double *) result, 1);
 	else
-		fatal("calc_intexp wrong type");
+          IP(false, "calc_intexp wrong type");
 
 	cell_free(result);
 
@@ -1290,7 +1290,7 @@ PUBLIC int calc_logexp(struct expression *exp)
 	else if (type == V_FLOAT)
 		log = (*(double *) result) != 0;
 	else
-		fatal("calc_logexp wrong type");
+          IP(false, "calc_logexp wrong type");
 
 	cell_free(result);
 

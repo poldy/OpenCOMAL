@@ -20,6 +20,8 @@
 #include "pdcsym.h"
 #include "pdcfree.h"
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#include "nana.h"
 
 PRIVATE void free_exp(struct expression *exp);
 PRIVATE void free_horse(struct comal_line *line);
@@ -104,7 +106,7 @@ PRIVATE void free_exp(struct expression *exp)
 		break;
 
 	default:
-		fatal("Free exp default action");
+          IP(false, "Free exp default action");
 	}
 
 	mem_free(exp);
@@ -180,7 +182,7 @@ PRIVATE void free_input(struct comal_line *line)
 			break;
 
 		default:
-			fatal("Input modifier incorrect (free)");
+                  IP(false, "Input modifier incorrect (free)");
 		}
 
 		mem_free(i->modifier);
@@ -214,7 +216,7 @@ PRIVATE void free_print(struct comal_line *line)
                         }
                         break;
                 default:
-			fatal("Print modifier incorrect (free)");
+                  IP(false, "Print modifier incorrect (free)");
                         break;
 		}
                 if (p->modifier->c_using != NULL) {
@@ -411,7 +413,7 @@ PRIVATE void free_horse(struct comal_line *line)
 		break;
 
 	default:
-		fatal("List default action (free)");
+          IP(false, "List default action (free)");
 	}
 
 	if (line->ld) {

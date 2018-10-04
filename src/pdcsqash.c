@@ -19,6 +19,9 @@
 #include "pdcexec.h"
 #include <string.h>
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#include "nana.h"
+
 PRIVATE void sqash_exp(struct expression *exp);
 PRIVATE void sqash_horse(struct comal_line *line);
 
@@ -49,8 +52,7 @@ PRIVATE void sqash_flush(void)
 
 PRIVATE void sqash_put(const void *data, unsigned size)
 {
-	if (size > SQASH_BUFSIZE)
-		fatal("Sqash_put() size overflow");
+  IP(size <= SQASH_BUFSIZE, "Sqash_put() size overflow");
 
 	if (sqash_i + size > SQASH_BUFSIZE)
 		sqash_flush();
@@ -237,7 +239,7 @@ PRIVATE void sqash_exp(struct expression *exp)
 		break;
 
 	default:
-		fatal("Sqash exp default action");
+          IP(false, "Sqash exp default action");
 	}
 }
 
@@ -309,7 +311,7 @@ PRIVATE void sqash_input(struct comal_line *line)
 			break;
 
 		default:
-			fatal("Input modifier incorrect (sqash)");
+                  IP(false, "Input modifier incorrect (sqash)");
 		}
 	}
 
@@ -346,7 +348,7 @@ PRIVATE void sqash_print(struct comal_line *line)
 			break;
 
 		default:
-			fatal("Print modifier incorrect (sqash)");
+                  IP(false, "Print modifier incorrect (sqash)");
 		}
 		if (p->modifier->c_using != NULL) {
 			sqash_putint(SQ_MODIFIER, usingSYM);
@@ -568,7 +570,7 @@ PRIVATE void sqash_horse(struct comal_line *line)
 		break;
 
 	default:
-		fatal("cmd switch default action (sqash_horse)");
+          IP(false, "cmd switch default action (sqash_horse)");
 	}
 }
 
@@ -708,8 +710,8 @@ PRIVATE struct string *expand_getstr(int code)
 		s = STR_ALLOC_PRIVATE(curenv->program_pool, l);
 		expand_get(s->s, l);
 		s->len = l;
-	} else if (c != SQ_EMPTYSTRING)
-		fatal("Internal sqash/expand error #1b");
+	} else
+          IP(c == SQ_EMPTYSTRING, "Internal sqash/expand error #1b");
 
 	return s;
 }
@@ -726,8 +728,8 @@ PRIVATE char *expand_getstr2(int code)
 		i = expand_getint();
 		s = (char *)mem_alloc_private(curenv->program_pool, i + 1);
 		expand_get(s, i + 1);
-	} else if (c != SQ_EMPTYSTRING)
-		fatal("Internal sqash/expand error #1");
+	} else
+          IP(c == SQ_EMPTYSTRING, "Internal sqash/expand error #1");
 
 	return s;
 }
@@ -812,7 +814,7 @@ PRIVATE void expand_twoexp(struct two_exp *work)
 		work->exp1 = expand_exp();
 		work->exp2 = expand_exp();
 	} else
-		fatal("Internal twoexp expand error #1");
+          IP(false, "Internal twoexp expand error #1");
 }
 
 PRIVATE struct two_exp *expand_alloc_twoexp(void)
@@ -846,8 +848,8 @@ PRIVATE struct expression *expand_exp(void)
 		DBG_PRINTF(true, "Empty exp");
 
 		return NULL;
-	} else if (c != SQ_EXP)
-		fatal("Internal sqash/expand error #3");
+	}
+        IP(c == SQ_EXP, "Internal sqash/expand error #3");
 
 	o = (enum optype)expand_getint();
 
@@ -922,7 +924,7 @@ PRIVATE struct expression *expand_exp(void)
 		break;
 
 	default:
-		fatal("Expand exp default action");
+          IP(false, "Expand exp default action");
 	}
 
 	exp->optype = o;
@@ -1016,7 +1018,7 @@ PRIVATE void expand_input(struct comal_line *line)
 			break;
 
 		default:
-			fatal("Input modifier incorrect (expand)");
+                  IP(false, "Input modifier incorrect (expand)");
 		}
 	}
 
@@ -1071,18 +1073,15 @@ PRIVATE void expand_print(struct comal_line *line)
 			break;
 
 		default:
-			fatal("Print modifier incorrect (expand)");
+                  IP(false, "Print modifier incorrect (expand)");
 		}
 		if (expand_peekc() == SQ_MODIFIER) {
 	                int type;
 
 			expand_getc();
 			type = expand_getint();
-			if (type == usingSYM) {
-				p->modifier->c_using = expand_exp();
-			} else {
-				fatal("Print modifier incorrect (expand)");
-			}
+                        IP(type == usingSYM, "Print modifier incorrect (expand)");
+                        p->modifier->c_using = expand_exp();
 		}
 	}
 
@@ -1185,8 +1184,7 @@ PRIVATE struct comal_line *expand_horse(void)
 
 	if (c == SQ_EMPTYLINE)
 		return NULL;
-	else if (c != SQ_LINE)
-		fatal("Sqash/expand internal error #5");
+	IP(c == SQ_LINE, "Sqash/expand internal error #5");
 
 	cmd = expand_getint();
 	line = (struct comal_line *)mem_alloc_private(curenv->program_pool, stat_size(cmd));
@@ -1357,7 +1355,7 @@ PRIVATE struct comal_line *expand_horse(void)
 		break;
 
 	default:
-		fatal("cmd switch default action (expand_horse)");
+          IP(false, "cmd switch default action (expand_horse)");
 	}
 #ifndef NDEBUG
 	if (comal_debug) {

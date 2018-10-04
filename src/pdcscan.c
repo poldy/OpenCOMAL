@@ -27,6 +27,9 @@
 
 #include "fmt.h"
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#include "nana.h"
+
 #define SCAN_STACK_SIZE		(MAX_INDENT)
 
 PRIVATE struct {
@@ -86,8 +89,7 @@ PRIVATE struct scan_entry scan_tab[] = {
 
 PRIVATE void scan_stack_push(int sym, struct comal_line *line)
 {
-	if (scan_sp >= SCAN_STACK_SIZE)
-		fatal("Internal scan stack overflow");
+  IP(scan_sp < SCAN_STACK_SIZE, "Internal scan stack overflow");
 
 	scan_stack[scan_sp].sym = sym;
 	scan_stack[scan_sp].line = line;

@@ -22,6 +22,9 @@
 
 #include "fmt.h"
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#include "nana.h"
+
 PRIVATE void val_print_array(int stream, struct var_item *var) 
 {
 	long n=var->array->nritems;
@@ -72,7 +75,7 @@ PUBLIC void val_print(int stream, void *result, enum VAL_TYPE type)
 		break;
 
 	default:
-		fatal("val_print() default action");
+          IP(false, "val_print() default action");
 	}
 
 	if (len) my_put(stream, pptr, len);
@@ -107,7 +110,7 @@ PUBLIC void val_copy(void *to, void *from, enum VAL_TYPE ttype, enum
 			run_error(VALUE_ERR,
 				  "Wrong type (must be semi-integer numeric)");
 	else
-		fatal("Val_copy() default action");
+          IP(false, "Val_copy() default action");
 
 }
 
@@ -132,7 +135,7 @@ PUBLIC double val_double(struct expression *exp) {
 	else if (type==V_INT)
 		d=*(long *)result;
 	else
-		fatal("val_double internal error #1");
+          IP(false, "val_double internal error #1");
 
 	cell_free(result);
 	return d;
@@ -199,7 +202,7 @@ PUBLIC int val_cmp(int op, void *r1, void *r2, enum VAL_TYPE t1, enum
 		break;
 
 	default:
-		fatal("val_cmp relop default action");
+          IP(false, "val_cmp relop default action");
 	}
 
 	return cmp;
@@ -326,7 +329,7 @@ PUBLIC long val_mustbelong(void *value, enum VAL_TYPE type, int freeit)
 	else if (type==V_FLOAT)
 		n=(long)*(double *)value;
 	else
-		fatal("val_mustbelong internal error #1");
+          IP(false, "val_mustbelong internal error #1");
 
 	if (freeit) cell_free(value);
 

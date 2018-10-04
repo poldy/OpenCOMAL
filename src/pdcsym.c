@@ -23,6 +23,9 @@
 #include <string.h>
 #include <stdbool.h>
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#include "nana.h"
+
 PUBLIC struct sym_env *sym_newenv(bool closed, struct sym_env *prev,
 				  struct sym_env *alias, 
 				  struct comal_line *curproc, const char *name)
@@ -209,7 +212,7 @@ PRIVATE void free_var(struct var_item *var)
 			break;
 
 		default:
-			fatal("free_var default action");
+                  IP(false, "free_var default action");
 		}
 	}
 
@@ -237,7 +240,7 @@ PRIVATE struct sym_item *free_symitem(struct sym_item *item)
 		break;
 
 	default:
-		fatal("free_symitem default action");
+          IP(false, "free_symitem default action");
 	}
 
 	mem_free(item);
@@ -422,7 +425,7 @@ PRIVATE void sym_list_horse(struct sym_env *env)
 			case S_FUNCVAR:	s="FUNC";
 					fun=sym_list_proc;
 					break;
-			default:	fatal("sym_list_horse: Err#1");
+                default:	IP(false, "sym_list_horse: Err#1");
 		}
 
 		my_printf(MSG_DIALOG,false,"  Item: %s (is %s) Value: ",walk->id->name,s);

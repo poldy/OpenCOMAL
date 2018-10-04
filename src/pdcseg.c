@@ -21,6 +21,8 @@
 #include "pdcprog.h"
 #include "pdcseg.h"
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#include "nana.h"
 
 PUBLIC void seg_total_scan(struct seg_des *seg)
 {
@@ -132,8 +134,7 @@ PUBLIC struct seg_des *seg_static_free(struct seg_des *seg)
 
 PUBLIC struct seg_des *seg_dynamic_free(struct seg_des *seg)
 {
-	if (curenv->segroot != seg)
-		fatal("Internal seg_free() error #1");
+  IP(curenv->segroot == seg, "Internal seg_free() error #1");
 
 	return curenv->segroot = seg_static_free(seg);
 }

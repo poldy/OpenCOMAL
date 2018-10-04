@@ -13,6 +13,10 @@
 #define _XOPEN_SOURCE 700
 
 #include "mem.h"
+
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#include "nana.h"
+
 #include "pdcglob.h"
 #include "pdcexec.h"
 #include "pdcmisc.h"
@@ -132,8 +136,7 @@ PUBLIC void *cell_alloc(unsigned pool)
 
 PUBLIC void *mem_alloc(unsigned pool, size_t size)
 {
-	if (pool >= NR_FIXED_POOLS)
-		fatal("Invalid pool number in mem_alloc()");
+  IP(pool < NR_FIXED_POOLS, "Invalid pool number in mem_alloc()");
 
 	return mem_alloc_private(&mem_pool[pool], size);
 }
@@ -207,8 +210,7 @@ PUBLIC void cell_free(void *m)
 	if (cell->c.marker == CELL_IN_MEM)
 		mem_free(cell);
 	else {
-		if ((cell->c.marker & 0xff00) != CELL_MARKER)
-			fatal("Cell_free() invalid marker");
+          IP((cell->c.marker & 0xff00) == CELL_MARKER, "Cell_free() invalid marker");
 
 		c = cell_hdr[cell->c.marker & 0xff];
 		cell->c.next = c->root;
@@ -231,8 +233,7 @@ PUBLIC void *mem_free(void *m)
 	DBG_PRINTF(true, "Memfree block at %p (pool %d)",
 		  memblock, memblock->pool->id);
 
-	if (memblock->marker != MEM_MARKER)
-		fatal("Invalid marker in mem_free()");
+	IP(memblock->marker == MEM_MARKER, "Invalid marker in mem_free()");
 
 	if (memblock->next)
 		memblock->next->prev = memblock->prev;
@@ -271,8 +272,7 @@ PUBLIC void cell_freepool(unsigned pool)
 
 PUBLIC void mem_freepool(unsigned pool)
 {
-	if (pool >= NR_FIXED_POOLS)
-		fatal("Invalid pool number in mem_alloc()");
+  IP(pool < NR_FIXED_POOLS, "Invalid pool number in mem_alloc()");
 
 	mem_freepool_private(&mem_pool[pool]);
 
@@ -291,8 +291,7 @@ PUBLIC void mem_freepool_private(struct mem_pool *pool)
 
 		next = work->next;
 
-		if (work->marker != MEM_MARKER)
-			fatal("Invalid marker in mem_freepool(%p)", pool);
+		IP(work->marker == MEM_MARKER, "Invalid marker in mem_freepool()");
 
 		FREE(work);
 		work = next;

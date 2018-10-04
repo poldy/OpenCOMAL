@@ -37,7 +37,7 @@ extern void my_printf(int stream, bool newline, const char *s, ...) __printflike
 #endif
 
 /** Abort execution of the current program and return to the command loop */
-extern void fatal(const char *s, ...) __printflike(1, 2);
+extern void fatal(const char *s);
 
 /**
  * Reverse a list.

@@ -30,6 +30,9 @@
 
 #include "fmt.h"
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#include "nana.h"
+
 PUBLIC void my_nl(int stream)
 {
 	if (sel_outfile && stream == MSG_PROGRAM) {
@@ -85,15 +88,9 @@ PUBLIC void my_printf(int stream, bool newline, const char *s, ...)
 }
 
 
-PUBLIC void fatal(const char *s, ...)
+PUBLIC void fatal(const char *s)
 {
-	char buf[140];
-	va_list_box box;
-
-	va_start(box.ap, s);
-	Fmt_vsfmt(buf, 140, s, &box);
-	va_end(box.ap);
-	my_printf(MSG_ERROR, true, "FATAL error: %s", buf);
+	my_printf(MSG_ERROR, true, "FATAL error: %s", s);
 
 	longjmp(RESTART, ERR_FATAL);
 }
@@ -229,8 +226,7 @@ PUBLIC struct id_rec *exp_of_id(struct expression *exp)
 {
 	struct id_rec *id = NULL;
 
-	if (exp->optype != T_EXP_IS_NUM && exp->optype != T_EXP_IS_STRING)
-		fatal("Exp_id() internal error #1");
+	IP(exp->optype == T_EXP_IS_NUM || exp->optype == T_EXP_IS_STRING, "Exp_id() internal error #1");
 
 	exp = exp->e.exp;
 
@@ -479,8 +475,7 @@ PUBLIC int stat_size(int cmd)
 	while (sizetab[i].cmd >= 0 && sizetab[i].cmd != cmd)
 		i++;
 
-	if (sizetab[i].cmd < 0)
-		fatal("stat_size() internal error");
+	IP(sizetab[i].cmd >= 0, "stat_size() internal error");
 
 	i = sizetab[i].size + sizeof(struct comal_line) -
 	    sizeof(union line_contents);
@@ -514,7 +509,7 @@ PUBLIC int type_size(enum VAL_TYPE t)
 	else if (t == V_STRING)
 		return sizeof(struct string *);
 	else
-		fatal("type_size(%d) invalid type", t);
+          IP(false, "type_size() invalid type");
 
 	/* NOTREACHED */
 	return 0;

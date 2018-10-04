@@ -21,6 +21,9 @@
 
 #include "fmt.h"
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#include "nana.h"
+
 PUBLIC bool show_exec = false;
 
 PRIVATE void list_horse(char **buf, struct comal_line *line);
@@ -451,7 +454,7 @@ PRIVATE void list_input(char **buf, struct comal_line *line)
 			break;
 
 		default:
-			fatal("Input modifier incorrect");
+                  IP(false, "Input modifier incorrect");
 		}
 
 	list_explist(buf, i->lvalroot, 0);
@@ -501,7 +504,7 @@ PRIVATE void list_print(char **buf, struct comal_line *line)
 			break;
 
 		default:
-			fatal("Print modifier incorrect");
+                  IP(false, "Print modifier incorrect");
 		}
 
 	list_printlist(buf, p->printroot);
