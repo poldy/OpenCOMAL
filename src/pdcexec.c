@@ -13,6 +13,7 @@
 #define _XOPEN_SOURCE 700
 
 #define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#define I_DEFAULT_PARAMS "assert"
 #define L_DEFAULT_HANDLER my_printf
 #define L_DEFAULT_PARAMS MSG_DEBUG
 #include "nana.h"
@@ -41,7 +42,6 @@
 #include <ctype.h>
 #include <fcntl.h>
 
-#include "assert.h"
 #include "fmt.h"
 
 #define FLOATUSING_MAX 32

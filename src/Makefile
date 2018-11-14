@@ -16,7 +16,7 @@ SOURCES:=lex.yy.c pdccloop.c pdccmd.c pdcenv.c pdcexec.c pdcexp.c pdcext.c \
 	pdcmisc.c pdcpars.tab.c pdcparss.c pdcprog.c pdcrun.c pdcscan.c \
 	pdcseg.c pdcsqash.c pdcstr.c pdcsym.c pdcval.c pdcmod.c long.c
 SOURCES_CII:=../cii/src/except.c ../cii/src/fmt.c
-SOURCES_NANA:=../nana/I.c
+SOURCES_NANA:=../nana/src/I.c
 
 TARG1:=../bin/opencomal
 OBJ1:=pdcpars.tab.o lex.yy.o pdcmain.o pdcmisc.o pdccmd.o  pdclexs.o  \
@@ -31,7 +31,7 @@ OBJ2:=pdcmain.o pdcmisc.o \
 	pdcval.o pdcrun.o pdcmod.o long.o
 OS:=pdcunix.o 
 OBJ_CII:=../cii/src/except.o ../cii/src/fmt.o
-OBJ_NANA:=../nana/I.o
+OBJ_NANA:=../nana/src/I.o
 
 ifdef DEBUG
 	SOURCES_CII+=../cii/src/memchk.c ../cii/src/assert.c
@@ -50,7 +50,7 @@ all: build $(TARG1) $(TARG2) ../bin/en.cat ../bin/ga.cat
 include $(REALCC).mk
 MKCATDEFS:=../tools/mkcatdefs
 include $(OPSYS).mk
-CFLAGS+=-I../cii/include -I. -I../nana
+CFLAGS+=-I../cii/include -I. -I../nana/src
 MIN_CFLAGS:=$(CFLAGS)
 CFLAGS+=$(TARG_CFLAGS)
 SOURCE_DATE_EPOCH=$(shell git log -l --pretty=%ct)

@@ -12,6 +12,10 @@
 
 #define _XOPEN_SOURCE 700
 
+#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
+#define I_DEFAULT_PARAMS "assert"
+#include "nana.h"
+
 #include "pdcglob.h"
 #include "pdcstr.h"
 #include "pdcmisc.h"
@@ -22,7 +26,6 @@
 #include "pdcext.h"
 #include "version.h"
 #include <string.h>
-#include "assert.h"
 
 struct inpfile_stkent {
 	struct inpfile_stkent *next;
@@ -364,7 +367,7 @@ PUBLIC bool ext_ht(void)
 
 PUBLIC void ext_page(FILE *f)
 {
-	assert(f != NULL);
+	I(f != NULL);
 	fputc('\f', f);
 }
 
