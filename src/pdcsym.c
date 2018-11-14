@@ -151,11 +151,10 @@ PRIVATE struct sym_item *search_horse(struct sym_env *env,
 	}
 	if (comal_debug) {
 		if (work) {
-			DBG_PRINTF(true,
-				  "Found SYM at %p, %s, type %d", work,
-				  work->id->name, work->symtype);
+			VL(("Found SYM at %p, %s, type %d", work,
+			    work->id->name, work->symtype));
                 } else {
-			DBG_PRINTF(true, "Returning NULL");
+			VL(("Returning NULL"));
                 }
 	}
 	return work;

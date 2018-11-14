@@ -285,7 +285,7 @@ PUBLIC struct comal_line *search_line(long l, int exact)
 	        if (work) {
 		        puts_line(MSG_DEBUG, work);
                 } else {
-		        DBG_PRINTF(true, "Returning NULL");
+		        VL(("Returning NULL"));
                 }
         }
 	return work;
