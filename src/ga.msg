@@ -6,7 +6,7 @@ $quote "
 $set Main
 NewlocaleFailed "rabhadh: Theip ar locale a roghadh.\nrabhadh: Ba cheart go mbeidís in ann an locale \"%s\" a úsáid ar do ríomhaire.\nrabhadh: Ag dul ar ais go dtí an príomh-locale (\"%s\").\n"
 BadOpt "Modh mí-aithneach: '-%c'\n"
-Usage "úsáid: %s [-y] [-m <msg-catalog>] ...\n"
+Usage "úsáid: %s [-dy] [-m <msg-catalog>] ...\n"
 Copyright "             (c) Cóipcheart 1992-2002  Jos Visser <josv@osp.nl>"
 Banner "OpenComal -- Clár Comal saor (eagrán %s; %s; déanamh %s)"
 Built "             Athrú deireanach ar an "

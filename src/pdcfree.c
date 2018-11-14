@@ -254,12 +254,10 @@ PRIVATE void free_horse(struct comal_line *line)
 {
 	if (!line)
 		return;
-#ifndef NDEBUG
         if (comal_debug) {
 	        DBG_PRINTF(false, "Freeing line: ");
 	        puts_line(MSG_DEBUG, line);
         }
-#endif
 	switch (line->cmd) {
 	case 0:
 	case quitSYM:

@@ -34,14 +34,12 @@ PUBLIC struct sym_env *sym_newenv(bool closed, struct sym_env *prev,
 {
 	struct sym_env *work = GETCORE(RUN_POOL, struct sym_env);
 
-#ifndef NDEBUG
 	if (comal_debug) {
 		DBG_PRINTF(false,
 			  "Handing out new env %s at %p, prev=%p for: ",
 			  name, work, prev);
 		puts_line(MSG_DEBUG, curproc);
 	}
-#endif
 	work->prev = prev;
 	work->aliasenv = alias;
 	work->closed = closed;
@@ -151,7 +149,6 @@ PRIVATE struct sym_item *search_horse(struct sym_env *env,
 		
 		work=search_horse(env->curproc->lc.pfrec.staticenv,id,type);
 	}
-#ifndef NDEBUG
 	if (comal_debug) {
 		if (work) {
 			DBG_PRINTF(true,
@@ -161,7 +158,6 @@ PRIVATE struct sym_item *search_horse(struct sym_env *env,
 			DBG_PRINTF(true, "Returning NULL");
                 }
 	}
-#endif
 	return work;
 }
 

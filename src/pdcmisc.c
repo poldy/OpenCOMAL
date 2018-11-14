@@ -281,7 +281,6 @@ PUBLIC struct comal_line *search_line(long l, int exact)
 
 	if (exact && work->ld->lineno != l)
 		work = NULL;
-#ifndef NDEBUG
         if (comal_debug) {
 	        if (work) {
 		        puts_line(MSG_DEBUG, work);
@@ -289,7 +288,6 @@ PUBLIC struct comal_line *search_line(long l, int exact)
 		        DBG_PRINTF(true, "Returning NULL");
                 }
         }
-#endif
 	return work;
 }
 
@@ -544,12 +542,10 @@ PUBLIC int proclevel(struct comal_line *proc)
 {
 	int i;
 
-#ifndef NDEBUG
 	if (comal_debug) {
 		DBG_PRINTF(false, "ProcLevel of ");
 		puts_line(MSG_DEBUG, proc);
 	}
-#endif
 	if (proc)
 		i = proc->lc.pfrec.level;
 	else

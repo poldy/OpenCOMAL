@@ -113,16 +113,11 @@ PUBLIC int main(int argc, char *argv[])
                 // curses initialisation.
                 latin_to_utf8 = iconv_open("utf8", "latin-9");
 
-#ifdef NDEBUG
-                while ((c = getopt(argc, argv, ":ym:")) != -1) {
-                        switch (c) {
-#else
                 while ((c = getopt(argc, argv, ":dym:")) != -1) {
                         switch (c) {
                         case 'd':
                                 comal_debug = true;
                                 break;
-#endif
                         case 'y':
                                 yydebug++;
                                 break;
@@ -147,11 +142,7 @@ PUBLIC int main(int argc, char *argv[])
                         }
                 }
                 if (errflg) {
-#ifdef NDEBUG
-                        Fmt_fprint(stderr, str_ltou(catgets(catdesc, MainSet, MainUsage, "usage: %s [-y] [-m <msg-catalog>] ...\n")), argv[0]);
-#else
-                        Fmt_fprint(stderr, "usage: %s [-dy] [-m <msg-catalog>] ...\n", argv[0]);
-#endif
+                        Fmt_fprint(stderr, str_ltou(catgets(catdesc, MainSet, MainUsage, "usage: %s [-dy] [-m <msg-catalog>] ...\n")), argv[0]);
                         RETURN EXIT_FAILURE;
                 }
 

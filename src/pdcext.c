@@ -38,12 +38,10 @@ PRIVATE bool *is_flag(char *cmd)
 {
 	extern bool show_exec;
 	extern bool short_circuit;
-#ifndef NDEBUG
 	extern bool comal_debug;
 
 	if (strcmp(cmd, "debug") == 0)
 		return &comal_debug;
-#endif
 	if (strcmp(cmd, "yydebug") == 0)
 		return (bool *)&yydebug;
 

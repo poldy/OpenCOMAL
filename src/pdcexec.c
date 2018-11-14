@@ -1146,19 +1146,15 @@ PRIVATE int exec_for(struct comal_line *line)
 	cell_free(eresult);
 
 	while (true) {
-#ifndef NDEBUG
                 if (comal_debug) {
 		        if (ltype == V_INT) {
-			        DBG_PRINTF(true,
-				        "FOR loop, lval=%p, %D", lval,
-				        *(long *) lval);
+			        VL(("FOR loop, lval=%p, %D", lval,
+				    *(long *) lval));
                         } else {
-			        DBG_PRINTF(true,
-				        "FOR loop, lval=%p, %f", lval,
-				        *(double *) lval);
+			        VL(("FOR loop, lval=%p, %f", lval,
+				    *(double *) lval));
 		        }
                 }
-#endif
 		if (ltype == V_INT)
 			if (lstep > 0)
 				stopfor = (*(long *) lval > lto);
@@ -1724,7 +1720,7 @@ PUBLIC void print_file(struct two_exp *twoexp,
 
 static inline void process_pr_sep(int pr_sep)
 {
-	assert(pr_sep == 0 || pr_sep == commaSYM || pr_sep == semicolonSYM);
+	I(pr_sep == 0 || pr_sep == commaSYM || pr_sep == semicolonSYM);
 	if (pr_sep == semicolonSYM) {
 		my_ht(MSG_PROGRAM);
 	}
@@ -2029,7 +2025,7 @@ PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp
 
 	if (len) {
 		l = calc_intexp(len) + 1;
-		assert(2 <= l && l <= MAX_LINELEN);
+		I(2 <= l && l <= MAX_LINELEN);
 	} else {
 		l = MAX_LINELEN;
 	}

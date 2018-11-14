@@ -64,9 +64,7 @@ EXTERN jmp_buf ERRBUF;		/**< Continue point after run_error */
 
 EXTERN struct comal_env *curenv;	/**< Current COMAL environment */
 EXTERN int entering;		/**< ENTER in progress */
-#ifndef NDEBUG
 EXTERN bool comal_debug;		/**< Internal debugging switch */
-#endif
 
 EXTERN FILE *sel_outfile;	/**< For select output */
 EXTERN FILE *sel_infile;	/**< For select input */

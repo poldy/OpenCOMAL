@@ -1359,12 +1359,10 @@ PRIVATE struct comal_line *expand_horse(void)
 	default:
           IP(false, "cmd switch default action (expand_horse)");
 	}
-#ifndef NDEBUG
 	if (comal_debug) {
 		DBG_PRINTF(false, "Line expanded: ");
 		puts_line(MSG_DEBUG, line);
 	}
-#endif
 	return line;
 }
 
