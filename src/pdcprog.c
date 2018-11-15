@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal program management functions */
+/*
+ * OpenComal program management functions 
+ */
 
 #define _XOPEN_SOURCE 700
 
@@ -28,145 +30,152 @@
 #include "pdcmod.h"
 
 
-PUBLIC void prog_addline(struct comal_line *line)
+PUBLIC void
+prog_addline(struct comal_line *line)
 {
-	struct comal_line *work = curenv->progroot;
-	struct comal_line *last = NULL;
-	int scan = 0;
+    struct comal_line *work = curenv->progroot;
+    struct comal_line *last = NULL;
+    int             scan = 0;
 
-	while (work && work->ld->lineno < line->ld->lineno) {
-		last = work;
-		work = work->ld->next;
-	}
+    while (work && work->ld->lineno < line->ld->lineno) {
+        last = work;
+        work = work->ld->next;
+    }
 
-	if (!work || work->ld->lineno > line->ld->lineno)
-		line->ld->next = work;
-	else {
-		line->ld->next = work->ld->next;
-		scan = assess_scan(work);
-		line_free(work, 1);
-	}
+    if (!work || work->ld->lineno > line->ld->lineno)
+        line->ld->next = work;
+    else {
+        line->ld->next = work->ld->next;
+        scan = assess_scan(work);
+        line_free(work, 1);
+    }
 
-	if (last) {
-		last->ld->next = line;
+    if (last) {
+        last->ld->next = line;
 
-		if (scan_necessary(last) == STRUCTURE_START)
-			line->ld->indent = last->ld->indent + INDENTION;
-		else
-			line->ld->indent = last->ld->indent;
-	} else
-		curenv->progroot = line;
+        if (scan_necessary(last) == STRUCTURE_START)
+            line->ld->indent = last->ld->indent + INDENTION;
+        else
+            line->ld->indent = last->ld->indent;
+    } else
+        curenv->progroot = line;
 
-	curenv->changed = true;
+    curenv->changed = true;
 
-	if (!scan)
-		scan = assess_scan(line);
+    if (!scan)
+        scan = assess_scan(line);
 
-	if (scan)
-		prog_structure_scan();
+    if (scan)
+        prog_structure_scan();
 }
 
 
-PUBLIC int prog_del(struct comal_line **root, long from, long to, int
-		    mainprog)
+PUBLIC int
+prog_del(struct comal_line **root, long from, long to, int
+         mainprog)
 {
-	struct comal_line *work = *root;
-	struct comal_line *last = NULL;
-	struct comal_line *next;
-	int scan = 0;
+    struct comal_line *work = *root;
+    struct comal_line *last = NULL;
+    struct comal_line *next;
+    int             scan = 0;
 
-	while (work && work->ld->lineno < from) {
-		last = work;
-		work = work->ld->next;
-	}
+    while (work && work->ld->lineno < from) {
+        last = work;
+        work = work->ld->next;
+    }
 
-	while (work && work->ld->lineno <= to) {
-		next = work->ld->next;
+    while (work && work->ld->lineno <= to) {
+        next = work->ld->next;
 
-		if (!scan)
-			scan = assess_scan(work);
+        if (!scan)
+            scan = assess_scan(work);
 
-		line_free(work, mainprog);
-		work = next;
-	}
+        line_free(work, mainprog);
+        work = next;
+    }
 
-	if (last)
-		last->ld->next = work;
-	else
-		*root = work;
+    if (last)
+        last->ld->next = work;
+    else
+        *root = work;
 
-	return scan;
+    return scan;
 }
 
 
-PUBLIC long prog_highest_line(void)
+PUBLIC long
+prog_highest_line(void)
 {
-	struct comal_line *work = curenv->progroot;
-	struct comal_line *last = NULL;
+    struct comal_line *work = curenv->progroot;
+    struct comal_line *last = NULL;
 
-	if (!work)
-		return 0L;
+    if (!work)
+        return 0L;
 
-	while (work) {
-		last = work;
-		work = work->ld->next;
-	}
+    while (work) {
+        last = work;
+        work = work->ld->next;
+    }
 
-	return last->ld->lineno;
+    return last->ld->lineno;
 }
 
-PUBLIC void prog_total_scan(void)
+PUBLIC void
+prog_total_scan(void)
 {
-	char errtxt[MAX_LINELEN];
-	struct comal_line *errline = NULL;
+    char            errtxt[MAX_LINELEN];
+    struct comal_line *errline = NULL;
 
-	DBG_PRINTF(true, "Total scanning...");
+    DBG_PRINTF(true, "Total scanning...");
 
-	curenv->scan_ok = scan_scan(NULL, errtxt, &errline);
+    curenv->scan_ok = scan_scan(NULL, errtxt, &errline);
 
-	if (!curenv->scan_ok) {
-		if (errline)
-			puts_line(MSG_ERROR, errline);
+    if (!curenv->scan_ok) {
+        if (errline)
+            puts_line(MSG_ERROR, errline);
 
-		my_printf(MSG_ERROR, true, "%s", errtxt);
-	}
-}
-
-
-PUBLIC void prog_new(void)
-{
-	clear_env(curenv);
-	mem_freepool_private(curenv->program_pool);
+        my_printf(MSG_ERROR, true, "%s", errtxt);
+    }
 }
 
 
-PUBLIC void prog_load(char *fn)
+PUBLIC void
+prog_new(void)
 {
-	DBG_PRINTF(true, "LOADing %s", fn);
-
-	prog_new();
-	curenv->progroot = expand_fromfile(fn);
-	curenv->changed = false;
+    clear_env(curenv);
+    mem_freepool_private(curenv->program_pool);
 }
 
 
-PUBLIC void prog_run(void)
+PUBLIC void
+prog_load(char *fn)
 {
-	clean_runenv(curenv);
+    DBG_PRINTF(true, "LOADing %s", fn);
 
-	if (runfilename) {
-		prog_load(runfilename);
-		prog_structure_scan();
-		mem_free(runfilename);
-		runfilename = NULL;
-	}
+    prog_new();
+    curenv->progroot = expand_fromfile(fn);
+    curenv->changed = false;
+}
 
-	curenv->curenv = ROOTENV();
 
-	prog_total_scan();
+PUBLIC void
+prog_run(void)
+{
+    clean_runenv(curenv);
 
-	if (curenv->scan_ok) {
-		mod_initall();
-		exec_seq(curenv->progroot);
-	}
+    if (runfilename) {
+        prog_load(runfilename);
+        prog_structure_scan();
+        mem_free(runfilename);
+        runfilename = NULL;
+    }
+
+    curenv->curenv = ROOTENV();
+
+    prog_total_scan();
+
+    if (curenv->scan_ok) {
+        mod_initall();
+        exec_seq(curenv->progroot);
+    }
 }

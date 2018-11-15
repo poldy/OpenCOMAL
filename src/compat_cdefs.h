@@ -44,7 +44,7 @@
         __attribute__((unused))
 #endif
 
-#endif  // __APPLE__
+#endif                          // __APPLE__
 
 #ifndef __malloc
 #define __malloc \

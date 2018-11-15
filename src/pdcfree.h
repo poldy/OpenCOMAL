@@ -16,6 +16,6 @@
 #define PDCFREE_H
 
 /** Free all storage for one line of a program */
-extern void line_free(struct comal_line *line, int mainprog);
+extern void     line_free(struct comal_line *line, int mainprog);
 
 #endif

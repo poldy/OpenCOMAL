@@ -8,14 +8,16 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* PDComal header file for FreeBSD */
+/*
+ * PDComal header file for FreeBSD 
+ */
 
-#define HUGE_POINTER		/* no need for this in real OS's */
+#define HUGE_POINTER            /* no need for this in real OS's */
 #define O_BINARY 	0
 
 #define HOST_OS		"FreeBSD"
 #define VERSION		"0.1"
-#define CLI		""	/* Command Line Interpreter */
+#define CLI		""      /* Command Line Interpreter */
 
 #define UNIX
 #define FREEBSD

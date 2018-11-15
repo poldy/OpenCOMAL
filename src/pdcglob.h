@@ -45,36 +45,38 @@
 #define EXTERN extern
 #endif
 
-#define NO_STRUCTURE	(0)	/**< return values from scan_necessary */
-#define STRUCTURE_START	(1)	/**< return values from scan_necessary */
+#define NO_STRUCTURE	(0)     /**< return values from scan_necessary */
+#define STRUCTURE_START	(1)     /**< return values from scan_necessary */
 #define STRUCTURE_END	(2)
 
-#define COMMAND(x)	(32767-x)	/**< to distinguish between statements & command from (e.q. RUN, DEL) */
+#define COMMAND(x)	(32767-x)       /**< to distinguish between statements & command from (e.q. RUN, DEL) */
 
-/* RESTART entry codes */
+/*
+ * RESTART entry codes 
+ */
 
-#define JUST_RESTART	1	/**< Nothing special, restart interpreter */
-#define QUIT		2	/**< Restart code = QUIT */
-#define RUN		3	/**< Restart code = RUN */
-#define PROG_END	4	/**< Restart code = end program */
-#define ERR_FATAL	666	/**< fatal error occurred */
+#define JUST_RESTART	1       /**< Nothing special, restart interpreter */
+#define QUIT		2       /**< Restart code = QUIT */
+#define RUN		3       /**< Restart code = RUN */
+#define PROG_END	4       /**< Restart code = end program */
+#define ERR_FATAL	666     /**< fatal error occurred */
 
-EXTERN jmp_buf RESTART;		/**< restart entry in the interpreter after error */
-EXTERN jmp_buf ERRBUF;		/**< Continue point after run_error */
+EXTERN jmp_buf  RESTART;        /**< restart entry in the interpreter after error */
+EXTERN jmp_buf  ERRBUF;         /**< Continue point after run_error */
 
-EXTERN struct comal_env *curenv;	/**< Current COMAL environment */
-EXTERN int entering;		/**< ENTER in progress */
-EXTERN bool comal_debug;		/**< Internal debugging switch */
+EXTERN struct comal_env *curenv;        /**< Current COMAL environment */
+EXTERN int      entering;       /**< ENTER in progress */
+EXTERN bool     comal_debug;            /**< Internal debugging switch */
 
-EXTERN FILE *sel_outfile;	/**< For select output */
-EXTERN FILE *sel_infile;	/**< For select input */
+EXTERN FILE    *sel_outfile;    /**< For select output */
+EXTERN FILE    *sel_infile;     /**< For select input */
 
-EXTERN char *runfilename;
+EXTERN char    *runfilename;
 
 EXTERN struct env_list *env_root;
 
 EXTERN locale_t latin_loc;
-EXTERN iconv_t latin_to_utf8;
-EXTERN nl_catd catdesc;
+EXTERN iconv_t  latin_to_utf8;
+EXTERN nl_catd  catdesc;
 
 #endif

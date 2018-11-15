@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* PDCOMAL SYS routines for any OS (default C) */
+/*
+ * PDCOMAL SYS routines for any OS (default C) 
+ */
 
 #include "pdcglob.h"
 #include "pdcmisc.h"
@@ -18,7 +20,8 @@
 #endif
 
 
-PUBLIC void sys_init()
+PUBLIC void
+sys_init()
 {
     ext_init();
 
@@ -30,103 +33,113 @@ PUBLIC void sys_init()
 }
 
 
-PUBLIC void sys_tini()
+PUBLIC void
+sys_tini()
 {
     ext_tini();
 }
 
 
-PUBLIC double sys_rand(arg)
-long arg;
+PUBLIC double
+sys_rand(arg)
+     long            arg;
 {
-    long n = rand();
+    long            n = rand();
 
     if (arg == 0)
-	if (n == 0)
-	    return 0L;
-	else
-	    return 1 / n;
+        if (n == 0)
+            return 0L;
+        else
+            return 1 / n;
 
     return (n * arg) / (~(1L << (8 * sizeof(int) - 1)));
 }
 
 
-PUBLIC int sys_escape()
+PUBLIC int
+sys_escape()
 {
     return 0;
 }
 
 
-PUBLIC void sys_put(stream, buf, len)
-int stream;
-char *buf;
+PUBLIC void
+sys_put(stream, buf, len)
+     int             stream;
+     char           *buf;
 {
     fputs(buf, stdout);
 }
 
 
-PUBLIC void sys_page(f)
-FILE *f;
+PUBLIC void
+sys_page(f)
+     FILE           *f;
 {
     run_error(NIMP_ERR, "PAGE not implemented");
 }
 
 
-PUBLIC void sys_cursor(f, x, y)
-FILE *f;
-long x;
-long y;
+PUBLIC void
+sys_cursor(f, x, y)
+     FILE           *f;
+     long            x;
+     long            y;
 {
     run_error(NIMP_ERR, "CURSOR not implemented");
 }
 
 
-PUBLIC void sys_nl(stream)
-int stream;
+PUBLIC void
+sys_nl(stream)
+     int             stream;
 {
     putchar('\n');
 }
 
 
-PUBLIC void sys_screen_readjust()
+PUBLIC void
+sys_screen_readjust()
 {
 }
 
-PUBLIC int sys_yn(stream, s)
-int stream;
-char *s;
+PUBLIC int
+sys_yn(stream, s)
+     int             stream;
+     char           *s;
 {
-    char buf[10];
-    int i;
+    char            buf[10];
+    int             i;
 
     for (;;) {
-	my_printf(MSG_DIALOG, 0, s);
-	fgets(buf, 9, stdin);
+        my_printf(MSG_DIALOG, 0, s);
+        fgets(buf, 9, stdin);
 
-	for (i = 0; i < 9 && buf[i]; i++)
-	    if (buf[i] == 'y' || buf[i] == 'Y')
-		return 1;
-	    else if (buf[i] == 'n' || buf[i] == 'N');
-	return 0;
+        for (i = 0; i < 9 && buf[i]; i++)
+            if (buf[i] == 'y' || buf[i] == 'Y')
+                return 1;
+            else if (buf[i] == 'n' || buf[i] == 'N');
+        return 0;
     }
 }
 
 
-PRIVATE int do_get(stream, line, maxlen, prompt)
-char *line;
-int maxlen;
-char *prompt;
+PRIVATE int
+do_get(stream, line, maxlen, prompt)
+     char           *line;
+     int             maxlen;
+     char           *prompt;
 {
     if (prompt)
-	my_printf(stream, 0, prompt);
+        my_printf(stream, 0, prompt);
 
     if (!fgets(line, maxlen, stdin)) {
-	*line = 0;
+        *line = 0;
 
-	if (!feof(stdin))
-	    perror("Error on input");
+        if (!feof(stdin))
+            perror("Error on input");
 
-	return 1;
+        return 1;
     }
 
     *(line + strlen(line) - 1) = '\0';
@@ -135,29 +148,31 @@ char *prompt;
 }
 
 
-PUBLIC int sys_get(stream, line, maxlen, prompt)
-int stream;
-char *line;
-int maxlen;
-char *prompt;
+PUBLIC int
+sys_get(stream, line, maxlen, prompt)
+     int             stream;
+     char           *line;
+     int             maxlen;
+     char           *prompt;
 {
     return do_get(stream, line, maxlen, prompt);
 }
 
 
-PUBLIC int sys_edit(stream, line, maxlen, cursor)
-int stream;
-char line[];
-int maxlen;
-int cursor;
+PUBLIC int
+sys_edit(stream, line, maxlen, cursor)
+     int             stream;
+     char            line[];
+     int             maxlen;
+     int             cursor;
 {
-    int i;
+    int             i;
 
     for (i = 0; line[i]; i++) {
-	if (i == cursor)
-	    putchar('!');
+        if (i == cursor)
+            putchar('!');
 
-	putchar(line[i]);
+        putchar(line[i]);
     }
 
     putchar('\n');
@@ -166,88 +181,96 @@ int cursor;
 }
 
 
-PUBLIC void *sys_alloc(size)
-long size;
+PUBLIC void    *
+sys_alloc(size)
+     long            size;
 {
     if (size > MAXUNSIGNED)
-	return NULL;
+        return NULL;
 
     return calloc(1, (unsigned) size);
 }
 
 
-PUBLIC void *sys_realloc(block, newsize)
-void *block;
-long newsize;
+PUBLIC void    *
+sys_realloc(block, newsize)
+     void           *block;
+     long            newsize;
 {
     if (newsize > MAXUNSIGNED)
-	return NULL;
+        return NULL;
 
     return realloc(block, (unsigned) newsize);
 }
 
 
-PUBLIC void sys_free(p)
-void *p;
+PUBLIC void
+sys_free(p)
+     void           *p;
 {
     free(p);
 }
 
 
-PUBLIC int sys_call_scan(id, exproot, errtext)
-struct id_rec *id;
-struct exp_list *exproot;
-char *errtext;
+PUBLIC int
+sys_call_scan(id, exproot, errtext)
+     struct id_rec  *id;
+     struct exp_list *exproot;
+     char           *errtext;
 {
-    int rc = ext_call_scan(id, exproot, errtext);
+    int             rc = ext_call_scan(id, exproot, errtext);
 
     if (rc == -1) {
-	sprintf(errtext, "PROCedure %s not found", id->name);
-	return 0;
+        sprintf(errtext, "PROCedure %s not found", id->name);
+        return 0;
     }
 
     return rc;
 }
 
 
-PUBLIC int sys_call(id, exproot, calltype, result, type)
-struct id_rec *id;
-struct exp_list *exproot;
-int calltype;
-void **result;
-enum VAL_TYPE *type;
+PUBLIC int
+sys_call(id, exproot, calltype, result, type)
+     struct id_rec  *id;
+     struct exp_list *exproot;
+     int             calltype;
+     void          **result;
+     enum VAL_TYPE  *type;
 {
     return ext_call(id, exproot, calltype, result, type);
 }
 
 
-PUBLIC void sys_sys_exp(exproot, result, type)
-struct exp_list *exproot;
-void **result;
-enum VAL_TYPE *type;
+PUBLIC void
+sys_sys_exp(exproot, result, type)
+     struct exp_list *exproot;
+     void          **result;
+     enum VAL_TYPE  *type;
 {
     if (ext_sys_exp(exproot, result, type) == -1)
-	run_error(SYS_ERR, "Unknown SYS() command");
+        run_error(SYS_ERR, "Unknown SYS() command");
 }
 
 
-PUBLIC void sys_syss_exp(exproot, result, type)
-struct exp_list *exproot;
-char **result;
-enum VAL_TYPE *type;
+PUBLIC void
+sys_syss_exp(exproot, result, type)
+     struct exp_list *exproot;
+     char          **result;
+     enum VAL_TYPE  *type;
 {
     if (ext_syss_exp(exproot, result, type) == -1)
-	run_error(SYS_ERR, "Unknown SYS$() command");
+        run_error(SYS_ERR, "Unknown SYS$() command");
 }
 
 
-PUBLIC int sys_sys_stat(exproot)
-struct exp_list *exproot;
+PUBLIC int
+sys_sys_stat(exproot)
+     struct exp_list *exproot;
 {
-    int rc = ext_sys_stat(exproot);
+    int             rc = ext_sys_stat(exproot);
 
     if (rc == -1)
-	run_error(SYS_ERR, "Unknown SYS statement command");
+        run_error(SYS_ERR, "Unknown SYS statement command");
 
     return rc;
 }

@@ -19,7 +19,9 @@
 #define SQ_VERSION		0x1254
 #define SQ_MARKER		"SqAsH"
 
-/* The sqash items */
+/*
+ * The sqash items 
+ */
 
 #define SQ_ERROR		0
 #define SQ_STRING		1
@@ -47,7 +49,7 @@
 #define SQ_ENDIDLIST		23
 
 /** Tokenize & save the current program to a file */
-extern void sqash_2file(char *fname);
+extern void     sqash_2file(char *fname);
 
 /** Load & detokenize a file, overwriting the current program */
 extern struct comal_line *expand_fromfile(char *fname);

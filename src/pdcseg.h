@@ -16,7 +16,7 @@
 #define PDCSEG_H
 
 /** SCAN an external segment */
-extern void seg_total_scan(struct seg_des *seg);
+extern void     seg_total_scan(struct seg_des *seg);
 
 /** Load a segment statically, one time */
 extern struct seg_des *seg_static_load(struct comal_line *line);
@@ -31,7 +31,7 @@ extern struct seg_des *seg_static_free(struct seg_des *seg);
 extern struct seg_des *seg_dynamic_free(struct seg_des *seg);
 
 /** Free all external segments */
-extern void seg_allfree(void);
+extern void     seg_allfree(void);
 
 /** Returns the root of the segment lines, or the current program if seg is NULL */
 extern struct comal_line *seg_root(struct seg_des *seg);

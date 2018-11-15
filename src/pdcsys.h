@@ -15,9 +15,9 @@
 #ifndef PDCSYS_H
 #define PDCSYS_H
 
-// #define INT_MAX               (~(1L<<(8*sizeof(long)-1)))
+// #define INT_MAX (~(1L<<(8*sizeof(long)-1)))
 #define MAXUNSIGNED	((unsigned)~0)
-// #define INT_MIN               (1L<<(8*sizeof(long)-1))
+// #define INT_MIN (1L<<(8*sizeof(long)-1))
 
 #include "pdcdsys.h"
 

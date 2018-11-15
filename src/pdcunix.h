@@ -23,13 +23,13 @@
 #ifndef PDCUNIX_H
 #define PDCUNIX_H
 
-#define HUGE_POINTER		/**< no need for this in real OS's */
+#define HUGE_POINTER            /**< no need for this in real OS's */
 #define O_BINARY 	0
 
 #define HOST_OS		"UNIX"
-#define HOST_OS_CODE	1	/**< Change when adding another OS! */
+#define HOST_OS_CODE	1       /**< Change when adding another OS! */
 #define VERSION		"0.3"
-#define CLI		""	/**< Command Line Interpreter */
+#define CLI		""      /**< Command Line Interpreter */
 
 #define FLEX
 

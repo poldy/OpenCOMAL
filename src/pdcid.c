@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal's ID routines */
+/*
+ * OpenComal's ID routines 
+ */
 
 #define _XOPEN_SOURCE 700
 
@@ -21,90 +23,98 @@
 PRIVATE struct id_rec *id_root = NULL;
 
 
-/* STRCMP was originally used because of 8086 segmentation.
- * I left it in there because I'm not sure if the interpreter interns strings.
+/*
+ * STRCMP was originally used because of 8086 segmentation. I left it in
+ * there because I'm not sure if the interpreter interns strings. 
  */
 
-PUBLIC int id_eql(struct id_rec *id1, struct id_rec *id2)
+PUBLIC int
+id_eql(struct id_rec *id1, struct id_rec *id2)
 {
-	return (strcmp(id1->name, id2->name) == 0) ? 1 : 0;
+    return (strcmp(id1->name, id2->name) == 0) ? 1 : 0;
 }
 
 
-/* The private function install builds a new record in memory for the
- * specified id name. Memory is allocated from the free pool.
+/*
+ * The private function install builds a new record in memory for the
+ * specified id name. Memory is allocated from the free pool. 
  */
 
-PRIVATE struct id_rec *install(char *idname)
+PRIVATE struct id_rec *
+install(char *idname)
 {
-	struct id_rec *work;
-	int l = strlen(idname);
+    struct id_rec  *work;
+    int             l = strlen(idname);
 
-	work = (struct id_rec *)mem_alloc(MISC_POOL, sizeof(struct id_rec) + l);
-	work->left = work->right = NULL;
-	term_strncpy(work->name, idname, l + 1);
+    work =
+        (struct id_rec *) mem_alloc(MISC_POOL, sizeof(struct id_rec) + l);
+    work->left = work->right = NULL;
+    term_strncpy(work->name, idname, l + 1);
 
-	switch (work->name[l - 1]) {
-	case '#':
-		work->type = V_INT;
-		break;
-	case '$':
-		work->type = V_STRING;
-		break;
-	default:
-		work->type = V_FLOAT;
-		break;
-	}
+    switch (work->name[l - 1]) {
+    case '#':
+        work->type = V_INT;
+        break;
+    case '$':
+        work->type = V_STRING;
+        break;
+    default:
+        work->type = V_FLOAT;
+        break;
+    }
 
-	return work;
+    return work;
 }
 
-/* The next routine does the horse work of searching and installing an
- * identifier.
+/*
+ * The next routine does the horse work of searching and installing an
+ * identifier. 
  */
 
-PRIVATE struct id_rec *id_horse(char *idname)
+PRIVATE struct id_rec *
+id_horse(char *idname)
 {
-	struct id_rec *walk = id_root;
-	struct id_rec *lastone = NULL;
-	struct id_rec *installed;
-	enum { atroot, overleft, overright } lastchoice = atroot;
-	int found = 0;
+    struct id_rec  *walk = id_root;
+    struct id_rec  *lastone = NULL;
+    struct id_rec  *installed;
+    enum { atroot, overleft, overright } lastchoice = atroot;
+    int             found = 0;
 
-	while (walk != NULL && !found) {
-		int cmp = strcoll_l(idname, walk->name, latin_loc);
+    while (walk != NULL && !found) {
+        int             cmp = strcoll_l(idname, walk->name, latin_loc);
 
-		lastone = walk;
+        lastone = walk;
 
-		if (cmp < 0) {
-			lastchoice = overleft;
-			walk = walk->left;
-		} else if (cmp > 0) {
-			lastchoice = overright;
-			walk = walk->right;
-		} else
-			found = 1;
-	}
+        if (cmp < 0) {
+            lastchoice = overleft;
+            walk = walk->left;
+        } else if (cmp > 0) {
+            lastchoice = overright;
+            walk = walk->right;
+        } else
+            found = 1;
+    }
 
-	if (found)
-		return walk;
+    if (found)
+        return walk;
 
-	installed = install(idname);
+    installed = install(idname);
 
-	if (lastchoice == atroot)
-		return (id_root = installed);
-	else if (lastchoice == overleft)
-		return (lastone->left = installed);
-	else
-		return (lastone->right = installed);
+    if (lastchoice == atroot)
+        return (id_root = installed);
+    else if (lastchoice == overleft)
+        return (lastone->left = installed);
+    else
+        return (lastone->right = installed);
 }
 
 
-PUBLIC struct id_rec *id_search(char *id)
+PUBLIC struct id_rec *
+id_search(char *id)
 {
-	char idname[MAX_IDLEN];
+    char            idname[MAX_IDLEN];
 
-	term_strncpy(idname, id, MAX_IDLEN);
-	strlwr(idname);
-	return (struct id_rec *) id_horse(idname);
+    term_strncpy(idname, id, MAX_IDLEN);
+    strlwr(idname);
+    return (struct id_rec *) id_horse(idname);
 }

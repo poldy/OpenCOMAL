@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal SYS routines for UNIX */
+/*
+ * OpenComal SYS routines for UNIX 
+ */
 
 #define _XOPEN_SOURCE 700
 #define _DARWIN_C_SOURCE 1
@@ -50,757 +52,814 @@
 
 PRIVATE volatile int escape = 0;
 
-PRIVATE int paged = 0, pagern;
-PRIVATE bool is_utf8_put = false;
-PRIVATE int getx,gety;
-PRIVATE char *edit_line;
-PRIVATE Keymap keymap;
+PRIVATE int     paged = 0,
+    pagern;
+PRIVATE bool    is_utf8_put = false;
+PRIVATE int     getx,
+                gety;
+PRIVATE char   *edit_line;
+PRIVATE Keymap  keymap;
 PRIVATE iconv_t utf8_to_latin;
-PRIVATE bool is_visual_mode = false;
-PRIVATE long zone = 1;
+PRIVATE bool    is_visual_mode = false;
+PRIVATE long    zone = 1;
 
 PRIVATE struct {
-	wint_t curses_key;
-	int internal_key;
-	const char *function;
+    wint_t          curses_key;
+    int             internal_key;
+    const char     *function;
 } my_keymap[] = {
-	{	KEY_HOME,	1,	"beginning-of-line"		},
-	{	KEY_END,	2,	"end-of-line"			},
-	{	KEY_RIGHT,	3,	"forward-char"			},
-	{	KEY_LEFT,	4,	"backward-char"			},
-	{	KEY_UP,		5,	"previous-history"		},
-	{	KEY_DOWN,	6,	"next-history"			},
-	{	KEY_DC,		7,	"delete-char"			},
-	{	KEY_BACKSPACE,	8,	"backward-delete-char"		},
-	//{	KEY_IC,		9,	"overwrite-mode"		},
-	{	10,		10,	"accept-line"			},
-	{	13,		13,	"accept-line"			},
-	{	0,		0,	NULL				}
-	
+    {KEY_HOME, 1, "beginning-of-line"},
+    {KEY_END, 2, "end-of-line"},
+    {KEY_RIGHT, 3, "forward-char"},
+    {KEY_LEFT, 4, "backward-char"},
+    {KEY_UP, 5, "previous-history"},
+    {KEY_DOWN, 6, "next-history"},
+    {KEY_DC, 7, "delete-char"},
+    {KEY_BACKSPACE, 8, "backward-delete-char"},
+    // { KEY_IC, 9, "overwrite-mode" },
+    {10, 10, "accept-line"},
+    {13, 13, "accept-line"},
+    {0, 0, NULL}
+
 };
 
-PRIVATE __dead void errw(const char *msg)
+PRIVATE __dead void
+errw(const char *msg)
 {
-        if (is_visual_mode) {
-                endwin();
+    if (is_visual_mode) {
+        endwin();
+    }
+    Fmt_fprint(stderr, "%s\n", msg);
+    exit(EXIT_FAILURE);
+}
+
+PRIVATE void
+int_handler(int signum __my_unused)
+{
+    escape = 1;
+}
+
+PRIVATE char
+wc_to_latin(wchar_t wc)
+{
+    char            uc[MB_LEN_MAX],
+                    lc;
+    int             l;
+    char           *inbuf,
+                   *outbuf;
+    size_t          inbytesleft,
+                    outbytesleft;
+
+    l = wctomb(uc, wc);
+    inbuf = uc;
+    inbytesleft = l;
+    outbuf = &lc;
+    outbytesleft = 1;
+    iconv(utf8_to_latin, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+    return lc;
+}
+
+PRIVATE int
+my_getch_horse(wint_t * c, char *lc)
+{
+    while (1) {
+        int             status;
+
+        status = get_wch(c);
+
+        switch (status) {
+        case KEY_CODE_YES:
+            if (*c == KEY_RESIZE) {
+                CHECK(refresh);
+                continue;
+            }
+            return KEY_CODE_YES;
+            break;
+        case OK:
+            *lc = wc_to_latin(*c);
+            if (escape) {
+                return ERR;
+            } else if (*lc == '\f') {
+                CHECK(clearok, curscr, TRUE);
+                CHECK(refresh);
+                continue;
+            }
+            return OK;
+            break;
+        case ERR:
+            return ERR;
+            break;
+        default:
+            return ERR;
+            break;
         }
-        Fmt_fprint(stderr, "%s\n", msg);
+    }
+
+    return ERR;
+}
+
+PRIVATE int
+my_getch(void)
+{
+    wint_t          c;
+    int             i;
+    unsigned char   lc;
+
+    while (1) {
+        int             status;
+
+        status = my_getch_horse(&c, (char *) &lc);
+
+        switch (status) {
+        case ERR:
+            if (escape) {
+                rl_done = 1;
+                return 10;
+            }
+            continue;
+            break;
+        case OK:
+            if (lc == 10 || lc == 13) {
+                return lc;
+            } else if (lc < ' ') {
+                CHECK(beep);
+                continue;
+            }
+            return lc;
+            break;
+        case KEY_CODE_YES:
+            for (i = 0; my_keymap[i].curses_key; i++) {
+                if (c == my_keymap[i].curses_key) {
+                    return my_keymap[i].internal_key;
+                }
+            }
+            CHECK(beep);
+            return ERR;
+            break;
+        default:
+            return ERR;
+            break;
+        }
+    }
+
+    return ERR;
+}
+
+
+PRIVATE int
+curses_getc(FILE * in __my_unused)
+{
+    return my_getch();
+}
+
+PRIVATE void
+addlstr(const char *lstr)
+{
+    char           *ustr;
+    wchar_t         wstr[MAX_LINELEN];
+
+    if (lstr == NULL) {
+        return;
+    }
+    if (is_utf8_put) {
+        ustr = (char *) lstr;
+    } else {
+        ustr = str_ltou(lstr);
+    }
+    mbstowcs(wstr, ustr, MAX_LINELEN);
+    CHECK(addwstr, wstr);
+}
+
+PRIVATE void
+curses_redisplay(void)
+{
+    CHECK(move, gety, getx);
+    addlstr(rl_line_buffer);
+    CHECK(clrtoeol);
+    CHECK(move, gety + rl_point / COLS, getx + rl_point % COLS);
+    CHECK(refresh);
+}
+
+PRIVATE int
+pre_input(void)
+{
+    rl_insert_text(edit_line);
+
+    return 0;
+}
+
+PRIVATE int
+startup(void)
+{
+    int             i;
+    static int      started_up = 0;
+
+    if (started_up) {
+        return 0;
+    }
+
+    keymap = rl_make_keymap();
+    rl_set_keymap(keymap);
+
+    for (i = 0; my_keymap[i].curses_key; i++) {
+        rl_command_func_t *func;
+
+        func = rl_named_function(my_keymap[i].function);
+
+        if (func)
+            rl_bind_key(my_keymap[i].internal_key, func);
+        else
+            printw("\nCan not map function: %s\n", my_keymap[i].function);
+    }
+
+    started_up = 1;
+
+    return 0;
+}
+
+PRIVATE void
+init_ncurses(void)
+{
+    if (initscr() == NULL) {
+        errw("initscr");
+    }
+    is_visual_mode = true;
+    if (has_colors()) {
+        CHECK(start_color);
+#ifdef NCURSES_VERSION
+        CHECK(use_default_colors);
+#endif
+    }
+    CHECK(scrollok, stdscr, TRUE);
+    CHECK(idlok, stdscr, TRUE);
+    CHECK(noecho);
+    CHECK(keypad, stdscr, TRUE);
+    CHECK(halfdelay, HALFDELAY);
+    CHECK(nonl);
+    CHECK(intrflush, NULL, FALSE);
+    curs_set(2);
+#ifdef NCURSES_VERSION
+    set_tabsize(zone);
+#endif
+}
+
+PRIVATE void
+init_readline(void)
+{
+    rl_prep_term_function = NULL;
+    rl_deprep_term_function = NULL;
+    rl_readline_name = "OpenComal";
+    rl_redisplay_function = curses_redisplay;
+    rl_pre_input_hook = pre_input;
+    rl_getc_function = curses_getc;
+    rl_startup_hook = startup;
+    rl_catch_signals = 0;
+    rl_catch_sigwinch = 0;
+    rl_change_environment = 0;
+}
+
+PRIVATE void
+init_iconv(void)
+{
+    utf8_to_latin = iconv_open("latin-9", "utf8");
+}
+
+PRIVATE void
+screen_init(void)
+{
+    init_ncurses();
+    init_readline();
+    init_iconv();
+}
+
+PRIVATE void
+deinit_ncurses(void)
+{
+    CHECK(endwin);
+    is_visual_mode = false;
+}
+
+PRIVATE void
+deinit_iconv(void)
+{
+    iconv_close(latin_to_utf8);
+    iconv_close(utf8_to_latin);
+}
+
+PRIVATE void
+screen_tini(void)
+{
+    deinit_ncurses();
+    deinit_iconv();
+}
+
+PUBLIC void
+sys_init(void)
+{
+    struct sigaction sa;
+
+    sa.sa_handler = int_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    if (sigaction(SIGINT, &sa, NULL) == -1) {
+        perror("sigaction");
         exit(EXIT_FAILURE);
+    }
+    screen_init();
 }
 
-PRIVATE void int_handler(int signum __my_unused)
+
+PUBLIC void
+sys_tini(void)
 {
-	escape = 1;
+    screen_tini();
 }
 
-PRIVATE char wc_to_latin(wchar_t wc)
+PUBLIC int
+sys_system(char *cmd)
 {
-	char uc[MB_LEN_MAX], lc;
-	int l;
-	char *inbuf, *outbuf;
-	size_t inbytesleft, outbytesleft;
+    int             rc;
 
-	l = wctomb(uc, wc);
-	inbuf = uc;
-	inbytesleft = l;
-	outbuf = &lc;
-	outbytesleft = 1;
-	iconv(utf8_to_latin, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
-	return lc;
-}
-		
-PRIVATE int my_getch_horse(wint_t *c, char *lc)
-{
-	while (1) {
-		int status;
+    CHECK(reset_shell_mode);
+    CHECK(putp, exit_ca_mode);
+    fflush(stdout);
+    rc = system(str_ltou(cmd));
+    fputs("\nPress return to continue...", stdout);
+    fflush(stdout);
+    while (getchar() != '\n');
+    CHECK(putp, enter_ca_mode);
+    CHECK(reset_prog_mode);
+    CHECK(clearok, curscr, TRUE);
+    CHECK(refresh);
 
-		status = get_wch(c);
-
-                switch (status) {
-                case KEY_CODE_YES:
-		        if (*c == KEY_RESIZE) {
-                                CHECK(refresh);
-			        continue;
-                        }
-                        return KEY_CODE_YES;
-                        break;
-                case OK:
-                        *lc = wc_to_latin(*c);
-		        if (escape) {
-			        return ERR;
-                        } else if (*lc=='\f') {
-                                CHECK(clearok, curscr, TRUE);
-                                CHECK(refresh);
-                                continue;
-		        }
-			return OK;
-                        break;
-                case ERR:
-                        return ERR;
-                        break;
-                default:
-                        return ERR;
-                        break;
-		}
-	}
-
-	return ERR;
+    return rc;
 }
 
-PRIVATE int my_getch(void)
+PUBLIC void
+sys_setpaged(int n)
 {
-	wint_t c;
-	int i;
-	unsigned char lc;
+    paged = n;
+    pagern = LINES;
+}
 
-	while (1) {
-        	int status;
+static inline void
+sys_setutf8(bool u)
+{
+    is_utf8_put = u;
+}
 
-		status = my_getch_horse(&c, (char *)&lc);
 
-                switch (status) {
-                case ERR:
-			if (escape) {
-				rl_done=1;
-				return 10;
-			}
-			continue;
-                        break;
-                case OK:
-		        if (lc==10 || lc==13)  {
-			        return lc;
-                        } else if (lc<' ') {
-			        CHECK(beep);
-			        continue;
-		        }
-			return lc;
-                        break;
-                case KEY_CODE_YES:
-		        for (i=0; my_keymap[i].curses_key; i++) {
-			        if (c==my_keymap[i].curses_key) {
-				        return my_keymap[i].internal_key;
-                                }
-                        }
-		        CHECK(beep);
-                        return ERR;
-                        break;
-                default:
-                        return ERR;
-                        break;
+PUBLIC void
+sys_rand(long *result, long *scale)
+{
+    *result = rand();
+    *scale = RAND_MAX;
+}
+
+
+PUBLIC void
+sys_randomize(long seed)
+{
+    srand(seed);
+}
+
+
+PUBLIC bool
+sys_escape(void)
+{
+    if (escape) {
+        escape = 0;
+
+        return true;
+    }
+
+    return false;
+}
+
+PRIVATE void
+do_put(int stream, const char *buf)
+{
+    if (stream == MSG_ERROR) {
+        CHECK(standout);
+    }
+
+    addlstr(buf);
+
+    if (stream == MSG_ERROR) {
+        CHECK(standend);
+    }
+
+    CHECK(refresh);
+}
+
+PUBLIC void
+sys_put(int stream, const char *buf, long len)
+{
+    int             buf_lines;
+
+    if (len < 0)
+        len = strlen(buf);
+
+    if (ext_put(buf)) {
+        return;
+    }
+
+    buf_lines = len / COLS;
+
+    if ((len % COLS) > 0)
+        buf_lines++;
+
+    do_put(stream, buf);
+
+    if (paged) {
+        pagern -= buf_lines;
+
+        if (pagern <= 0) {
+
+            while (true) {
+                int             c;
+
+                c = my_getch();
+
+                if (c == ' ') {
+                    pagern = LINES;
+                    break;
+                } else if (c == '\n') {
+                    pagern--;
+                    break;
+                } else if (c == 'q') {
+                    escape = 1;
+                    paged = 0;
+                    break;
                 }
-	}
-
-        return ERR;
-}
-
-
-PRIVATE int curses_getc(FILE *in __my_unused)
-{
-	return my_getch();
-}
-
-PRIVATE void addlstr(const char *lstr)
-{
-	char *ustr;
-	wchar_t wstr[MAX_LINELEN];
-
-	if (lstr == NULL) {
-		return;
-	}
-	if (is_utf8_put) {
-		ustr = (char *)lstr;
-	} else {
-		ustr = str_ltou(lstr);
-	}
-	mbstowcs(wstr, ustr, MAX_LINELEN);
-	CHECK(addwstr, wstr);
-}
-
-PRIVATE void curses_redisplay(void)
-{
-	CHECK(move,gety,getx);
-	addlstr(rl_line_buffer);
-	CHECK(clrtoeol);
-	CHECK(move,gety+rl_point/COLS,getx+rl_point%COLS);
-	CHECK(refresh);
-}
-
-PRIVATE int pre_input(void)
-{
-	rl_insert_text(edit_line);
-
-	return 0;
-}
-
-PRIVATE int startup(void)
-{
-	int i;
-	static int started_up=0;
-
-	if (started_up) {
-                return 0;
+            }
         }
-
-	keymap=rl_make_keymap();
-	rl_set_keymap(keymap);
-
-	for (i=0; my_keymap[i].curses_key; i++) {
-		rl_command_func_t *func;
-
-		func=rl_named_function(my_keymap[i].function);
-
-		if (func)
-			rl_bind_key(my_keymap[i].internal_key,func);
-		else
-			printw("\nCan not map function: %s\n",my_keymap[i].function);
-	}
-
-	started_up=1;
-
-	return 0;
+    }
 }
 
-PRIVATE void init_ncurses(void)
+
+PUBLIC void
+sys_page(FILE * f)
 {
-	if (initscr() == NULL) {
-                errw("initscr");
-        }
-        is_visual_mode = true;
-        if (has_colors()) {
-                CHECK(start_color);
-#ifdef NCURSES_VERSION
-                CHECK(use_default_colors);
-#endif
-        }
-	CHECK(scrollok, stdscr, TRUE);
-        CHECK(idlok, stdscr, TRUE);
-	CHECK(noecho);
-	CHECK(keypad, stdscr, TRUE);
-	CHECK(halfdelay, HALFDELAY);
-        CHECK(nonl);
-        CHECK(intrflush, NULL, FALSE);
-        curs_set(2);
-#ifdef NCURSES_VERSION
-	set_tabsize(zone);
-#endif
+    if (f == NULL) {
+        CHECK(erase);
+    } else {
+        ext_page(f);
+    }
 }
 
-PRIVATE void init_readline(void)
+
+PUBLIC void
+sys_clrtoeol(FILE * f)
 {
-	rl_prep_term_function=NULL;
-	rl_deprep_term_function=NULL;
-	rl_readline_name="OpenComal";
-	rl_redisplay_function=curses_redisplay;
-	rl_pre_input_hook=pre_input;
-	rl_getc_function=curses_getc;
-	rl_startup_hook=startup;
-	rl_catch_signals=0;
-	rl_catch_sigwinch=0;
-        rl_change_environment=0;
+    if (f == NULL) {
+        CHECK(clrtoeol);
+    }
 }
 
-PRIVATE void init_iconv(void)
+
+PUBLIC void
+sys_rvson(FILE * f)
 {
-	utf8_to_latin = iconv_open("latin-9", "utf8");
+    if (f == NULL) {
+        CHECK(attron, A_REVERSE);
+    }
 }
 
-PRIVATE void screen_init(void)
+
+PUBLIC void
+sys_rvsoff(FILE * f)
 {
-        init_ncurses();
-        init_readline();
-        init_iconv();
+    if (f == NULL) {
+        CHECK(attroff, A_REVERSE);
+    }
 }
 
-PRIVATE void deinit_ncurses(void)
+
+PUBLIC void
+sys_cursor(FILE * f, long y, long x)
 {
-	CHECK(endwin);
-        is_visual_mode = false;
+    if (f != NULL) {
+        return;
+    }
+    if (y > LINES || x > COLS) {
+        run_error(CURSOR_ERR, "Coordinates off-screen");
+    }
+    if (y == 0) {
+        y = sys_currow();
+    }
+    if (x == 0) {
+        x = sys_curcol();
+    }
+    CHECK(move, y - 1, x - 1);
 }
 
-PRIVATE void deinit_iconv(void)
+
+PUBLIC int
+sys_curcol(void)
 {
-	iconv_close(latin_to_utf8);
-	iconv_close(utf8_to_latin);
+    int y           __my_unused;
+    int             x;
+
+    getyx(stdscr, y, x);
+    return x + 1;
 }
 
-PRIVATE void screen_tini(void)
+
+PUBLIC int
+sys_currow(void)
 {
-        deinit_ncurses();
-        deinit_iconv();
+    int             y;
+    int x           __my_unused;
+
+    getyx(stdscr, y, x);
+    return y + 1;
 }
 
-PUBLIC void sys_init(void)
+
+PUBLIC void
+sys_nl(void)
 {
-        struct sigaction sa;
-
-        sa.sa_handler = int_handler;
-        sigemptyset(&sa.sa_mask);
-        sa.sa_flags = SA_RESTART;
-        if (sigaction(SIGINT, &sa, NULL) == -1) {
-                perror("sigaction");
-                exit(EXIT_FAILURE);
-        }
-	screen_init();
+    if (!ext_nl()) {
+        CHECK(addch, '\n');
+    }
 }
 
 
-PUBLIC void sys_tini(void)
+PUBLIC void
+sys_ht(void)
 {
-	screen_tini();
+    if (!ext_ht()) {
+        CHECK(addch, '\t');
+    }
 }
 
-PUBLIC int sys_system(char *cmd)
+
+PUBLIC long
+sys_zone_num(void)
 {
-	int rc;
-
-        CHECK(reset_shell_mode);
-        CHECK(putp, exit_ca_mode);
-	fflush(stdout);
-	rc = system(str_ltou(cmd));
-	fputs("\nPress return to continue...", stdout);
-        fflush(stdout);
-	while (getchar() != '\n')
-		;
-        CHECK(putp, enter_ca_mode);
-        CHECK(reset_prog_mode);
-        CHECK(clearok, curscr, TRUE);
-        CHECK(refresh);
-
-	return rc;
-}
-
-PUBLIC void sys_setpaged(int n)
-{
-	paged = n;
-	pagern = LINES;
-}
-
-static inline void sys_setutf8(bool u)
-{
-	is_utf8_put = u;
+    return zone;
 }
 
 
-PUBLIC void  sys_rand(long *result, long *scale)
-{
-	*result = rand();
-	*scale=RAND_MAX;
-}
-
-
-PUBLIC void sys_randomize(long seed)
-{
-	srand(seed);
-}
-
-
-PUBLIC bool sys_escape(void)
-{
-	if (escape) {
-		escape = 0;
-
-		return true;
-	}
-
-	return false;
-}
-
-PRIVATE void do_put(int stream, const char *buf)
-{
-	if (stream == MSG_ERROR) {
-		CHECK(standout);
-        }
-
-	addlstr(buf);
-
-	if (stream == MSG_ERROR) {
-		CHECK(standend);
-        }
-
-        CHECK(refresh);
-}
-
-PUBLIC void sys_put(int stream, const char *buf, long len)
-{
-	int buf_lines;
-
-	if (len < 0)
-		len = strlen(buf);
-
-	if (ext_put(buf)) {
-		return;
-	}
-
-	buf_lines = len / COLS;
-
-	if ((len % COLS) > 0)
-		buf_lines++;
-
-	do_put(stream, buf);
-
-	if (paged) {
-		pagern -= buf_lines;
-
-		if (pagern <= 0) {
-
-			while (true) {
-				int c;
-
-				c = my_getch();
-
-				if (c == ' ') {
-					pagern = LINES;
-					break;
-				} else if (c == '\n') {
-					pagern--;
-					break;
-				} else if (c == 'q') {
-					escape = 1;
-					paged = 0;
-					break;
-				}
-			}
-		}
-	}
-}
-
-
-PUBLIC void sys_page(FILE * f)
-{
-	if (f == NULL) {
-		CHECK(erase);
-	} else {
-		ext_page(f);
-	}
-}
-
-
-PUBLIC void sys_clrtoeol(FILE * f)
-{
-	if (f == NULL) {
-		CHECK(clrtoeol);
-	}
-}
-
-
-PUBLIC void sys_rvson(FILE * f)
-{
-	if (f == NULL) {
-		CHECK(attron, A_REVERSE);
-	}
-}
-
-
-PUBLIC void sys_rvsoff(FILE * f)
-{
-	if (f == NULL) {
-		CHECK(attroff, A_REVERSE);
-	}
-}
-
-
-PUBLIC void sys_cursor(FILE * f, long y, long x)
-{
-	if (f != NULL) {
-		return;
-	}
-        if (y > LINES || x > COLS) {
-                run_error(CURSOR_ERR, "Coordinates off-screen");
-        }
-	if (y == 0) {
-		y = sys_currow();
-	}
-	if (x == 0) {
-		x = sys_curcol();
-	}
-	CHECK(move, y - 1, x - 1);
-}
-
-
-PUBLIC int sys_curcol(void)
-{
-	int y __my_unused;
-        int x;
-
-	getyx(stdscr, y, x);
-	return x + 1;
-}
-
-
-PUBLIC int sys_currow(void)
-{
-	int y;
-        int x __my_unused;
-
-	getyx(stdscr, y, x);
-	return y + 1;
-}
-
-
-PUBLIC void sys_nl(void)
-{
-	if (!ext_nl()) {
-		CHECK(addch, '\n');
-	}
-}
-
-
-PUBLIC void sys_ht(void)
-{
-	if (!ext_ht()) {
-		CHECK(addch, '\t');
-	}
-}
-
-
-PUBLIC long sys_zone_num(void)
-{
-	return zone;
-}
-
-
-PUBLIC void sys_zone(long size)
+PUBLIC void
+sys_zone(long size)
 {
 #ifdef NCURSES_VERSION
-	set_tabsize(size);
+    set_tabsize(size);
 #endif
-	zone = size;
+    zone = size;
 }
 
 
-PUBLIC bool sys_yn(int stream, const char *prompt)
+PUBLIC bool
+sys_yn(int stream, const char *prompt)
 {
-	do_put(stream, prompt);
+    do_put(stream, prompt);
 
-	for (;;) {
-		char c;
+    for (;;) {
+        char            c;
 
-		c = my_getch();
+        c = my_getch();
 
-		if (sys_escape() || c == 'n' || c == 'N') {
-			addlstr(catgets(catdesc, UNIXSet, UNIXNo, "No\n"));
-			return false;
-		} else if (c == 'y' || c == 'Y') {
-			addlstr(catgets(catdesc, UNIXSet, UNIXYes, "Yes\n"));
-			return true;
-		}
-	}
+        if (sys_escape() || c == 'n' || c == 'N') {
+            addlstr(catgets(catdesc, UNIXSet, UNIXNo, "No\n"));
+            return false;
+        } else if (c == 'y' || c == 'Y') {
+            addlstr(catgets(catdesc, UNIXSet, UNIXYes, "Yes\n"));
+            return true;
+        }
+    }
 }
 
 
-PRIVATE bool do_get(int stream, char *line, int maxlen, const char *prompt)
+PRIVATE bool
+do_get(int stream, char *line, int maxlen, const char *prompt)
 {
-	bool escape=false;
-        char *l;
+    bool            escape = false;
+    char           *l;
 
-	rl_num_chars_to_read=maxlen-1;
-	edit_line=line;
-	addlstr(prompt);
-	getyx(stdscr,gety,getx);
-	addlstr(line);
-	CHECK(refresh);
-        l = readline("");
-	term_strncpy(line,l,maxlen);
-        free(l);
-	CHECK(move,gety+rl_end/COLS,getx+rl_end%COLS);
-	if (stream != MSG_PROGRAM) {
-		CHECK(addch, '\n');
-	}
+    rl_num_chars_to_read = maxlen - 1;
+    edit_line = line;
+    addlstr(prompt);
+    getyx(stdscr, gety, getx);
+    addlstr(line);
+    CHECK(refresh);
+    l = readline("");
+    term_strncpy(line, l, maxlen);
+    free(l);
+    CHECK(move, gety + rl_end / COLS, getx + rl_end % COLS);
+    if (stream != MSG_PROGRAM) {
+        CHECK(addch, '\n');
+    }
 
-	escape=sys_escape();
+    escape = sys_escape();
 
-	if (!escape) {
-                add_history(line);
+    if (!escape) {
+        add_history(line);
+    }
+
+    return escape;
+}
+
+
+PUBLIC bool
+sys_get(int stream, char *line, int maxlen, const char *prompt)
+{
+    if (ext_get(stream, line, maxlen, prompt))
+        return false;
+    else
+        return do_get(stream, line, maxlen, prompt);
+}
+
+
+PUBLIC bool
+sys_edit(int stream, char line[], int maxlen)
+{
+    return do_get(stream, line, maxlen, NULL);
+}
+
+PUBLIC char    *
+sys_dir_string(void)
+{
+    static int      buf_size = 1024;
+    static char    *buf = 0;
+
+    while (true) {
+        if (!buf) {
+            buf = (char *) ALLOC(buf_size);
         }
 
-	return escape;
-}
-
-
-PUBLIC bool sys_get(int stream, char *line, int maxlen, const char *prompt)
-{
-	if (ext_get(stream, line, maxlen, prompt))
-		return false;
-	else
-		return do_get(stream, line, maxlen, prompt);
-}
-
-
-PUBLIC bool sys_edit(int stream, char line[], int maxlen)
-{
-	return do_get(stream, line, maxlen, NULL);
-}
-
-PUBLIC char *sys_dir_string(void) 
-{
-	static int buf_size=1024;
-	static char *buf=0;
-
-	while (true) {
-		if (!buf) {
-                        buf=(char *)ALLOC(buf_size);
-                }
-
-		if (getcwd(buf,buf_size)!=NULL) {
-                        return buf;
-                }
-
-		if (errno==ERANGE) { /* buffer too small */
-			buf_size+=1024;
-			FREE(buf);
-		} else {
-			run_error(DIRS_ERR, "%s", strerror(errno));
-                }
-	}
-}
-
-PUBLIC void sys_dir(const char *pattern) {
-	FILE *f;
-	char *upattern;
-	int l;
-	char *buf;
-	char line[256];
-	
-	upattern = str_ltou(pattern);
-	l=strlen(upattern);
-	buf=(char *)ALLOC(8+l);
-	term_strncpy(buf,"ls -l ",8);
-	strncat(buf,upattern,l);
-	f=popen(buf,"r");
-
-	if (!f) {
-		FREE(buf);
-                run_error(DIRS_ERR, "%s", strerror(errno));
+        if (getcwd(buf, buf_size) != NULL) {
+            return buf;
         }
 
-	sys_setpaged(1);
-	sys_setutf8(true);
-
-	while (fgets(line,254,f)) {
-		sys_put(MSG_PROGRAM,line,-1);
+        if (errno == ERANGE) {  /* buffer too small */
+            buf_size += 1024;
+            FREE(buf);
+        } else {
+            run_error(DIRS_ERR, "%s", strerror(errno));
         }
-
-	sys_setpaged(0);
-	sys_setutf8(false);
-	pclose(f);
-	FREE(buf);
+    }
 }
 
-PUBLIC const char *sys_unit_string(void) 
+PUBLIC void
+sys_dir(const char *pattern)
 {
-	return "C:"; /* :-) */
+    FILE           *f;
+    char           *upattern;
+    int             l;
+    char           *buf;
+    char            line[256];
+
+    upattern = str_ltou(pattern);
+    l = strlen(upattern);
+    buf = (char *) ALLOC(8 + l);
+    term_strncpy(buf, "ls -l ", 8);
+    strncat(buf, upattern, l);
+    f = popen(buf, "r");
+
+    if (!f) {
+        FREE(buf);
+        run_error(DIRS_ERR, "%s", strerror(errno));
+    }
+
+    sys_setpaged(1);
+    sys_setutf8(true);
+
+    while (fgets(line, 254, f)) {
+        sys_put(MSG_PROGRAM, line, -1);
+    }
+
+    sys_setpaged(0);
+    sys_setutf8(false);
+    pclose(f);
+    FREE(buf);
 }
 
-PUBLIC const char *sys_tab_string(long col)
+PUBLIC const char *
+sys_unit_string(void)
 {
-	int curcol, num_spaces;
-	static char result[MAX_LINELEN * 2];
-
-	curcol = sys_curcol();
-	if (col > curcol) {
-		num_spaces = col - curcol;
-	} else {
-		num_spaces = COLS - (curcol - col);
-	}
-	memset(result, ' ', num_spaces);
-	result[num_spaces] = '\0';
-	return result;
+    return "C:";                /* :-) */
 }
 
-PUBLIC void sys_chdir(char *dir)
+PUBLIC const char *
+sys_tab_string(long col)
 {
-	if (chdir(dir)<0)
-		run_error(DIR_ERR, "%s", strerror(errno));
+    int             curcol,
+                    num_spaces;
+    static char     result[MAX_LINELEN * 2];
+
+    curcol = sys_curcol();
+    if (col > curcol) {
+        num_spaces = col - curcol;
+    } else {
+        num_spaces = COLS - (curcol - col);
+    }
+    memset(result, ' ', num_spaces);
+    result[num_spaces] = '\0';
+    return result;
 }
 
-PUBLIC void sys_mkdir(char *dir)
+PUBLIC void
+sys_chdir(char *dir)
 {
-	if (mkdir(dir,0777)<0)
-		run_error(DIR_ERR, "%s", strerror(errno));
-} 
-
-PUBLIC void sys_rmdir(char *dir)
-{
-	if (rmdir(dir)<0)
-		run_error(DIR_ERR, "%s", strerror(errno));
+    if (chdir(dir) < 0)
+        run_error(DIR_ERR, "%s", strerror(errno));
 }
 
-PUBLIC char *sys_key(long delay)
+PUBLIC void
+sys_mkdir(char *dir)
 {
-	static char result[2] = {'\0','\0'};
-	int status=ERR;
-        wint_t c;
+    if (mkdir(dir, 0777) < 0)
+        run_error(DIR_ERR, "%s", strerror(errno));
+}
 
-	/*
-	 * -1 means neverending delay 
-	 */
-	if (delay<0) {
-		while (status==ERR && !escape) {
-			status=my_getch_horse(&c, result);
-                }
-	} else if (delay==0) {
-		CHECK(raw);
-		CHECK(nodelay,stdscr,TRUE);
-		status=my_getch_horse(&c, result);
-		CHECK(halfdelay, HALFDELAY);
-	} else {
-		CHECK(halfdelay, delay*10);
-		status=my_getch_horse(&c, result);
-		CHECK(halfdelay, HALFDELAY);
-	}
+PUBLIC void
+sys_rmdir(char *dir)
+{
+    if (rmdir(dir) < 0)
+        run_error(DIR_ERR, "%s", strerror(errno));
+}
 
-	if (status == ERR) {
-                *result='\0';
+PUBLIC char    *
+sys_key(long delay)
+{
+    static char     result[2] = { '\0', '\0' };
+    int             status = ERR;
+    wint_t          c;
+
+    /*
+     * -1 means neverending delay 
+     */
+    if (delay < 0) {
+        while (status == ERR && !escape) {
+            status = my_getch_horse(&c, result);
         }
+    } else if (delay == 0) {
+        CHECK(raw);
+        CHECK(nodelay, stdscr, TRUE);
+        status = my_getch_horse(&c, result);
+        CHECK(halfdelay, HALFDELAY);
+    } else {
+        CHECK(halfdelay, delay * 10);
+        status = my_getch_horse(&c, result);
+        CHECK(halfdelay, HALFDELAY);
+    }
 
-	return result;
+    if (status == ERR) {
+        *result = '\0';
+    }
+
+    return result;
 }
 
-PUBLIC void sys_sys_exp(struct exp_list *exproot, void **result, enum
-			VAL_TYPE *type)
+PUBLIC void
+sys_sys_exp(struct exp_list *exproot, void **result, enum
+            VAL_TYPE *type)
 {
-        char *cmd;
+    char           *cmd;
 
-        cmd = exp_cmd(exproot->exp);
+    cmd = exp_cmd(exproot->exp);
 
 #ifndef __APPLE__
-        if (strcmp(cmd, "sbrk") == 0) {
-                if (exproot->next)
-                        run_error(SYS_ERR,
-                                  "SYS(sbrk) takes no further parameters");
+    if (strcmp(cmd, "sbrk") == 0) {
+        if (exproot->next)
+            run_error(SYS_ERR, "SYS(sbrk) takes no further parameters");
 
-                *result = cell_alloc(INT_CPOOL);
-		**( (long **) result )=(long)sbrk(0);
-                *type = V_INT;
-	} else
+        *result = cell_alloc(INT_CPOOL);
+        **((long **) result) = (long) sbrk(0);
+        *type = V_INT;
+    } else
 #endif
-	if (strcmp(cmd, "now") == 0) {
-                if (exproot->next)
-                        run_error(SYS_ERR,
-                                  "SYS(now) takes no further parameters");
+    if (strcmp(cmd, "now") == 0) {
+        if (exproot->next)
+            run_error(SYS_ERR, "SYS(now) takes no further parameters");
 
-                *result = cell_alloc(INT_CPOOL);
-		**( (long **) result )=(long)time(0);
-                *type = V_INT;
-        } else if (ext_sys_exp(exproot, result, type) == -1)
-		run_error(SYS_ERR, "Unknown SYS() command");
+        *result = cell_alloc(INT_CPOOL);
+        **((long **) result) = (long) time(0);
+        *type = V_INT;
+    } else if (ext_sys_exp(exproot, result, type) == -1)
+        run_error(SYS_ERR, "Unknown SYS() command");
 }
 
 
-PUBLIC void sys_syss_exp(struct exp_list *exproot, struct string **result, enum
-			 VAL_TYPE *type)
+PUBLIC void
+sys_syss_exp(struct exp_list *exproot, struct string **result, enum
+             VAL_TYPE *type)
 {
-	if (ext_syss_exp(exproot, result, type) == -1)
-		run_error(SYS_ERR, "Unknown SYS$() command");
+    if (ext_syss_exp(exproot, result, type) == -1)
+        run_error(SYS_ERR, "Unknown SYS$() command");
 }
 
 
-PUBLIC int sys_sys_stat(struct exp_list *exproot)
+PUBLIC int
+sys_sys_stat(struct exp_list *exproot)
 {
-	int rc = ext_sys_stat(exproot);
+    int             rc = ext_sys_stat(exproot);
 
-	if (rc == -1)
-		run_error(SYS_ERR, "Unknown SYS statement command");
+    if (rc == -1)
+        run_error(SYS_ERR, "Unknown SYS statement command");
 
-	return rc;
+    return rc;
 }

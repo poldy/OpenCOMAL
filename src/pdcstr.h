@@ -18,10 +18,10 @@
 #include <string.h>
 
 /** Duplicate a string using memory from a specified pool */
-extern char *my_strdup(int pool, const char *s);
+extern char    *my_strdup(int pool, const char *s);
 
 /** Compare two COMAL strings */
-extern int str_cmp(struct string *s1, struct string *s2);
+extern int      str_cmp(struct string *s1, struct string *s2);
 
 /** Convert a C string to a COMAL string */
 extern struct string *str_make(int pool, const char *s);
@@ -33,16 +33,20 @@ extern struct string *str_make2(int pool, long len);
 extern struct string *str_cat(struct string *s1, struct string *s2);
 
 /** Search for one COMAL string in another, like strstr in C */
-extern long str_search(struct string *needle, struct string *haystack);
+extern long     str_search(struct string *needle, struct string *haystack);
 
-/* Copy a COMAL string */
+/*
+ * Copy a COMAL string 
+ */
 extern struct string *str_cpy(struct string *s1, struct string *s2);
 
 /** Copies a substring of string 2 to string 1 */
-extern struct string *str_partcpy(struct string *s1, struct string *s2, long from, long to);
+extern struct string *str_partcpy(struct string *s1, struct string *s2,
+                                  long from, long to);
 
 /** Copies string 2 to a substring of string 1 */
-extern struct string *str_partcpy2(struct string *s1, struct string *s2, long from, long to);
+extern struct string *str_partcpy2(struct string *s1, struct string *s2,
+                                   long from, long to);
 
 /** Duplicate a COMAL string */
 extern struct string *str_dup(int pool, struct string *s);
@@ -51,10 +55,10 @@ extern struct string *str_dup(int pool, struct string *s);
 extern struct string *str_maxdup(int pool, struct string *s, long n);
 
 /** Extend the storage allocated for a COMAL string */
-extern void str_extend(int pool, struct string **s, long newlen);
+extern void     str_extend(int pool, struct string **s, long newlen);
 
 /** Convert a string from Latin-9 to UTF8 encoding */
-extern char *str_ltou(const char *lstr);
+extern char    *str_ltou(const char *lstr);
 
 /**
  * Like strncpy, but guarantees that @c dest will be NUL-terminated.
@@ -62,11 +66,12 @@ extern char *str_ltou(const char *lstr);
  * @param[in] src source string
  * @param[in] n size of @c dest
  */
-static inline char *term_strncpy(char *dest, const char *src, size_t n)
+static inline char *
+term_strncpy(char *dest, const char *src, size_t n)
 {
-        strncpy(dest, src, n - 1);
-        dest[n - 1] = '\0';
-        return dest;
+    strncpy(dest, src, n - 1);
+    dest[n - 1] = '\0';
+    return dest;
 }
 
 #endif

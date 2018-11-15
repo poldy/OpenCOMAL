@@ -8,7 +8,9 @@
  * License. See doc/LICENSE for more information.
  */
 
-/* OpenComal line execution routines and related */
+/*
+ * OpenComal line execution routines and related 
+ */
 
 #define _XOPEN_SOURCE 700
 
@@ -46,2533 +48,2611 @@
 
 #define FLOATUSING_MAX 32
 
-PRIVATE void *return_result;	/* For comms of FUNC results */
+PRIVATE void   *return_result;  /* For comms of FUNC results */
 PRIVATE enum VAL_TYPE return_type;
-PRIVATE FILE *prev_sel_file;
-PRIVATE bool in_print_file, in_input_file;
+PRIVATE FILE   *prev_sel_file;
+PRIVATE bool    in_print_file,
+                in_input_file;
 
-PRIVATE int exec_seq3(void);
-PRIVATE int exec_seq2(void);
-PRIVATE void print_con(struct print_list *printroot, int pr_sep);
-PRIVATE void print_using(struct expression *str, struct print_list *printroot, int pr_sep);
-PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp_list *lvalroot, int pr_sep);
+PRIVATE int     exec_seq3(void);
+PRIVATE int     exec_seq2(void);
+PRIVATE void    print_con(struct print_list *printroot, int pr_sep);
+PRIVATE void    print_using(struct expression *str,
+                            struct print_list *printroot, int pr_sep);
+PRIVATE void    input_con(struct expression *len, struct string *prompt,
+                          struct exp_list *lvalroot, int pr_sep);
 
-PUBLIC void run_error(int error, const char *s, ...)
+PUBLIC void
+run_error(int error, const char *s, ...)
 {
-	char *buf;
-	char buf2[MAX_LINELEN];
+    char           *buf;
+    char            buf2[MAX_LINELEN];
 
-	mem_free(curenv->lasterrmsg);
-        if (s != NULL) {
-	        va_list_box box;
+    mem_free(curenv->lasterrmsg);
+    if (s != NULL) {
+        va_list_box     box;
 
-	        va_start(box.ap, s);
-	        Fmt_vsfmt(buf2, MAX_LINELEN, s, &box);
-	        va_end(box.ap);
-	        curenv->lasterrmsg = my_strdup(MISC_POOL, buf2);
-        } else {
-                curenv->lasterrmsg = NULL;
-                buf2[0] = '\0';
+        va_start(box.ap, s);
+        Fmt_vsfmt(buf2, MAX_LINELEN, s, &box);
+        va_end(box.ap);
+        curenv->lasterrmsg = my_strdup(MISC_POOL, buf2);
+    } else {
+        curenv->lasterrmsg = NULL;
+        buf2[0] = '\0';
+    }
+
+    curenv->error = curenv->lasterr = error;
+
+    buf = (char *) mem_alloc(MISC_POOL, MAX_LINELEN);
+
+    if (curenv->running == RUNNING) {
+        Fmt_sfmt(buf, MAX_LINELEN, "Error %d: \"%s\" at line %D", error,
+                 buf2, curenv->curline->ld->lineno);
+        curenv->errline = curenv->curline;
+        curenv->lasterrline = curenv->curline->ld->lineno;
+    } else {
+        Fmt_sfmt(buf, MAX_LINELEN, "Error %d: \"%s\"", error, buf2);
+        curenv->errline = NULL;
+        curenv->lasterrline = 0;
+    }
+
+    mem_free(curenv->errmsg);
+    curenv->errmsg = buf;
+    if (in_input_file) {
+        sel_infile = prev_sel_file;
+        prev_sel_file = NULL;
+        in_input_file = false;
+    }
+    if (in_print_file) {
+        sel_outfile = prev_sel_file;
+        prev_sel_file = NULL;
+        in_print_file = false;
+    }
+    longjmp(ERRBUF, 666);
+}
+
+
+PRIVATE void
+exec_temphalt(const char *reason)
+{
+    puts_line(MSG_DIALOG, curenv->curline);
+    my_printf(MSG_DIALOG, true, "%s", reason);
+
+    comal_loop(HALTED);
+}
+
+PRIVATE void
+exec_stop(struct comal_line *line)
+{
+    char           *reason;
+    struct string  *result;
+    enum VAL_TYPE   type;
+
+    if (line->lc.exp) {
+        calc_exp(line->lc.exp, (void **) &result, &type);
+        reason = my_strdup(MISC_POOL, result->s);
+        mem_free(result);
+    } else {
+        reason =
+            my_strdup(MISC_POOL,
+                      catgets(catdesc, ExecSet, ExecStopped,
+                              "OpenComal's warp engines answered full stop"));
+    }
+    exec_temphalt(reason);
+}
+
+PRIVATE void
+exec_newvar(struct id_rec *id, struct var_item *var)
+{
+    struct sym_env *env = sym_newvarenv(curenv->curenv);
+
+    if (!sym_enter(env, id, S_VAR, var))
+        run_error(VAR_ERR, "Variable %s exists", id->name);
+}
+
+
+PRIVATE void   *
+exec_lval(struct expression *exp, enum VAL_TYPE *type,
+          struct var_item **var, long *strlen)
+{
+    struct id_rec  *id = exp->e.expid.id;
+    void           *lval = exp_lval(exp, type, var, strlen);
+
+    /*
+     * Lvalue (variable) does not exist. Let's create a new one 
+     */
+    if (!lval) {
+        if (strlen)
+            *strlen = DEFAULT_STRLEN;
+
+        *type = id->type;
+
+        if (strlen)
+            *var = var_newvar(*type, NULL, *strlen);
+        else
+            *var = var_newvar(*type, NULL, 0L);
+
+        exec_newvar(id, *var);
+        lval = &(*var)->data;
+    }
+
+    DBG_PRINTF(true, "Exec_LVAL returns %p", lval);
+
+    return lval;
+}
+
+
+PRIVATE void
+parm_enter(struct sym_env *env, struct id_rec *id,
+           enum SYM_TYPE type, void *ptr, const char *kind)
+{
+    if (!sym_enter(env, id, type, ptr))
+        run_error(PARM_ERR, "%s parameter %s already present",
+                  kind, id->name);
+}
+
+
+PRIVATE struct comal_line *
+routine_search_horse(struct id_rec *id, int type, struct comal_line *root)
+{
+    DBG_PRINTF(true, "Searching routine %s", id->name);
+
+    while (root) {
+        DBG_PRINTF(true, "  Examining %s", root->lc.pfrec.id->name);
+
+        if (root->cmd == type && root->lc.pfrec.id == id)
+            return root;
+
+        root = root->lc.pfrec.proclink;
+    }
+
+    return NULL;
+}
+
+
+PRIVATE struct comal_line *
+routine_search(struct id_rec *id, int type)
+{
+    struct sym_item *sym;
+    struct comal_line *father;
+
+    if (type == funcSYM)
+        sym = sym_search(curenv->curenv, id, S_FUNCVAR);
+    else
+        sym = sym_search(curenv->curenv, id, S_PROCVAR);
+
+    if (sym)
+        return sym->data.pfline;
+
+    father = curenv->curenv->curproc;
+
+    while (father) {
+        struct comal_line *procline;
+
+        procline =
+            routine_search_horse(id, type, father->lc.pfrec.localproc);
+
+        if (procline)
+            return procline;
+
+        father = father->lc.pfrec.fatherproc;
+    }
+
+    return routine_search_horse(id, type, curenv->globalproc);
+}
+
+
+PRIVATE void
+call_enter(struct sym_env *env, struct id_rec *id,
+           struct expression *exp, enum SYM_TYPE type, int otype)
+{
+    struct id_rec  *procid = exp_of_id(exp);
+    struct comal_line *pfline = routine_search(procid, otype);
+
+    if (!pfline)
+        run_error(PARM_ERR, "%s %s not found", lex_sym(otype),
+                  procid->name);
+
+    if (id->type != procid->type)
+        run_error(PARM_ERR, "FUNC types differ (%s, %s)",
+                  procid->name, id->name);
+
+    parm_enter(env, id, type, pfline, "PROC/FUNC");
+}
+
+
+PRIVATE struct arr_dim *
+dim_copy(struct arr_dim *a)
+{
+    struct arr_dim *d2root = NULL;
+    struct arr_dim *d2;
+    struct arr_dim *d = a;
+
+    while (d) {
+        d2 = (struct arr_dim *) mem_alloc(RUN_POOL,
+                                          sizeof(struct arr_dim));
+        d2->bottom = d->bottom;
+        d2->top = d->top;
+        d2->next = d2root;
+        d2root = d2;
+
+        d = d->next;
+    }
+
+    return (struct arr_dim *) my_reverse(d2root);
+}
+
+PRIVATE void
+parm_array_val(struct sym_env *env, struct id_rec *id,
+               struct expression *exp)
+{
+    struct arr_dim *arrdim;
+    char HUGE_POINTER *lval;
+    char HUGE_POINTER *lval2;
+    enum VAL_TYPE   type;
+    long            strl;
+    long            nr;
+    struct var_item *var,
+                   *lvar;
+    int             size;
+
+    check_lval(exp);
+    lval = (char *) exp_lval(exp, &type, &lvar, &strl);
+
+    if (type != V_ARRAY)
+        run_error(PARM_ERR, "Parameter %s should be an array()", id->name);
+
+    DBG_PRINTF(true, "id=%s(%d), type=%d", id->name, id->type, type);
+
+    if (lvar->type != id->type)
+        run_error(PARM_ERR, "Type difference in value pass of array");
+
+    type = lvar->type;
+    size = type_size(type);
+    arrdim = dim_copy(lvar->array->dimroot);
+    var = var_newvar(type, arrdim, strl);
+    nr = lvar->array->nritems;
+    lval2 = (char *) &var->data;
+
+    if (type != V_STRING)
+        memcpy(lval2, lval, nr * size);
+    else
+        while (nr) {
+            *(struct string **) lval2 =
+                str_dup(RUN_POOL, *(struct string **) lval);
+            lval += size;
+            lval2 += size;
+            nr--;
         }
 
-	curenv->error = curenv->lasterr = error;
-
-	buf = (char *)mem_alloc(MISC_POOL, MAX_LINELEN);
-
-	if (curenv->running == RUNNING) {
-		Fmt_sfmt(buf, MAX_LINELEN, "Error %d: \"%s\" at line %D", error, buf2,
-			curenv->curline->ld->lineno);
-		curenv->errline = curenv->curline;
-		curenv->lasterrline = curenv->curline->ld->lineno;
-	} else {
-		Fmt_sfmt(buf, MAX_LINELEN, "Error %d: \"%s\"", error, buf2);
-		curenv->errline = NULL;
-		curenv->lasterrline = 0;
-	}
-
-        mem_free(curenv->errmsg);
-	curenv->errmsg = buf;
-	if (in_input_file) {
-		sel_infile = prev_sel_file;
-		prev_sel_file = NULL;
-                in_input_file = false;
-	}
-	if (in_print_file) {
-		sel_outfile = prev_sel_file;
-		prev_sel_file = NULL;
-                in_print_file = false;
-	}
-	longjmp(ERRBUF, 666);
+    parm_enter(env, id, S_VAR, var, "Value()");
 }
 
 
-PRIVATE void exec_temphalt(const char *reason)
+PRIVATE void
+decode_parmlist(struct sym_env *env, struct parm_list *plist,
+                struct exp_list *elist)
 {
-	puts_line(MSG_DIALOG, curenv->curline);
-	my_printf(MSG_DIALOG, true, "%s", reason);
+    void           *result;
+    enum VAL_TYPE   type;
+    struct var_item *var,
+                   *lvar;
+    struct name_rec *name;
+    void           *lval;
+    long            strlen;
 
-	comal_loop(HALTED);
-}
+    while (plist && elist) {
+        if (plist->ref == refSYM) {
+            check_lval(elist->exp);
+            lval = exp_lval(elist->exp, &type, &lvar, &strlen);
 
-PRIVATE void exec_stop(struct comal_line *line)
-{
-	char *reason;
-	struct string *result;
-	enum VAL_TYPE type;
+            if (plist->id->type != lvar->type)
+                run_error(PARM_ERR,
+                          "REF parameter %s wrong type", plist->id->name);
 
-	if (line->lc.exp) {
-		calc_exp(line->lc.exp, (void **) &result, &type);
-		reason = my_strdup(MISC_POOL, result->s);
-		mem_free(result);
-	} else {
-		reason =
-		    my_strdup(MISC_POOL,
-			      catgets(catdesc, ExecSet, ExecStopped, "OpenComal's warp engines answered full stop"));
+            if (plist->array && type != V_ARRAY)
+                run_error(PARM_ERR,
+                          "REF parameter %s should be an array",
+                          plist->id->name);
+            else if (!plist->array && type == V_ARRAY)
+                run_error(PARM_ERR,
+                          "REF parameter %s should not be an array",
+                          plist->id->name);
+
+            var = var_refvar(lvar, type, strlen, lval);
+            parm_enter(env, plist->id, S_VAR, var, "REF");
+        } else if (plist->ref == nameSYM) {
+            if (!type_match1(plist->id, elist->exp))
+                run_error(PARM_ERR,
+                          "NAME expression is of the wrong type");
+
+            name = name_new(curenv->curenv, elist->exp);
+            parm_enter(env, plist->id, S_NAME, name, "NAME");
+        } else if (plist->ref == procSYM)
+            call_enter(env, plist->id, elist->exp, S_PROCVAR, procSYM);
+        else if (plist->ref == funcSYM)
+            call_enter(env, plist->id, elist->exp, S_FUNCVAR, funcSYM);
+        else {
+            if (plist->array)
+                parm_array_val(env, plist->id, elist->exp);
+            else {
+                calc_exp(elist->exp, &result, &type);
+                var = var_newvar(plist->id->type, NULL, INT_MAX);
+                val_copy(&var->data, result, var->type, type);
+                val_free(result, type);
+                parm_enter(env, plist->id, S_VAR, var, "Value");
+            }
         }
-	exec_temphalt(reason);
-}
 
-PRIVATE void exec_newvar(struct id_rec *id, struct var_item *var)
-{
-	struct sym_env *env = sym_newvarenv(curenv->curenv);
+        plist = plist->next;
+        elist = elist->next;
+    }
 
-	if (!sym_enter(env, id, S_VAR, var))
-		run_error(VAR_ERR, "Variable %s exists", id->name);
-}
-
-
-PRIVATE void *exec_lval(struct expression *exp, enum VAL_TYPE *type,
-			struct var_item **var, long *strlen)
-{
-	struct id_rec *id = exp->e.expid.id;
-	void *lval = exp_lval(exp, type, var, strlen);
-
-	/*
-	 * Lvalue (variable) does not exist. Let's create a new one 
-	 */
-	if (!lval) {
-		if (strlen)
-			*strlen = DEFAULT_STRLEN;
-
-		*type = id->type;
-
-		if (strlen)
-			*var = var_newvar(*type, NULL, *strlen);
-		else
-			*var = var_newvar(*type, NULL, 0L);
-
-		exec_newvar(id, *var);
-		lval = &(*var)->data;
-	}
-
-	DBG_PRINTF(true, "Exec_LVAL returns %p", lval);
-
-	return lval;
-}
-
-
-PRIVATE void parm_enter(struct sym_env *env, struct id_rec *id,
-			enum SYM_TYPE type, void *ptr, const char *kind)
-{
-	if (!sym_enter(env, id, type, ptr))
-		run_error(PARM_ERR, "%s parameter %s already present",
-			  kind, id->name);
-}
-
-
-PRIVATE struct comal_line *routine_search_horse(struct id_rec *id,
-						int type,
-						struct comal_line *root)
-{
-	DBG_PRINTF(true, "Searching routine %s", id->name);
-
-	while (root) {
-		DBG_PRINTF(true, "  Examining %s",
-			  root->lc.pfrec.id->name);
-
-		if (root->cmd == type && root->lc.pfrec.id == id)
-			return root;
-
-		root = root->lc.pfrec.proclink;
-	}
-
-	return NULL;
-}
-
-
-PRIVATE struct comal_line *routine_search(struct id_rec *id, int type)
-{
-	struct sym_item *sym;
-	struct comal_line *father;
-
-	if (type == funcSYM)
-		sym = sym_search(curenv->curenv, id, S_FUNCVAR);
-	else
-		sym = sym_search(curenv->curenv, id, S_PROCVAR);
-
-	if (sym)
-		return sym->data.pfline;
-
-	father = curenv->curenv->curproc;
-
-	while (father) {
-		struct comal_line *procline;
-
-		procline =
-		    routine_search_horse(id, type,
-					 father->lc.pfrec.localproc);
-
-		if (procline)
-			return procline;
-
-		father = father->lc.pfrec.fatherproc;
-	}
-
-	return routine_search_horse(id, type, curenv->globalproc);
-}
-
-
-PRIVATE void call_enter(struct sym_env *env, struct id_rec *id,
-			struct expression *exp, enum SYM_TYPE type,
-			int otype)
-{
-	struct id_rec *procid = exp_of_id(exp);
-	struct comal_line *pfline = routine_search(procid, otype);
-
-	if (!pfline)
-		run_error(PARM_ERR, "%s %s not found", lex_sym(otype),
-			  procid->name);
-
-	if (id->type != procid->type)
-		run_error(PARM_ERR, "FUNC types differ (%s, %s)",
-			  procid->name, id->name);
-
-	parm_enter(env, id, type, pfline, "PROC/FUNC");
-}
-
-
-PRIVATE struct arr_dim *dim_copy(struct arr_dim *a)
-{
-	struct arr_dim *d2root = NULL;
-	struct arr_dim *d2;
-	struct arr_dim *d = a;
-
-	while (d) {
-		d2 = (struct arr_dim *)mem_alloc(RUN_POOL, sizeof(struct arr_dim));
-		d2->bottom = d->bottom;
-		d2->top = d->top;
-		d2->next = d2root;
-		d2root = d2;
-
-		d = d->next;
-	}
-
-	return (struct arr_dim *)my_reverse(d2root);
-}
-
-PRIVATE void parm_array_val(struct sym_env *env, struct id_rec *id,
-			    struct expression *exp)
-{
-	struct arr_dim *arrdim;
-	char HUGE_POINTER *lval;
-	char HUGE_POINTER *lval2;
-	enum VAL_TYPE type;
-	long strl;
-	long nr;
-	struct var_item *var,*lvar;
-	int size;
-
-	check_lval(exp);
-	lval = (char *)exp_lval(exp, &type, &lvar, &strl);
-
-	if (type!=V_ARRAY)
-		run_error(PARM_ERR, "Parameter %s should be an array()",id->name);
-
-	DBG_PRINTF(true, "id=%s(%d), type=%d", id->name,
-		  id->type, type);
-
-	if (lvar->type != id->type)
-		run_error(PARM_ERR,
-			  "Type difference in value pass of array");
-
-	type = lvar->type;
-	size = type_size(type);
-	arrdim = dim_copy(lvar->array->dimroot);
-	var = var_newvar(type, arrdim, strl);
-	nr = lvar->array->nritems;
-	lval2 = (char *)&var->data;
-
-	if (type != V_STRING)
-		memcpy(lval2,lval,nr*size);
-	else
-		while (nr) {
-			*(struct string **) lval2 =
-			    str_dup(RUN_POOL, *(struct string **) lval);
-			lval+=size;
-			lval2+=size;
-			nr--;
-		}
-
-	parm_enter(env, id, S_VAR, var, "Value()");
-}
-
-
-PRIVATE void decode_parmlist(struct sym_env *env, struct parm_list *plist,
-			     struct exp_list *elist)
-{
-	void *result;
-	enum VAL_TYPE type;
-	struct var_item *var,*lvar;
-	struct name_rec *name;
-	void *lval;
-	long strlen;
-
-	while (plist && elist) {
-		if (plist->ref == refSYM) {
-			check_lval(elist->exp);
-			lval =
-			    exp_lval(elist->exp, &type, &lvar, &strlen);
-
-			if (plist->id->type != lvar->type)
-				run_error(PARM_ERR,
-					  "REF parameter %s wrong type",
-					  plist->id->name);
-
-			if (plist->array && type!=V_ARRAY)
-				run_error(PARM_ERR,
-					  "REF parameter %s should be an array",
-					  plist->id->name);
-			else if (!plist->array && type==V_ARRAY)
-				run_error(PARM_ERR,
-					  "REF parameter %s should not be an array",
-					  plist->id->name);
-
-			var = var_refvar(lvar, type, strlen, lval);
-			parm_enter(env, plist->id, S_VAR, var, "REF");
-		} else if (plist->ref == nameSYM) {
-			if (!type_match1(plist->id, elist->exp))
-				run_error(PARM_ERR,
-					  "NAME expression is of the wrong type");
-
-			name = name_new(curenv->curenv, elist->exp);
-			parm_enter(env, plist->id, S_NAME, name, "NAME");
-		} else if (plist->ref == procSYM)
-			call_enter(env, plist->id, elist->exp, S_PROCVAR,
-				   procSYM);
-		else if (plist->ref == funcSYM)
-			call_enter(env, plist->id, elist->exp, S_FUNCVAR,
-				   funcSYM);
-		else {
-			if (plist->array)
-				parm_array_val(env, plist->id, elist->exp);
-			else {
-				calc_exp(elist->exp, &result, &type);
-				var =
-				    var_newvar(plist->id->type, NULL,
-					       INT_MAX);
-				val_copy(&var->data, result, var->type,
-					 type);
-				val_free(result, type);
-				parm_enter(env, plist->id, S_VAR, var,
-					   "Value");
-			}
-		}
-
-		plist = plist->next;
-		elist = elist->next;
-	}
-
-	if (plist && !elist)
-		run_error(PARM_ERR, "Too few parameters provided");
-	else if (!plist && elist)
-		run_error(PARM_ERR, "Too much parameters provided");
+    if (plist && !elist)
+        run_error(PARM_ERR, "Too few parameters provided");
+    else if (!plist && elist)
+        run_error(PARM_ERR, "Too much parameters provided");
 }
 
 /*
  * This function is way too complicated...
  */
-PUBLIC void exec_call(struct expression *exp, int calltype, void **result,
-		      enum VAL_TYPE *type)
+PUBLIC void
+exec_call(struct expression *exp, int calltype, void **result,
+          enum VAL_TYPE *type)
 {
-	struct comal_line *pfline;
-	struct comal_line *curline;
-	int wasrunning;
-	struct sym_env *env=NULL;
-	struct sym_env *save_env = curenv->curenv;
-	struct seg_des *seg = NULL;
-	struct ext_rec *ext = NULL;
-	int dynseg_loaded = 0;
-	struct comal_line *modline=NULL;
-	struct sym_env *modenv = NULL;
-	struct sym_env *aliasenv = NULL;
-
-	/*
-	 * If we are running in the command loop, first scan the program
-	 * before we execute something...
-	 */
-	if (curenv->running == CMDLOOP) {
-		if (!curenv->scan_ok)
-			prog_total_scan();
-
-		if (!curenv->scan_ok)
-			run_error(DIRECT_ERR,
-				  "Execution of direct command aborted due to program structure errors");
-	}
-
-	/*
-	 * Search the Comal line with the proc/func definition
-	 */
-	pfline = routine_search(exp->e.expid.id, calltype);
-
-	/*
-	 * If we did not find it, it might be an exported proc/func
-	 * form a module...
-	 */
-	if (!pfline) {
-		pfline=mod_search_routine(exp->e.expid.id,calltype);
-
-		if (!pfline) {
-			run_error(UNFUNC_ERR, "Unknown identifier %s",
-			  	exp->e.expid.id->name);
-		}
-
-		/*
-		 * The routine was found in an OpenComal module. Next to
-		 * the line of the proc/func, also record the line where
-		 * the module definition lives...
-		 */
-		modline=pfline->lc.pfrec.fatherproc;
-
-		/*
-		 * Also record the module's static environment
-		 */	
-		modenv=modline->lc.pfrec.staticenv;
-	}
-
-	/*
-	 * Is this an externally defined procedure or function?
-	 */
-	ext = pfline->lc.pfrec.external;
-
-	if (ext) {
-		if (ext->seg)
-			seg = ext->seg;
-		else if (ext->dynamic == staticSYM
-			 || (exp_of_string(ext->filename)
-			     && ext->dynamic != dynamicSYM))
-			seg = seg_static_load(pfline);
-		else {
-			seg = seg_dynamic_load(pfline);
-			dynseg_loaded = 1;
-		}
-
-		pfline = seg->procdef;
-	}
-
-	/*
-	 * This is a call to an EXPORTed routine in a MODULE. We have 
-	 * to insert the MODULEs static environment in front of the new
-	 * PROC/FUNC environment. This is done by inserting an alias
-	 * symbol environment in the chain that refers to the static
-	 * environment that was created when the module was initialised.
-	 */
-	if (modenv) {
-		aliasenv = sym_newenv(1,save_env,modenv,modline,
-			modline->lc.pfrec.id->name);
-		env = sym_newenv(pfline->lc.pfrec.closed, aliasenv, 
-			NULL, pfline, exp->e.expid.id->name);
-	} else
-		env = sym_newenv(pfline->lc.pfrec.closed, save_env, 
-			NULL, pfline, exp->e.expid.id->name);
-                // The env name is strdup()ed by sym_newenv()
-
-	decode_parmlist(env, pfline->lc.pfrec.parmroot,
-			exp->e.expid.exproot);
-
-	curenv->curenv = env;
-	curline = curenv->curline;
-	curenv->curline = pfline->ld->next;
-	wasrunning = curenv->running;
-	curenv->running = RUNNING;
-
-	if (exec_seq2() != returnSYM)
-		fatal("Internal CALL/RETURN error #1");
-
-	curenv->curline = curline;
-	env = sym_freeenv(env, 0);
-
-	if (aliasenv) {
-          IP(aliasenv==env, "exec_call internal error #1");
-
-		sym_freeenv(aliasenv,0);
-	}
-
-	curenv->curenv = save_env;
-	curenv->running = wasrunning;
-
-	if (dynseg_loaded)
-		seg_dynamic_free(seg);
-
-	if (calltype == funcSYM) {
-		*result = return_result;
-		*type = return_type;
-	}
-}
-
-PRIVATE void do_call(struct expression *exp, int calltype)
-{
-	void *val = 0;
-	enum VAL_TYPE type = V_ERROR;
-
-	exec_call(exp, calltype, &val, &type);
-
-	IP(val == 0, "Internal error in do_call(), pdcexec.c");
-}
-
-
-PRIVATE void run_chain(struct comal_line *line, int endsym)
-{
-	while (line->cmd != endsym)
-		line = line->lineptr;
-
-	curenv->curline = line;
-}
-
-
-PRIVATE void exec_restore(struct comal_line *line)
-{
-	struct comal_line *walk;
-
-	if (line->ld) {
-		curenv->datalptr = line->lineptr;
-		curenv->dataeptr = curenv->datalptr->lc.exproot;
-		return;
-	}
-
-	walk = curenv->progroot;
-
-	if (line->lc.id) {
-		while (walk
-		       && !(walk->cmd == idSYM
-			    && walk->lc.id == line->lc.id))
-			walk = walk->ld->next;
-
-		if (!walk)
-			run_error(LABEL_ERR, "Label %s not found",
-				  line->lc.id->name);
-	}
-
-	while (walk && walk->cmd != dataSYM)
-		walk = walk->ld->next;
-
-	if (!walk)
-		run_error(DATA_ERR, "No DATA statements found");
-	else {
-		curenv->datalptr = walk;
-		curenv->dataeptr = walk->lc.exproot;
-	}
-}
-
-
-PRIVATE struct arr_dim *make_arrdim(struct dim_ension *d)
-{
-	struct arr_dim *root = NULL;
-	struct arr_dim *work;
-
-	while (d && !curenv->error) {
-		work = GETCORE(RUN_POOL, struct arr_dim);
-
-		if (d->bottom)
-			work->bottom = calc_intexp(d->bottom);
-		else
-			work->bottom = DEFAULT_DIMBOTTOM;
-
-		if (!curenv->error)
-			work->top = calc_intexp(d->top);
-
-		if (work->bottom > work->top)
-			run_error(DIM_ERR, "Dimension error (top<bottom)");
-
-		work->next = root;
-		root = work;
-		d = d->next;
-	}
-
-	root = (struct arr_dim *)my_reverse(root);
-
-	return root;
-}
-
-
-PRIVATE void do_1dim(struct dim_list *dim, struct comal_line *line)
-{
-	struct arr_dim *arrdim = make_arrdim(dim->dimensionroot);
-	struct sym_env *env;
-	long strlen;
-
-	if (dim->strlen)
-		strlen = calc_intexp(dim->strlen);
-	else
-		strlen = DEFAULT_STRLEN;
-
-	if (line->cmd == localSYM)
-		env = curenv->curenv;
-	else if (line->cmd == staticSYM) {
-		env=curenv->curenv->curproc->lc.pfrec.staticenv;
-
-		if (!env) {
-	    		env=sym_newenv(1, NULL, NULL, NULL, 
-				line->lc.pfrec.id->name);
-
-			curenv->curenv->curproc->lc.pfrec.staticenv=env;
-		} else
-			if (sym_search(env,dim->id,S_VAR))
-				return;
-	} else
-		env = sym_newvarenv(curenv->curenv);
-
-	if (!sym_enter
-	    (env, dim->id, S_VAR,
-	     var_newvar(dim->id->type, arrdim, strlen)))
-		run_error(VAR_ERR, "Variable %s exists", dim->id->name);
-}
-
-
-PRIVATE void exec_dim(struct comal_line *line)
-{
-	struct dim_list *work = line->lc.dimroot;
-
-	while (work) {
-		do_1dim(work, line);
-		work = work->next;
-	}
-}
-
-PRIVATE void do_int_assign(long HUGE_POINTER *to, long from, long nr)
-{
-	while (nr>0) {
-		*to=from;
-		to++;
-		nr--;
-	}
-}
-
-
-PRIVATE void do_float_assign(double HUGE_POINTER *to, double from, long nr)
-{
-	while (nr>0) {
-		*to=from;
-		to++;
-		nr--;
-	}
-}
-
-PRIVATE void do_num_assign(void *lval, enum VAL_TYPE ltype,
-			   struct var_item *lvar, void *rval,
-			   enum VAL_TYPE rtype, int must_free_mem)
-{
-
-	if (ltype==V_ARRAY) {
-		if (lvar->type == V_INT)
-			do_int_assign((long HUGE_POINTER *)lval,(rtype==V_INT)?*(long *)rval:d2int(*(double *)rval,0),lvar->array->nritems);
-		else
-			do_float_assign((double HUGE_POINTER *)lval,(rtype==V_FLOAT)?*(double *)rval:(double)*(long *)rval,lvar->array->nritems);
-	} else 
-		val_copy(lval,rval,ltype,rtype);
-
-	if (must_free_mem)
-		cell_free(rval);
-}
-
-PRIVATE void do_num_array_assign(struct var_item *to, struct var_item *from)
-{
-	void *from_data,*to_data;
-
-	IP(from->array && to->array, "do_num_array_assign internal error #1");
-
-	IP(from->array->nritems==to->array->nritems, "do_num_array_assign internal error #2");
-
-	IP(from->type==to->type, "do_num_array_assign internal error #3");
-
-	from_data=var_data(from);
-	to_data=var_data(to);
-
-	memcpy(to_data,from_data,from->array->nritems*type_size(from->type));
-}
-
-
-PRIVATE void do_calc_fromto(struct two_exp *twoexp, long *from, long *to)
-{
-	if (twoexp) {
-	        const char *err = NULL;
-
-		if (twoexp->exp1)
-			*from = calc_intexp(twoexp->exp1);
-		else
-			*from = 1;
-
-		if (twoexp->exp2)
-			if (twoexp->exp2==twoexp->exp1)
-				*to=*from;
-			else
-				*to = calc_intexp(twoexp->exp2);
-		else
-			*to = INT_MAX;
-
-		if (*from > *to)
-			err = "Substring specifier incorrect (from>to)";
-		else if (*from < 1)
-			err = "Substring specifier start < 1";
-
-		if (err)
-			run_error(SUBSTR_ERR, "%s", err);
-	} else
-		*from = *to = 0;
-}
-	
-
-PRIVATE void do_str_assign(struct string **lval, struct two_exp *twoexp,
-			   long strl, struct string *rval, int must_free_mem)
-{
-	long from, to;
-
-	/*
-	 * Calculate the substring expression tied to the lval (the variable
-	 * to be assigned to. from/to denote the parts of the string that
-	 * must be assigned.
-	 */
-	do_calc_fromto(twoexp, &from, &to);
-
-	/*
-	 * Do we have a full string assignment?
-	 */
-	if (!from) {
-		/*
-	 	* Free the value to be assigned to
-	 	*/
-		if (*lval) mem_free(*lval);
-
-		/*
-		 * If the expression to be assigned exists in the heap.
-		 * we just switch the pointers. Otherwise we must make
-		 * a copy
-		 */
-		if (must_free_mem) {
-			*lval=rval;
-			must_free_mem=0;
-		} else
-			*lval=str_maxdup(RUN_POOL,rval,strl);
-	} else {
-		/*
-		 * We have a substring assignment on our hands
-		 */
-
-		/*
-		 * If the target string does not exist yet -> create it
-		 */
-		if (!*lval)
-			*lval=str_make2(RUN_POOL,to);
-
-		/*
-		 * If the upper bound of the substring assignment is
-		 * beyond the length of the string -> extend the string
-		 */
-		if ((*lval)->len<to)
-			str_extend(RUN_POOL,lval,to);
-
-		str_partcpy2(*lval,rval,from,to);
-	}
-
-	if (must_free_mem)
-		mem_free(rval);
-}
-
-PRIVATE void do_str_array_assign(struct var_item *lvar, void *rval, enum VAL_TYPE rtype, int must_free_mem)
-{
-	struct string *str = NULL;
-	struct var_item *var;
-	struct string **from, **to;
-	long nr;
-
-	to=&lvar->data.str[0];
-
-	if (rtype==V_STRING) {
-		str=(struct string *)rval;
-
-		for (nr=lvar->array->nritems; nr; --nr) {
-			if (*to) mem_free(*to);
-
-			*to=str_dup(RUN_POOL,str);
-			to++;
-		}
-	} else if (rtype==V_ARRAY) {
-		var=(struct var_item *)rval;
-		from=&var->data.str[0];
-
-		for (nr=lvar->array->nritems; nr; --nr) {
-			if (*to) mem_free(*to);
-
-			*to=str_dup(RUN_POOL,*from);
-			to++;
-			from++;
-		}
-	} else 
-          IP(false, "do_str_array_assign internal error #1");
-
-	if (rtype==V_STRING && must_free_mem) mem_free(str);
-	
-}
-
-
-PRIVATE void do_assign2(struct expression *lval, void *rval,
-			enum VAL_TYPE rtype, int must_free_mem)
-{
-	void *lvalptr;
-	struct var_item *lvar;
-	long strl;
-	enum VAL_TYPE ltype;
-
-	lvalptr = exec_lval(lval, &ltype, &lvar, &strl);
-
-	if (ltype!=V_ARRAY && rtype==V_ARRAY)
-		run_error(ARRAY_ERR,"You are trying to assign an array to simple variable %s. Why?",
-			lval->e.expid.id->name);
-
-	if (ltype==V_ARRAY && rtype==V_ARRAY) {
-		if (lvar->array->nritems!=((struct var_item *)rval)->array->nritems)
-			run_error(ARRAY_ERR,"Arrays are of unequal sizes");
-
-		if (lvar->type!=((struct var_item *)rval)->type)
-			run_error(ARRAY_ERR,"Arrays are of different type (int/float mismatch)");
-	}
-
-	if (lval->optype == T_ID || lval->optype == T_ARRAY)
-		if (rtype == V_INT || rtype == V_FLOAT)
-			do_num_assign(lvalptr, ltype, lvar, rval, rtype, must_free_mem);
-		else if (rtype==V_ARRAY)
-			do_num_array_assign(lvar,(struct var_item *)rval);
-		else
-			run_error(TYPE_ERR,"Type mismatch in assignment (numeric expected)");
-	else if (lval->optype == T_SID || lval->optype == T_SARRAY) 
-		if (ltype==V_ARRAY)
-			do_str_array_assign(lvar,rval,rtype,must_free_mem);
-		else if (rtype == V_STRING) {
-                  IP(ltype==V_STRING, "do_assign2 internal error #4");
-                  do_str_assign((struct string **)lvalptr, lval->e.expsid.twoexp, strl, (struct string *)rval, must_free_mem);
-		} else
-			run_error(TYPE_ERR,"Type mismatch in assignment (string expected)");
-	else
-          IP(false, "do_assign2 internal error #3");
-}
-
-
-PRIVATE void do_assign1(struct expression *lval, int op,
-			struct expression *rval)
-{
-	void *result;
-	enum VAL_TYPE type;
-	struct expression exp;
-
-	if (op == becomesSYM)
-		calc_exp(rval, &result, &type);
-	else {
-		exp.optype = T_BINARY;
-
-		switch (op) {
-		case becplusSYM:
-			exp.op = plusSYM;
-			break;
-		case becminusSYM:
-			exp.op = minusSYM;
-			break;
-
-		default:
-                  IP(false, "Assign2 complex assignop switch default action");
-		}
-
-		exp.e.twoexp.exp1 = lval;
-		exp.e.twoexp.exp2 = rval;
-
-		calc_exp(&exp, &result, &type);
-	}
-
-	do_assign2(lval, result, type, 1);
-}
-
-
-PRIVATE void exec_assign(struct comal_line *line)
-{
-	struct assign_list *work = line->lc.assignroot;
-
-	while (work) {
-		do_assign1(work->lval, work->op, work->exp);
-		work = work->next;
-	}
-}
-
-
-PRIVATE void exec_end(void)
-{
-	if (curenv->running != RUNNING && !sys_yn(MSG_DIALOG, catgets(catdesc, ExecSet, ExecSure, "Are you sure? "))) {
-		return;
+    struct comal_line *pfline;
+    struct comal_line *curline;
+    int             wasrunning;
+    struct sym_env *env = NULL;
+    struct sym_env *save_env = curenv->curenv;
+    struct seg_des *seg = NULL;
+    struct ext_rec *ext = NULL;
+    int             dynseg_loaded = 0;
+    struct comal_line *modline = NULL;
+    struct sym_env *modenv = NULL;
+    struct sym_env *aliasenv = NULL;
+
+    /*
+     * If we are running in the command loop, first scan the program
+     * before we execute something...
+     */
+    if (curenv->running == CMDLOOP) {
+        if (!curenv->scan_ok)
+            prog_total_scan();
+
+        if (!curenv->scan_ok)
+            run_error(DIRECT_ERR,
+                      "Execution of direct command aborted due to program structure errors");
+    }
+
+    /*
+     * Search the Comal line with the proc/func definition
+     */
+    pfline = routine_search(exp->e.expid.id, calltype);
+
+    /*
+     * If we did not find it, it might be an exported proc/func
+     * form a module...
+     */
+    if (!pfline) {
+        pfline = mod_search_routine(exp->e.expid.id, calltype);
+
+        if (!pfline) {
+            run_error(UNFUNC_ERR, "Unknown identifier %s",
+                      exp->e.expid.id->name);
         }
-	longjmp(RESTART, PROG_END);
+
+        /*
+         * The routine was found in an OpenComal module. Next to
+         * the line of the proc/func, also record the line where
+         * the module definition lives...
+         */
+        modline = pfline->lc.pfrec.fatherproc;
+
+        /*
+         * Also record the module's static environment
+         */
+        modenv = modline->lc.pfrec.staticenv;
+    }
+
+    /*
+     * Is this an externally defined procedure or function?
+     */
+    ext = pfline->lc.pfrec.external;
+
+    if (ext) {
+        if (ext->seg)
+            seg = ext->seg;
+        else if (ext->dynamic == staticSYM || (exp_of_string(ext->filename)
+                                               && ext->dynamic !=
+                                               dynamicSYM))
+            seg = seg_static_load(pfline);
+        else {
+            seg = seg_dynamic_load(pfline);
+            dynseg_loaded = 1;
+        }
+
+        pfline = seg->procdef;
+    }
+
+    /*
+     * This is a call to an EXPORTed routine in a MODULE. We have 
+     * to insert the MODULEs static environment in front of the new
+     * PROC/FUNC environment. This is done by inserting an alias
+     * symbol environment in the chain that refers to the static
+     * environment that was created when the module was initialised.
+     */
+    if (modenv) {
+        aliasenv = sym_newenv(1, save_env, modenv, modline,
+                              modline->lc.pfrec.id->name);
+        env = sym_newenv(pfline->lc.pfrec.closed, aliasenv,
+                         NULL, pfline, exp->e.expid.id->name);
+    } else
+        env = sym_newenv(pfline->lc.pfrec.closed, save_env,
+                         NULL, pfline, exp->e.expid.id->name);
+    // The env name is strdup()ed by sym_newenv()
+
+    decode_parmlist(env, pfline->lc.pfrec.parmroot, exp->e.expid.exproot);
+
+    curenv->curenv = env;
+    curline = curenv->curline;
+    curenv->curline = pfline->ld->next;
+    wasrunning = curenv->running;
+    curenv->running = RUNNING;
+
+    if (exec_seq2() != returnSYM)
+        fatal("Internal CALL/RETURN error #1");
+
+    curenv->curline = curline;
+    env = sym_freeenv(env, 0);
+
+    if (aliasenv) {
+        IP(aliasenv == env, "exec_call internal error #1");
+
+        sym_freeenv(aliasenv, 0);
+    }
+
+    curenv->curenv = save_env;
+    curenv->running = wasrunning;
+
+    if (dynseg_loaded)
+        seg_dynamic_free(seg);
+
+    if (calltype == funcSYM) {
+        *result = return_result;
+        *type = return_type;
+    }
+}
+
+PRIVATE void
+do_call(struct expression *exp, int calltype)
+{
+    void           *val = 0;
+    enum VAL_TYPE   type = V_ERROR;
+
+    exec_call(exp, calltype, &val, &type);
+
+    IP(val == 0, "Internal error in do_call(), pdcexec.c");
 }
 
 
-PRIVATE int exec_while(struct comal_line *line)
+PRIVATE void
+run_chain(struct comal_line *line, int endsym)
 {
-	struct ifwhile_rec *w = &line->lc.ifwhilerec;
+    while (line->cmd != endsym)
+        line = line->lineptr;
 
-	if (w->stat)
-		while (calc_logexp(w->exp)) {
-			int retcode;
-
-			retcode = exec_line(w->stat);
-
-			if (retcode)
-				return retcode;
-	} else if (!calc_logexp(w->exp))
-		curenv->curline = line->lineptr->ld->next;
-
-	return 0;
-}
-
-PRIVATE int exec_repeat(struct comal_line *line)
-{
-	int retcode;
-	struct ifwhile_rec *w = &line->lc.ifwhilerec;
-
-	do {
-		if (w->stat) {
-			retcode = exec_line(w->stat);
-
-			if (retcode) return retcode;
-		}
-	} while (!calc_logexp(w->exp));
-
-	return 0;
+    curenv->curline = line;
 }
 
 
-PUBLIC int exec_trap(struct comal_line *line)
+PRIVATE void
+exec_restore(struct comal_line *line)
 {
-	jmp_buf save_err;
-	static int retcode;
-	struct seg_des *seg_marker;
+    struct comal_line *walk;
 
-	retcode = 0;
+    if (line->ld) {
+        curenv->datalptr = line->lineptr;
+        curenv->dataeptr = curenv->datalptr->lc.exproot;
+        return;
+    }
 
-	if (line->lc.traprec.esc) {
-		curenv->escallowed = (line->lc.traprec.esc == plusSYM);
+    walk = curenv->progroot;
 
-		return 0;
-	}
+    if (line->lc.id) {
+        while (walk && !(walk->cmd == idSYM && walk->lc.id == line->lc.id))
+            walk = walk->ld->next;
 
-	memcpy(save_err, ERRBUF, sizeof(jmp_buf));
-	seg_marker = curenv->segroot;
-	curenv->nrtraps++;
+        if (!walk)
+            run_error(LABEL_ERR, "Label %s not found", line->lc.id->name);
+    }
 
-	retry:
+    while (walk && walk->cmd != dataSYM)
+        walk = walk->ld->next;
 
-	if (setjmp(ERRBUF) == 0) {
-		curenv->curline = line->ld->next;
-		retcode = exec_seq3();
-	}
-
-	curenv->nrtraps--;
-	memcpy(ERRBUF, save_err, sizeof(jmp_buf));
-
-	if (curenv->error) {
-		curenv->error = 0;
-		mem_free(curenv->errmsg);
-		curenv->errmsg = NULL;
-		curenv->curline = line->lineptr->ld->next;
-
-		while (curenv->segroot != seg_marker)
-			seg_dynamic_free(curenv->segroot);
-
-		if (line->lineptr->cmd == handlerSYM) {
-			retcode = exec_seq3();
-
-			if (retcode == retrySYM )
-				goto retry;
-			else if (retcode != endtrapSYM)
-				return retcode;
-			else {
-				curenv->curline =
-				    curenv->curline->ld->next;
-				return 0;
-			}
-		}
-	} else if (retcode == handlerSYM)
-		curenv->curline = curenv->curline->lineptr->ld->next;
-	else if (retcode == endtrapSYM)
-		curenv->curline = curenv->curline->ld->next;
-	else
-		return retcode;
-
-	return 0;
+    if (!walk)
+        run_error(DATA_ERR, "No DATA statements found");
+    else {
+        curenv->datalptr = walk;
+        curenv->dataeptr = walk->lc.exproot;
+    }
 }
 
 
-PRIVATE int exec_exit(struct comal_line *line)
+PRIVATE struct arr_dim *
+make_arrdim(struct dim_ension *d)
 {
-	if (curenv->running != RUNNING)
-		run_error(DIRECT_ERR,
-			  "%s", catgets(catdesc, ExecSet, ExecCantExit, "Can't EXIT in direct mode (use BYE to leave OpenCOMAL)"));
+    struct arr_dim *root = NULL;
+    struct arr_dim *work;
 
-	if (!line->lc.exp || calc_logexp(line->lc.exp))
-		return exitSYM;
+    while (d && !curenv->error) {
+        work = GETCORE(RUN_POOL, struct arr_dim);
 
-	return 0;
-}
+        if (d->bottom)
+            work->bottom = calc_intexp(d->bottom);
+        else
+            work->bottom = DEFAULT_DIMBOTTOM;
 
-PRIVATE int exec_loop(struct comal_line *line)
-{
-	int retcode = endloopSYM;
+        if (!curenv->error)
+            work->top = calc_intexp(d->top);
 
-	while (retcode == endloopSYM) {
-		curenv->curline = line->ld->next;
-		retcode = exec_seq3();
-	}
+        if (work->bottom > work->top)
+            run_error(DIM_ERR, "Dimension error (top<bottom)");
 
-	if (retcode == exitSYM) {
-		retcode = 0;
-		curenv->curline = line->lineptr->ld->next;
-	}
+        work->next = root;
+        root = work;
+        d = d->next;
+    }
 
-	return retcode;
-}
+    root = (struct arr_dim *) my_reverse(root);
 
-
-PRIVATE int exec_if(struct comal_line *line)
-{
-	struct ifwhile_rec *i = &line->lc.ifwhilerec;
-	struct comal_line *elif = line->lineptr;
-
-	if (calc_logexp(i->exp))
-		if (i->stat)
-			return exec_line(i->stat);
-		else
-			return 0;
-	else if (i->stat)
-		return 0;
-	else {
-		while (elif->cmd == elifSYM) {
-			if (calc_logexp(elif->lc.exp)) {
-				curenv->curline = elif->ld->next;
-
-				return 0;
-			}
-
-			elif = elif->lineptr;
-		}
-
-		curenv->curline = elif->ld->next;	/* after else or endif */
-	}
-
-	return 0;
+    return root;
 }
 
 
-PRIVATE int exec_for(struct comal_line *line)
+PRIVATE void
+do_1dim(struct dim_list *dim, struct comal_line *line)
 {
-	struct for_rec *f = &line->lc.forrec;
-	enum VAL_TYPE ltype;
-	struct var_item *var;
-	long lto, lstep;
-	double dto, dstep;
-	void *eresult;
-	enum VAL_TYPE etype;
-	void *lval;
-	int stopfor = 0;
-	int retcode;
+    struct arr_dim *arrdim = make_arrdim(dim->dimensionroot);
+    struct sym_env *env;
+    long            strlen;
 
-	lval = exec_lval(f->lval, &ltype, &var, NULL);
+    if (dim->strlen)
+        strlen = calc_intexp(dim->strlen);
+    else
+        strlen = DEFAULT_STRLEN;
 
-	if (ltype==V_ARRAY)
-		run_error(FOR_ERR,
-			  "FOR loop variable may not be an array");
+    if (line->cmd == localSYM)
+        env = curenv->curenv;
+    else if (line->cmd == staticSYM) {
+        env = curenv->curenv->curproc->lc.pfrec.staticenv;
 
-	calc_exp(f->from, &eresult, &etype);
-	val_copy(lval, eresult, ltype, etype);
-	cell_free(eresult);
+        if (!env) {
+            env = sym_newenv(1, NULL, NULL, NULL, line->lc.pfrec.id->name);
 
-	calc_exp(f->to, &eresult, &etype);
+            curenv->curenv->curproc->lc.pfrec.staticenv = env;
+        } else if (sym_search(env, dim->id, S_VAR))
+            return;
+    } else
+        env = sym_newvarenv(curenv->curenv);
 
-	if (ltype == V_FLOAT) {
-		val_copy(&dto, eresult, V_FLOAT, etype);
-
-		if (f->step) {
-			cell_free(eresult);
-			calc_exp(f->step, &eresult, &etype);
-			val_copy(&dstep, eresult, V_FLOAT, etype);
-
-			if (dstep == 0)
-				run_error(FOR_ERR,
-					  "STEP value must not be 0");
-		} else
-			dstep = 1;
-
-		if (f->mode == downtoSYM)
-			dstep = -dstep;
-
-		DBG_PRINTF(true,
-			  "FOR from %f to %f step %f",
-			  *(double *) lval, dto, dstep);
-	} else {
-		val_copy(&lto, eresult, V_INT, etype);
-
-		if (f->step) {
-			cell_free(eresult);
-			calc_exp(f->step, &eresult, &etype);
-			val_copy(&lstep, eresult, V_INT, etype);
-
-			if (lstep == 0)
-				run_error(FOR_ERR,
-					  "STEP value must not be 0");
-		} else
-			lstep = 1;
-
-		if (f->mode == downtoSYM)
-			lstep = -lstep;
-
-		DBG_PRINTF(true,
-			  "FOR from %D to %D step %D",
-			  *(long *) lval, lto, lstep);
-	}
-
-	cell_free(eresult);
-
-	while (true) {
-                if (comal_debug) {
-		        if (ltype == V_INT) {
-			        VL((true, "FOR loop, lval=%p, %D", lval,
-				    *(long *) lval));
-                        } else {
-			        VL((true, "FOR loop, lval=%p, %f", lval,
-				    *(double *) lval));
-		        }
-                }
-		if (ltype == V_INT)
-			if (lstep > 0)
-				stopfor = (*(long *) lval > lto);
-			else
-				stopfor = (*(long *) lval < lto);
-		else if (dstep > 0)
-			stopfor = (*(double *) lval > dto);
-		else
-			stopfor = (*(double *) lval < dto);
-
-		if (stopfor)
-			break;
-
-		if (f->stat) {
-			retcode = exec_line(f->stat);
-
-			if (retcode)
-				return retcode;
-		} else {
-			curenv->curline = line->ld->next;
-
-			retcode = exec_seq3();
-
-			if (retcode == endforSYM)
-				retcode = 0;
-			else
-				return retcode;
-		}
-
-		if (ltype == V_INT)
-			*(long *) lval += lstep;
-		else
-			*(double *) lval += dstep;
-	}
-
-	if (!f->stat)
-		curenv->curline = line->lineptr->ld->next;
-
-	return 0;
+    if (!sym_enter
+        (env, dim->id, S_VAR, var_newvar(dim->id->type, arrdim, strlen)))
+        run_error(VAR_ERR, "Variable %s exists", dim->id->name);
 }
 
 
-PRIVATE void exec_case(struct comal_line *line)
+PRIVATE void
+exec_dim(struct comal_line *line)
 {
-	void *cresult;
-	enum VAL_TYPE ctype;
-	void *wresult;
-	enum VAL_TYPE wtype;
-	struct comal_line *whenline = line->lineptr;
-	struct when_list *walk;
-	int casefound = 0;
+    struct dim_list *work = line->lc.dimroot;
 
-	calc_exp(line->lc.exp, &cresult, &ctype);
+    while (work) {
+        do_1dim(work, line);
+        work = work->next;
+    }
+}
 
-	while (!casefound && whenline->cmd != endcaseSYM) {
-		if (whenline->cmd == otherwiseSYM) {
-			curenv->curline = whenline->ld->next;
-			casefound = 1;
-		} else {
-			walk = whenline->lc.whenroot;
-
-			while (walk && !casefound) {
-				calc_exp(walk->exp, &wresult, &wtype);
-				casefound =
-				    val_cmp(walk->op, cresult, wresult,
-					    ctype, wtype);
-				val_free(wresult, wtype);
-				walk = walk->next;
-			}
-
-			if (casefound)
-				curenv->curline = whenline->ld->next;
-			else
-				whenline = whenline->lineptr;
-		}
-	}
-
-	val_free(cresult, ctype);
+PRIVATE void
+do_int_assign(long HUGE_POINTER * to, long from, long nr)
+{
+    while (nr > 0) {
+        *to = from;
+        to++;
+        nr--;
+    }
 }
 
 
-PUBLIC struct file_rec *fsearch(long i)
+PRIVATE void
+do_float_assign(double HUGE_POINTER * to, double from, long nr)
 {
-	struct file_rec *walk = curenv->fileroot;
+    while (nr > 0) {
+        *to = from;
+        to++;
+        nr--;
+    }
+}
 
-	while (walk && walk->cfno != i)
-		walk = walk->next;
+PRIVATE void
+do_num_assign(void *lval, enum VAL_TYPE ltype,
+              struct var_item *lvar, void *rval,
+              enum VAL_TYPE rtype, int must_free_mem)
+{
 
-	return walk;
+    if (ltype == V_ARRAY) {
+        if (lvar->type == V_INT)
+            do_int_assign((long HUGE_POINTER *) lval,
+                          (rtype ==
+                           V_INT) ? *(long *) rval : d2int(*(double *)
+                                                           rval, 0),
+                          lvar->array->nritems);
+        else
+            do_float_assign((double HUGE_POINTER *) lval,
+                            (rtype ==
+                             V_FLOAT) ? *(double *) rval : (double) *(long
+                                                                      *)
+                            rval, lvar->array->nritems);
+    } else
+        val_copy(lval, rval, ltype, rtype);
+
+    if (must_free_mem)
+        cell_free(rval);
+}
+
+PRIVATE void
+do_num_array_assign(struct var_item *to, struct var_item *from)
+{
+    void           *from_data,
+                   *to_data;
+
+    IP(from->array && to->array, "do_num_array_assign internal error #1");
+
+    IP(from->array->nritems == to->array->nritems,
+       "do_num_array_assign internal error #2");
+
+    IP(from->type == to->type, "do_num_array_assign internal error #3");
+
+    from_data = var_data(from);
+    to_data = var_data(to);
+
+    memcpy(to_data, from_data,
+           from->array->nritems * type_size(from->type));
 }
 
 
-PRIVATE void exec_open(struct comal_line *line)
+PRIVATE void
+do_calc_fromto(struct two_exp *twoexp, long *from, long *to)
 {
-	struct string *name;
-	enum VAL_TYPE type;
-	struct file_rec *frec;
-	struct open_rec *o = &line->lc.openrec;
-	const char *flags;
-        char *fname;
+    if (twoexp) {
+        const char     *err = NULL;
 
-	calc_exp(o->filename, (void **) &name, &type);
-	frec = (struct file_rec *)mem_alloc(RUN_POOL, sizeof(struct file_rec));
-	frec->cfno = calc_intexp(o->filenum);
+        if (twoexp->exp1)
+            *from = calc_intexp(twoexp->exp1);
+        else
+            *from = 1;
 
-	if (fsearch(frec->cfno))
-		run_error(OPEN_ERR, "File %D already open", frec->cfno);
+        if (twoexp->exp2)
+            if (twoexp->exp2 == twoexp->exp1)
+                *to = *from;
+            else
+                *to = calc_intexp(twoexp->exp2);
+        else
+            *to = INT_MAX;
 
-	frec->mode = o->type;
-	frec->read_only = false;
+        if (*from > *to)
+            err = "Substring specifier incorrect (from>to)";
+        else if (*from < 1)
+            err = "Substring specifier start < 1";
 
-	switch (frec->mode) {
-	case readSYM:
-		flags = "rb";
-		frec->read_only = true;
-		break;
-
-	case writeSYM:
-		flags = "wbx";
-		break;
-
-	case appendSYM:
-		flags = "ab";
-		break;
-
-	case randomSYM:
-		frec->reclen = calc_intexp(o->reclen);
-
-		if (frec->reclen <= 0)
-			run_error(OPEN_ERR, "Invalid record length %D",
-				  frec->reclen);
-
-		if (o->read_only) {
-                        flags = "rb";
-			frec->read_only = true;
-		} else {
-                        flags = "rb+";
-                }
-
-		break;
-
-	default:
-          IP(false, "open filemode switch default action");
-	}
-
-	fname = str_ltou(name->s);
-	if (frec->mode == randomSYM && !o->read_only && access(fname, F_OK) != 0) {
-		// The modern replacement for creat(2)
-		int fd = open(fname, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
-		if (fd < 0) {
-			run_error(OPEN_ERR, "OPEN error: %s", strerror(errno));
-		}
-		close(fd);
-	}
-	frec->hfptr = fopen(fname, flags);
-
-	if (frec->hfptr == NULL)
-		run_error(OPEN_ERR, "OPEN error: %s", strerror(errno));
-
-	frec->next = curenv->fileroot;
-	curenv->fileroot = frec;
+        if (err)
+            run_error(SUBSTR_ERR, "%s", err);
+    } else
+        *from = *to = 0;
 }
 
 
-PRIVATE void exec_create(struct comal_line *line)
+PRIVATE void
+do_str_assign(struct string **lval, struct two_exp *twoexp,
+              long strl, struct string *rval, int must_free_mem)
 {
-	struct create_rec *c = &line->lc.createrec;
-	struct string *name;
-	enum VAL_TYPE type;
-	char *fname;
-	FILE *f;
+    long            from,
+                    to;
 
-	calc_exp(c->filename, (void **)&name, &type);
-	fname = str_ltou(name->s);
-	f = fopen(fname, "wbx");
-	if (f == NULL) {
-		run_error(OPEN_ERR, "OPEN error: %s", strerror(errno));
-	}
-	fseek(f, calc_intexp(c->top) * calc_intexp(c->reclen) - 1, SEEK_SET);
-	fputc(0, f);
-	fclose(f);
+    /*
+     * Calculate the substring expression tied to the lval (the variable
+     * to be assigned to. from/to denote the parts of the string that
+     * must be assigned.
+     */
+    do_calc_fromto(twoexp, &from, &to);
+
+    /*
+     * Do we have a full string assignment?
+     */
+    if (!from) {
+        /*
+         * Free the value to be assigned to
+         */
+        if (*lval)
+            mem_free(*lval);
+
+        /*
+         * If the expression to be assigned exists in the heap.
+         * we just switch the pointers. Otherwise we must make
+         * a copy
+         */
+        if (must_free_mem) {
+            *lval = rval;
+            must_free_mem = 0;
+        } else
+            *lval = str_maxdup(RUN_POOL, rval, strl);
+    } else {
+        /*
+         * We have a substring assignment on our hands
+         */
+
+        /*
+         * If the target string does not exist yet -> create it
+         */
+        if (!*lval)
+            *lval = str_make2(RUN_POOL, to);
+
+        /*
+         * If the upper bound of the substring assignment is
+         * beyond the length of the string -> extend the string
+         */
+        if ((*lval)->len < to)
+            str_extend(RUN_POOL, lval, to);
+
+        str_partcpy2(*lval, rval, from, to);
+    }
+
+    if (must_free_mem)
+        mem_free(rval);
+}
+
+PRIVATE void
+do_str_array_assign(struct var_item *lvar, void *rval, enum VAL_TYPE rtype,
+                    int must_free_mem)
+{
+    struct string  *str = NULL;
+    struct var_item *var;
+    struct string **from,
+                  **to;
+    long            nr;
+
+    to = &lvar->data.str[0];
+
+    if (rtype == V_STRING) {
+        str = (struct string *) rval;
+
+        for (nr = lvar->array->nritems; nr; --nr) {
+            if (*to)
+                mem_free(*to);
+
+            *to = str_dup(RUN_POOL, str);
+            to++;
+        }
+    } else if (rtype == V_ARRAY) {
+        var = (struct var_item *) rval;
+        from = &var->data.str[0];
+
+        for (nr = lvar->array->nritems; nr; --nr) {
+            if (*to)
+                mem_free(*to);
+
+            *to = str_dup(RUN_POOL, *from);
+            to++;
+            from++;
+        }
+    } else
+        IP(false, "do_str_array_assign internal error #1");
+
+    if (rtype == V_STRING && must_free_mem)
+        mem_free(str);
+
 }
 
 
-PRIVATE void exec_close(struct comal_line *line)
+PRIVATE void
+do_assign2(struct expression *lval, void *rval,
+           enum VAL_TYPE rtype, int must_free_mem)
 {
-	struct exp_list *work = line->lc.exproot;
-	struct file_rec *walk;
+    void           *lvalptr;
+    struct var_item *lvar;
+    long            strl;
+    enum VAL_TYPE   ltype;
 
-	if (!work) {
-		walk = curenv->fileroot;
+    lvalptr = exec_lval(lval, &ltype, &lvar, &strl);
 
-		while (walk) {
-			DBG_PRINTF(true,
-				  "Closing Comal file %D",
-				  walk->cfno);
+    if (ltype != V_ARRAY && rtype == V_ARRAY)
+        run_error(ARRAY_ERR,
+                  "You are trying to assign an array to simple variable %s. Why?",
+                  lval->e.expid.id->name);
 
-			if (fclose(walk->hfptr) == EOF)
-				run_error(CLOSE_ERR,
-					  "Close error on file %D: %s",
-					  walk->cfno, strerror(errno));
+    if (ltype == V_ARRAY && rtype == V_ARRAY) {
+        if (lvar->array->nritems !=
+            ((struct var_item *) rval)->array->nritems)
+            run_error(ARRAY_ERR, "Arrays are of unequal sizes");
 
-			walk = (struct file_rec *)mem_free(walk);
-		}
+        if (lvar->type != ((struct var_item *) rval)->type)
+            run_error(ARRAY_ERR,
+                      "Arrays are of different type (int/float mismatch)");
+    }
 
-		curenv->fileroot = NULL;
-	} else {
-		while (work) {
-			struct file_rec *last;
-			long fno;
-
-			fno = calc_intexp(work->exp);
-			walk = curenv->fileroot;
-			last = NULL;
-
-			while (walk && walk->cfno != fno) {
-				last = walk;
-				walk = walk->next;
-			}
-
-			if (!walk)
-				run_error(CLOSE_ERR, "File %D not open",
-					  fno);
-
-			if (fclose(walk->hfptr) == EOF)
-				run_error(CLOSE_ERR,
-					  "CLOSE error on file %D: %s",
-					  walk->cfno, strerror(errno));
-			else {
-				if (last)
-					last->next = walk->next;
-				else
-					curenv->fileroot = walk->next;
-
-				mem_free(walk);
-			}
-
-			work = work->next;
-		}
-	}
+    if (lval->optype == T_ID || lval->optype == T_ARRAY)
+        if (rtype == V_INT || rtype == V_FLOAT)
+            do_num_assign(lvalptr, ltype, lvar, rval, rtype,
+                          must_free_mem);
+        else if (rtype == V_ARRAY)
+            do_num_array_assign(lvar, (struct var_item *) rval);
+        else
+            run_error(TYPE_ERR,
+                      "Type mismatch in assignment (numeric expected)");
+    else if (lval->optype == T_SID || lval->optype == T_SARRAY)
+        if (ltype == V_ARRAY)
+            do_str_array_assign(lvar, rval, rtype, must_free_mem);
+        else if (rtype == V_STRING) {
+            IP(ltype == V_STRING, "do_assign2 internal error #4");
+            do_str_assign((struct string **) lvalptr,
+                          lval->e.expsid.twoexp, strl,
+                          (struct string *) rval, must_free_mem);
+        } else
+            run_error(TYPE_ERR,
+                      "Type mismatch in assignment (string expected)");
+    else
+        IP(false, "do_assign2 internal error #3");
 }
 
 
-PRIVATE struct file_rec *pos_file(struct two_exp *r)
+PRIVATE void
+do_assign1(struct expression *lval, int op, struct expression *rval)
 {
-	long cfno = calc_intexp(r->exp1);
-	struct file_rec *f = fsearch(cfno);
+    void           *result;
+    enum VAL_TYPE   type;
+    struct expression exp;
 
-	if (!f)
-		run_error(POS_ERR, "File %D not open", cfno);
+    if (op == becomesSYM)
+        calc_exp(rval, &result, &type);
+    else {
+        exp.optype = T_BINARY;
 
-	if (f->mode == randomSYM) {
-		long recno;
+        switch (op) {
+        case becplusSYM:
+            exp.op = plusSYM;
+            break;
+        case becminusSYM:
+            exp.op = minusSYM;
+            break;
 
-		if (!r->exp2)
-			run_error(POS_ERR,
-				  "Record number needed for a RANDOM file");
+        default:
+            IP(false, "Assign2 complex assignop switch default action");
+        }
 
-		recno = calc_intexp(r->exp2);
+        exp.e.twoexp.exp1 = lval;
+        exp.e.twoexp.exp2 = rval;
 
-		if (recno < 1)
-			run_error(POS_ERR,
-				  "Random file record number must be >=1");
+        calc_exp(&exp, &result, &type);
+    }
 
-		DBG_PRINTF(true,
-			  "Positioning file %D (host=%p) to record %D, offset %D",
-			  f->cfno, f->hfptr, recno,
-			  (recno - 1) * f->reclen);
-
-		if (fseek(f->hfptr, (recno - 1) * f->reclen, SEEK_SET) ==
-		    -1)
-			run_error(POS_ERR,
-				  "Random file positioning error: %s",
-				  strerror(errno));
-	}
-
-	return f;
+    do_assign2(lval, result, type, 1);
 }
 
 
-PRIVATE void read1(struct file_rec *f, struct id_rec *id, void **data,
-		   enum VAL_TYPE *type, long *totsize)
+PRIVATE void
+exec_assign(struct comal_line *line)
 {
-	long size;
-	int c;
+    struct assign_list *work = line->lc.assignroot;
 
-	*type = (enum VAL_TYPE) 0;
-        c = fgetc(f->hfptr);
-	*type = (enum VAL_TYPE)c;
-
-	if (c != EOF) {
-		long r;
-
-		DBG_PRINTF(true,
-			  "Reading a type %d from file", *type);
-
-		if (*type != id->type)
-			run_error(READ_ERR,
-				  "INPUT/READ from file, wrong type (%s)",
-				  id->name);
-
-		switch (*type) {
-		case V_FLOAT:
-			*data = cell_alloc(FLOAT_CPOOL);
-			size = sizeof(double);
-			break;
-
-		case V_INT:
-			*data = cell_alloc(INT_CPOOL);
-			size = sizeof(long);
-			break;
-
-		case V_STRING:
-			r = fread(&size, sizeof(long), 1, f->hfptr);
-			break;
-
-		default:
-                  IP(false, "read1 type switch default action");
-		}
-
-                if (!(*type == V_STRING && r == 0)) {
-			DBG_PRINTF(true,
-				  "Reading %D bytes from file %D (host %p)",
-				  size, f->cfno, f->hfptr);
-
-			if (f->mode == randomSYM) {
-				*totsize += size + 1;	/* 1 extra for type */
-
-				if (*type == V_STRING)
-					*totsize += sizeof(long);
-
-				if (*totsize > f->reclen)
-					run_error(READ_ERR,
-						  "Random file record overflow");
-			}
-
-			if (*type == V_STRING) {
-				*data = STR_ALLOC(RUN_POOL, size);
-				r = fread((*(struct string **)data)->s, 1, size, f->hfptr);
-				(*(struct string **) data)->len = size;
-			} else {
-				r = fread((char *)*data, 1, size, f->hfptr);
-                        }
-                        if (r == size) {
-                                return;
-                        }
-		}
-	}
-
-	if (ferror(f->hfptr)) {
-		run_error(READ_ERR, "INPUT/READ file error: %s",
-		  	strerror(errno));
-	}
+    while (work) {
+        do_assign1(work->lval, work->op, work->exp);
+        work = work->next;
+    }
 }
 
 
-PUBLIC void do_readfile(struct two_exp *twoexp, struct exp_list *lvalroot)
+PRIVATE void
+exec_end(void)
 {
-	struct file_rec *f = pos_file(twoexp);
-	struct exp_list *work = lvalroot;
-	void *result;
-	enum VAL_TYPE ltype;
-	enum VAL_TYPE rtype;
-	long totsize = 0;
-	struct var_item *var;
-	long strl;
-	long nr;
-
-	while (work) {
-		int size;
-		char HUGE_POINTER *lval;
-
-		lval = (char *)exec_lval(work->exp, &ltype, &var, &strl);
-
-		if (ltype==V_ARRAY) {
-			nr = var->array->nritems;
-			ltype = var->type;
-		} else
-			nr = 1;
-
-		size=type_size(ltype);
-
-		for (; nr > 0; --nr) {
-			read1(f, work->exp->e.expid.id, &result, &rtype,
-			      &totsize);
-
-			if (ltype == V_STRING)
-				do_str_assign((struct string **)lval, work->exp->e.expsid.twoexp, strl, (struct string *)result, 1);
-			else
-				do_num_assign((void *)lval, ltype, NULL, result,
-					      rtype, 1);
-
-			lval+=size;
-		}
-
-		work = work->next;
-	}
+    if (curenv->running != RUNNING
+        && !sys_yn(MSG_DIALOG,
+                   catgets(catdesc, ExecSet, ExecSure,
+                           "Are you sure? "))) {
+        return;
+    }
+    longjmp(RESTART, PROG_END);
 }
 
 
-PUBLIC void read_data(struct comal_line *line)
+PRIVATE int
+exec_while(struct comal_line *line)
 {
-	struct exp_list *walk = line->lc.readrec.lvalroot;
+    struct ifwhile_rec *w = &line->lc.ifwhilerec;
 
-	while (walk) {
-		if (!curenv->dataeptr)
-			run_error(EOD_ERR, "End of DATA");
+    if (w->stat)
+        while (calc_logexp(w->exp)) {
+            int             retcode;
 
-		do_assign1(walk->exp, becomesSYM, curenv->dataeptr->exp);
+            retcode = exec_line(w->stat);
 
-		walk = walk->next;
+            if (retcode)
+                return retcode;
+    } else if (!calc_logexp(w->exp))
+        curenv->curline = line->lineptr->ld->next;
 
-		curenv->dataeptr = curenv->dataeptr->next;
+    return 0;
+}
 
-		if (!curenv->dataeptr) {
-			do
-				curenv->datalptr =
-				    curenv->datalptr->ld->next;
-			while (curenv->datalptr
-			       && curenv->datalptr->cmd != dataSYM);
+PRIVATE int
+exec_repeat(struct comal_line *line)
+{
+    int             retcode;
+    struct ifwhile_rec *w = &line->lc.ifwhilerec;
 
-			if (curenv->datalptr)
-				curenv->dataeptr =
-				    curenv->datalptr->lc.exproot;
-		}
-	}
+    do {
+        if (w->stat) {
+            retcode = exec_line(w->stat);
+
+            if (retcode)
+                return retcode;
+        }
+    } while (!calc_logexp(w->exp));
+
+    return 0;
 }
 
 
-PUBLIC void exec_read(struct comal_line *line)
+PUBLIC int
+exec_trap(struct comal_line *line)
 {
-	if (line->lc.readrec.modifier)
-		do_readfile(line->lc.readrec.modifier,
-			    line->lc.readrec.lvalroot);
-	else
-		read_data(line);
+    jmp_buf         save_err;
+    static int      retcode;
+    struct seg_des *seg_marker;
+
+    retcode = 0;
+
+    if (line->lc.traprec.esc) {
+        curenv->escallowed = (line->lc.traprec.esc == plusSYM);
+
+        return 0;
+    }
+
+    memcpy(save_err, ERRBUF, sizeof(jmp_buf));
+    seg_marker = curenv->segroot;
+    curenv->nrtraps++;
+
+  retry:
+
+    if (setjmp(ERRBUF) == 0) {
+        curenv->curline = line->ld->next;
+        retcode = exec_seq3();
+    }
+
+    curenv->nrtraps--;
+    memcpy(ERRBUF, save_err, sizeof(jmp_buf));
+
+    if (curenv->error) {
+        curenv->error = 0;
+        mem_free(curenv->errmsg);
+        curenv->errmsg = NULL;
+        curenv->curline = line->lineptr->ld->next;
+
+        while (curenv->segroot != seg_marker)
+            seg_dynamic_free(curenv->segroot);
+
+        if (line->lineptr->cmd == handlerSYM) {
+            retcode = exec_seq3();
+
+            if (retcode == retrySYM)
+                goto retry;
+            else if (retcode != endtrapSYM)
+                return retcode;
+            else {
+                curenv->curline = curenv->curline->ld->next;
+                return 0;
+            }
+        }
+    } else if (retcode == handlerSYM)
+        curenv->curline = curenv->curline->lineptr->ld->next;
+    else if (retcode == endtrapSYM)
+        curenv->curline = curenv->curline->ld->next;
+    else
+        return retcode;
+
+    return 0;
 }
 
 
-PRIVATE void write1(struct file_rec *f, void *data, enum VAL_TYPE type,
-		    long *totsize)
+PRIVATE int
+exec_exit(struct comal_line *line)
 {
-	long size;
-	long w;
-	char c;
+    if (curenv->running != RUNNING)
+        run_error(DIRECT_ERR,
+                  "%s", catgets(catdesc, ExecSet, ExecCantExit,
+                                "Can't EXIT in direct mode (use BYE to leave OpenCOMAL)"));
 
-	switch (type) {
-	case V_FLOAT:
-		size = sizeof(double);
-		break;
-	case V_INT:
-		size = sizeof(long);
-		break;
-	case V_STRING:
-		if (data)
-			size = ((struct string *) data)->len;
-		else
-			size = 0;
-		break;
-	default:
-          IP(false, "write1 type switch default action");
-	}
+    if (!line->lc.exp || calc_logexp(line->lc.exp))
+        return exitSYM;
 
-	if (f->mode == randomSYM) {
-		*totsize += size + 1;	/* 1 extra for type byte */
+    return 0;
+}
 
-		if (type == V_STRING)
-			*totsize += sizeof(long);	/* str size */
+PRIVATE int
+exec_loop(struct comal_line *line)
+{
+    int             retcode = endloopSYM;
 
-		if (*totsize > f->reclen)
-			run_error(WRITE_ERR,
-				  "Random file record overflow");
-	}
+    while (retcode == endloopSYM) {
+        curenv->curline = line->ld->next;
+        retcode = exec_seq3();
+    }
 
-	c = (char) type;
-        w = fputc(c, f->hfptr);
+    if (retcode == exitSYM) {
+        retcode = 0;
+        curenv->curline = line->lineptr->ld->next;
+    }
 
-	if (w != EOF) {
-		DBG_PRINTF(true,
-			  "Writing %D bytes to file %D (host %p)",
-			  size, f->cfno, f->hfptr);
-
-		if (type == V_STRING) {
-			w = fwrite(&size, sizeof(long), 1, f->hfptr);
-
-			if (w > 0) {
-				w = fwrite(((struct string *)data)->s, 1, size, f->hfptr);
-                        }
-		} else {
-			w = fwrite((char *)data, 1, size, f->hfptr);
-                }
-                if (w == size) {
-                        return;
-                }
-	}
-
-	if (ferror(f->hfptr)) {
-		run_error(WRITE_ERR, "File write error: %s",
-		  	strerror(errno));
-	}
+    return retcode;
 }
 
 
-PUBLIC void exec_write(struct comal_line *line)
+PRIVATE int
+exec_if(struct comal_line *line)
 {
-	struct file_rec *f = pos_file(&line->lc.writerec.twoexp);
-	struct exp_list *work = line->lc.writerec.exproot;
-	enum VAL_TYPE type;
-	long totsize = 0;
-	char HUGE_POINTER *result;
-	long nr;
-	struct var_item *var;
+    struct ifwhile_rec *i = &line->lc.ifwhilerec;
+    struct comal_line *elif = line->lineptr;
 
-	if (f->read_only)
-		run_error(WRITE_ERR, "File open for READ (only)");
+    if (calc_logexp(i->exp))
+        if (i->stat)
+            return exec_line(i->stat);
+        else
+            return 0;
+    else if (i->stat)
+        return 0;
+    else {
+        while (elif->cmd == elifSYM) {
+            if (calc_logexp(elif->lc.exp)) {
+                curenv->curline = elif->ld->next;
 
-	while (work) {
-		int size;
+                return 0;
+            }
 
-		calc_exp(work->exp, (void **)&result, &type);
+            elif = elif->lineptr;
+        }
 
-		if (type==V_ARRAY) {
-			var=(struct var_item *)result;
-			result=(char *)&var->data.str[0];
-			nr = var->array->nritems;
-			type=var->type;
-		}
-		else
-			nr = 1;
+        curenv->curline = elif->ld->next;       /* after else or endif */
+    }
 
-		size=type_size(type);
-
-		for (; nr > 0; --nr) {
-			write1(f, (type==V_STRING)?(void *)*(struct string **)result:(void *)result, type, &totsize);
-			result+=size;
-		}
-
-		work = work->next;
-	}
-}
-
-PUBLIC void print_file(struct two_exp *twoexp,
-		       struct print_list *printroot, int pr_sep, struct expression *using_modifier)
-{
-	struct file_rec *f = pos_file(twoexp);
-
-	if (f->read_only)
-		run_error(WRITE_ERR, "File open for READ (only)");
-
-	prev_sel_file = sel_outfile;
-	sel_outfile = f->hfptr;
-        in_print_file = true;
-	if (using_modifier == NULL) {
-		print_con(printroot, pr_sep);
-	} else {
-		print_using(using_modifier, printroot, pr_sep);
-	}
-	sel_outfile = prev_sel_file;
-	prev_sel_file = NULL;
-        in_print_file = false;
+    return 0;
 }
 
 
-static inline void process_pr_sep(int pr_sep)
+PRIVATE int
+exec_for(struct comal_line *line)
 {
-	I(pr_sep == 0 || pr_sep == commaSYM || pr_sep == semicolonSYM);
-	if (pr_sep == semicolonSYM) {
-		my_ht(MSG_PROGRAM);
-	}
+    struct for_rec *f = &line->lc.forrec;
+    enum VAL_TYPE   ltype;
+    struct var_item *var;
+    long            lto,
+                    lstep;
+    double          dto,
+                    dstep;
+    void           *eresult;
+    enum VAL_TYPE   etype;
+    void           *lval;
+    int             stopfor = 0;
+    int             retcode;
+
+    lval = exec_lval(f->lval, &ltype, &var, NULL);
+
+    if (ltype == V_ARRAY)
+        run_error(FOR_ERR, "FOR loop variable may not be an array");
+
+    calc_exp(f->from, &eresult, &etype);
+    val_copy(lval, eresult, ltype, etype);
+    cell_free(eresult);
+
+    calc_exp(f->to, &eresult, &etype);
+
+    if (ltype == V_FLOAT) {
+        val_copy(&dto, eresult, V_FLOAT, etype);
+
+        if (f->step) {
+            cell_free(eresult);
+            calc_exp(f->step, &eresult, &etype);
+            val_copy(&dstep, eresult, V_FLOAT, etype);
+
+            if (dstep == 0)
+                run_error(FOR_ERR, "STEP value must not be 0");
+        } else
+            dstep = 1;
+
+        if (f->mode == downtoSYM)
+            dstep = -dstep;
+
+        DBG_PRINTF(true,
+                   "FOR from %f to %f step %f",
+                   *(double *) lval, dto, dstep);
+    } else {
+        val_copy(&lto, eresult, V_INT, etype);
+
+        if (f->step) {
+            cell_free(eresult);
+            calc_exp(f->step, &eresult, &etype);
+            val_copy(&lstep, eresult, V_INT, etype);
+
+            if (lstep == 0)
+                run_error(FOR_ERR, "STEP value must not be 0");
+        } else
+            lstep = 1;
+
+        if (f->mode == downtoSYM)
+            lstep = -lstep;
+
+        DBG_PRINTF(true,
+                   "FOR from %D to %D step %D",
+                   *(long *) lval, lto, lstep);
+    }
+
+    cell_free(eresult);
+
+    while (true) {
+        if (comal_debug) {
+            if (ltype == V_INT) {
+                VL((true, "FOR loop, lval=%p, %D", lval, *(long *) lval));
+            } else {
+                VL((true, "FOR loop, lval=%p, %f", lval,
+                    *(double *) lval));
+            }
+        }
+        if (ltype == V_INT)
+            if (lstep > 0)
+                stopfor = (*(long *) lval > lto);
+            else
+                stopfor = (*(long *) lval < lto);
+        else if (dstep > 0)
+            stopfor = (*(double *) lval > dto);
+        else
+            stopfor = (*(double *) lval < dto);
+
+        if (stopfor)
+            break;
+
+        if (f->stat) {
+            retcode = exec_line(f->stat);
+
+            if (retcode)
+                return retcode;
+        } else {
+            curenv->curline = line->ld->next;
+
+            retcode = exec_seq3();
+
+            if (retcode == endforSYM)
+                retcode = 0;
+            else
+                return retcode;
+        }
+
+        if (ltype == V_INT)
+            *(long *) lval += lstep;
+        else
+            *(double *) lval += dstep;
+    }
+
+    if (!f->stat)
+        curenv->curline = line->lineptr->ld->next;
+
+    return 0;
 }
 
 
-PRIVATE void print_con(struct print_list *printroot, int pr_sep)
+PRIVATE void
+exec_case(struct comal_line *line)
 {
-	void *result;
-	enum VAL_TYPE type;
-	struct print_list *work = printroot;
+    void           *cresult;
+    enum VAL_TYPE   ctype;
+    void           *wresult;
+    enum VAL_TYPE   wtype;
+    struct comal_line *whenline = line->lineptr;
+    struct when_list *walk;
+    int             casefound = 0;
 
-	while (work) {
-		process_pr_sep(work->pr_sep);
-		calc_exp(work->exp, &result, &type);
-		val_print(MSG_PROGRAM, result, type);
-		val_free(result, type);
-		work = work->next;
-	}
+    calc_exp(line->lc.exp, &cresult, &ctype);
 
-	if (pr_sep == 0) {
-		my_nl(MSG_PROGRAM);
-	} else {
-		process_pr_sep(pr_sep);
-	}
+    while (!casefound && whenline->cmd != endcaseSYM) {
+        if (whenline->cmd == otherwiseSYM) {
+            curenv->curline = whenline->ld->next;
+            casefound = 1;
+        } else {
+            walk = whenline->lc.whenroot;
+
+            while (walk && !casefound) {
+                calc_exp(walk->exp, &wresult, &wtype);
+                casefound =
+                    val_cmp(walk->op, cresult, wresult, ctype, wtype);
+                val_free(wresult, wtype);
+                walk = walk->next;
+            }
+
+            if (casefound)
+                curenv->curline = whenline->ld->next;
+            else
+                whenline = whenline->lineptr;
+        }
+    }
+
+    val_free(cresult, ctype);
 }
 
 
-PRIVATE char *format_using(char *u, char *p)
+PUBLIC struct file_rec *
+fsearch(long i)
 {
-	char *s;
-	int decpoint = 0;
-	int width = 0, prec = 0;
+    struct file_rec *walk = curenv->fileroot;
 
-	for (s = u; *s; s++) {
-		if (*s == '#') {
-			if (decpoint)
-				prec++;
-		} else if (*s == '.')
-			if (decpoint)
-				break;
-			else
-				decpoint = 1;
-		else
-			break;
-		width++;
-	}
+    while (walk && walk->cfno != i)
+        walk = walk->next;
 
-	Fmt_sfmt(p, FLOATUSING_MAX, "%%%d.%df", width, prec);
-	return s;
+    return walk;
 }
 
 
-PRIVATE char *put_using(char *s)
+PRIVATE void
+exec_open(struct comal_line *line)
 {
-	char str[MAX_LINELEN];
-	char *from, *to;
+    struct string  *name;
+    enum VAL_TYPE   type;
+    struct file_rec *frec;
+    struct open_rec *o = &line->lc.openrec;
+    const char     *flags;
+    char           *fname;
 
-	from = s;
-	to = str;
-	while (*from != '\0' && *from != '#' && to < &str[MAX_LINELEN - 1]) {
-		*to = *from;
-		from++;
-		to++;
-	}
-	*to = '\0';
-	my_put(MSG_PROGRAM, str, -1L);
-	return from;
+    calc_exp(o->filename, (void **) &name, &type);
+    frec =
+        (struct file_rec *) mem_alloc(RUN_POOL, sizeof(struct file_rec));
+    frec->cfno = calc_intexp(o->filenum);
+
+    if (fsearch(frec->cfno))
+        run_error(OPEN_ERR, "File %D already open", frec->cfno);
+
+    frec->mode = o->type;
+    frec->read_only = false;
+
+    switch (frec->mode) {
+    case readSYM:
+        flags = "rb";
+        frec->read_only = true;
+        break;
+
+    case writeSYM:
+        flags = "wbx";
+        break;
+
+    case appendSYM:
+        flags = "ab";
+        break;
+
+    case randomSYM:
+        frec->reclen = calc_intexp(o->reclen);
+
+        if (frec->reclen <= 0)
+            run_error(OPEN_ERR, "Invalid record length %D", frec->reclen);
+
+        if (o->read_only) {
+            flags = "rb";
+            frec->read_only = true;
+        } else {
+            flags = "rb+";
+        }
+
+        break;
+
+    default:
+        IP(false, "open filemode switch default action");
+    }
+
+    fname = str_ltou(name->s);
+    if (frec->mode == randomSYM && !o->read_only
+        && access(fname, F_OK) != 0) {
+        // The modern replacement for creat(2)
+        int             fd =
+            open(fname, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
+        if (fd < 0) {
+            run_error(OPEN_ERR, "OPEN error: %s", strerror(errno));
+        }
+        close(fd);
+    }
+    frec->hfptr = fopen(fname, flags);
+
+    if (frec->hfptr == NULL)
+        run_error(OPEN_ERR, "OPEN error: %s", strerror(errno));
+
+    frec->next = curenv->fileroot;
+    curenv->fileroot = frec;
 }
 
 
-PRIVATE void print_using(struct expression *str,
-			 struct print_list *printroot, int pr_sep)
+PRIVATE void
+exec_create(struct comal_line *line)
 {
-	struct string *usingstr;
-	char floatusing[FLOATUSING_MAX];
-	void *result;
-	double d;
-	enum VAL_TYPE type;
-	struct print_list *work = printroot;
-	char *formatptr;
+    struct create_rec *c = &line->lc.createrec;
+    struct string  *name;
+    enum VAL_TYPE   type;
+    char           *fname;
+    FILE           *f;
 
-	calc_exp(str, (void **) &usingstr, &type);
-	formatptr = put_using(usingstr->s);
-
-	while (work) {
-		calc_exp(work->exp, &result, &type);
-
-		if (type == V_INT)
-			d = *(long *) result;
-		else
-			d = *(double *) result;
-
-		val_free(result, type);
-		formatptr = format_using(formatptr, floatusing);
-		my_printf(MSG_PROGRAM, false, floatusing, d);
-		if (*formatptr != '\0') {
-			formatptr = put_using(formatptr);
-		}
-
-		work = work->next;
-	}
-	mem_free(usingstr);
-
-	if (!pr_sep)
-		my_nl(MSG_PROGRAM);
-}
-
-PRIVATE void print_maybe_using(struct print_rec *p)
-{
-	if (p->modifier == NULL || p->modifier->c_using == NULL) {
-		print_con(p->printroot, p->pr_sep);
-	} else {
-		print_using(p->modifier->c_using, p->printroot, p->pr_sep);
-	}
-}
-
-PRIVATE void print_at(struct print_rec *p)
-{
-	sys_cursor(sel_outfile, calc_intexp(p->modifier->twoexp->exp1),
-		   calc_intexp(p->modifier->twoexp->exp2));
-	print_maybe_using(p);
-}
-
-PRIVATE void exec_print(struct comal_line *line)
-{
-	struct print_rec *p = &line->lc.printrec;
-
-	if (p->modifier != NULL) {
-		if (p->modifier->type == atSYM) {
-			if (p->modifier->twoexp != NULL) {
-				print_at(p);
-			} else {
-				print_maybe_using(p);
-			}
-		} else if (p->modifier->type == fileSYM) {
-			print_file(p->modifier->twoexp,
-				   p->printroot, p->pr_sep, p->modifier->c_using);
-		} else {
-                  IP(false, "Bad print_rec.modifier.type");
-		}
-	} else {
-		print_maybe_using(p);
-	}
+    calc_exp(c->filename, (void **) &name, &type);
+    fname = str_ltou(name->s);
+    f = fopen(fname, "wbx");
+    if (f == NULL) {
+        run_error(OPEN_ERR, "OPEN error: %s", strerror(errno));
+    }
+    fseek(f, calc_intexp(c->top) * calc_intexp(c->reclen) - 1, SEEK_SET);
+    fputc(0, f);
+    fclose(f);
 }
 
 
-PRIVATE void exec_selfile(FILE ** f, struct expression *exp, const char *mode)
+PRIVATE void
+exec_close(struct comal_line *line)
 {
-	struct string *result;
-	enum VAL_TYPE type;
+    struct exp_list *work = line->lc.exproot;
+    struct file_rec *walk;
 
-	if (*f)
-		if (fclose(*f))
-			run_error(SELECT_ERR,
-				  "Error when closing current SELECT file: %s",
-				  strerror(errno));
+    if (!work) {
+        walk = curenv->fileroot;
 
-	calc_exp(exp, (void **) &result, &type);
+        while (walk) {
+            DBG_PRINTF(true, "Closing Comal file %D", walk->cfno);
 
-	if (result->len == 0 || strncmp(result->s, "ds:", 3) == 0) {
-		*f = NULL;
-	} else {
-		if (strcmp(result->s, "lp:") == 0) {
-			run_error(NIMP_ERR, "SELECT \"lp:\" not implemented");
-		}
+            if (fclose(walk->hfptr) == EOF)
+                run_error(CLOSE_ERR,
+                          "Close error on file %D: %s",
+                          walk->cfno, strerror(errno));
 
-		*f = fopen(result->s, mode);
+            walk = (struct file_rec *) mem_free(walk);
+        }
 
-		if (!*f)
-			run_error(SELECT_ERR,
-				  "Error when opening new SELECT file: %s",
-				  strerror(errno));
-	}
+        curenv->fileroot = NULL;
+    } else {
+        while (work) {
+            struct file_rec *last;
+            long            fno;
 
-	mem_free(result);
+            fno = calc_intexp(work->exp);
+            walk = curenv->fileroot;
+            last = NULL;
+
+            while (walk && walk->cfno != fno) {
+                last = walk;
+                walk = walk->next;
+            }
+
+            if (!walk)
+                run_error(CLOSE_ERR, "File %D not open", fno);
+
+            if (fclose(walk->hfptr) == EOF)
+                run_error(CLOSE_ERR,
+                          "CLOSE error on file %D: %s",
+                          walk->cfno, strerror(errno));
+            else {
+                if (last)
+                    last->next = walk->next;
+                else
+                    curenv->fileroot = walk->next;
+
+                mem_free(walk);
+            }
+
+            work = work->next;
+        }
+    }
 }
 
 
-PRIVATE void exec_import(struct comal_line *line)
+PRIVATE struct file_rec *
+pos_file(struct two_exp *r)
 {
-	struct import_list *work = line->lc.importrec.importroot;
-	struct sym_item *importsym;
-	struct var_item *var;
-	struct sym_env *env;
-	static int import_warning=1;
+    long            cfno = calc_intexp(r->exp1);
+    struct file_rec *f = fsearch(cfno);
 
-	if (line->lc.importrec.id)
-		env =
-		    search_env(line->lc.importrec.id->name,
-			       curenv->curenv->prev);
-	else
-		env =
-		    search_env_level(curenv->curenv->curproc->lc.pfrec.
-				     level - 1, curenv->curenv);
+    if (!f)
+        run_error(POS_ERR, "File %D not open", cfno);
 
-	if (!env)
-		run_error(IMPORT_ERR, "Environment not found");
+    if (f->mode == randomSYM) {
+        long            recno;
 
-	while (work) {
-		importsym = sym_search(env, work->id, S_VAR);
+        if (!r->exp2)
+            run_error(POS_ERR, "Record number needed for a RANDOM file");
 
-		if (!importsym) {
-			/* UniComal compatibility; IMPORT of PROC/FUNC */
-			if (!routine_search_horse(work->id,procSYM,curenv->curenv->curproc) &&
-			    !routine_search_horse(work->id,funcSYM,curenv->curenv->curproc))
-				run_error(IMPORT_ERR,
-				  	"IMPORTable item \"%s\" not found",
-				  	work->id->name);
-			else if (import_warning) {
-				puts_line(MSG_DIALOG,line);
-				my_printf(MSG_DIALOG,true,"Warning: IMPORT of PROC/FUNC not necessary in OpenComal");
-				import_warning=0;
-			}
-		} else {
+        recno = calc_intexp(r->exp2);
 
-			var = importsym->data.var;
+        if (recno < 1)
+            run_error(POS_ERR, "Random file record number must be >=1");
 
-			if (var->array && !work->array)
-				run_error(IMPORT_ERR,
-				  	"IMPORTable symbol %s is an array",
-				  work->id->name);
-			else if (!var->array && work->array)
-				run_error(IMPORT_ERR,
-				  	"IMPORTable symbol %s is not an array",
-				  	work->id->name);
+        DBG_PRINTF(true,
+                   "Positioning file %D (host=%p) to record %D, offset %D",
+                   f->cfno, f->hfptr, recno, (recno - 1) * f->reclen);
 
-			var =
-		    	var_refvar(var, var->array?V_ARRAY:var->type, var->strlen,
-			       	&var->data);
+        if (fseek(f->hfptr, (recno - 1) * f->reclen, SEEK_SET) == -1)
+            run_error(POS_ERR,
+                      "Random file positioning error: %s",
+                      strerror(errno));
+    }
 
-			if (!sym_enter(curenv->curenv, work->id, S_VAR, var))
-				run_error(IMPORT_ERR,
-				  	"IMPORTable symbol %s already present in this environment",
-				  	work->id->name);
-		}
-
-		work = work->next;
-	}
-}
-
-PUBLIC void input_file(struct two_exp *twoexp, struct exp_list *lvalroot)
-{
-	struct file_rec *f = pos_file(twoexp);
-
-	prev_sel_file = sel_infile;
-	sel_infile = f->hfptr;
-        in_input_file = true;
-	input_con(NULL, NULL, lvalroot, commaSYM);
-	sel_infile = prev_sel_file;
-	prev_sel_file = NULL;
-        in_input_file = false;
+    return f;
 }
 
 
-PRIVATE bool input_line(char *s, long len, const char *p)
+PRIVATE void
+read1(struct file_rec *f, struct id_rec *id, void **data,
+      enum VAL_TYPE *type, long *totsize)
 {
-	bool esc;
+    long            size;
+    int             c;
 
-	if (sel_infile) {
-		if (!fgets(s, len - 1, sel_infile)) {
-			if (feof(sel_infile)) {
-				fclose(sel_infile);
-				sel_infile = NULL;
+    *type = (enum VAL_TYPE) 0;
+    c = fgetc(f->hfptr);
+    *type = (enum VAL_TYPE) c;
 
-				DBG_PRINTF(true,
-					  "Closing SELINPUT file");
-			} else
-				run_error(SELECT_ERR,
-					  "Read error when reading SELECT INPUT file");
-		} else {
-			*(s + strlen(s) - 1) = '\0';	/* overwrite \n */
-			return false;
-		}
-	}
+    if (c != EOF) {
+        long            r;
 
-	esc = sys_get(MSG_PROGRAM, s, len, p);
+        DBG_PRINTF(true, "Reading a type %d from file", *type);
 
-	return esc;
+        if (*type != id->type)
+            run_error(READ_ERR,
+                      "INPUT/READ from file, wrong type (%s)", id->name);
+
+        switch (*type) {
+        case V_FLOAT:
+            *data = cell_alloc(FLOAT_CPOOL);
+            size = sizeof(double);
+            break;
+
+        case V_INT:
+            *data = cell_alloc(INT_CPOOL);
+            size = sizeof(long);
+            break;
+
+        case V_STRING:
+            r = fread(&size, sizeof(long), 1, f->hfptr);
+            break;
+
+        default:
+            IP(false, "read1 type switch default action");
+        }
+
+        if (!(*type == V_STRING && r == 0)) {
+            DBG_PRINTF(true,
+                       "Reading %D bytes from file %D (host %p)",
+                       size, f->cfno, f->hfptr);
+
+            if (f->mode == randomSYM) {
+                *totsize += size + 1;   /* 1 extra for type */
+
+                if (*type == V_STRING)
+                    *totsize += sizeof(long);
+
+                if (*totsize > f->reclen)
+                    run_error(READ_ERR, "Random file record overflow");
+            }
+
+            if (*type == V_STRING) {
+                *data = STR_ALLOC(RUN_POOL, size);
+                r = fread((*(struct string **) data)->s, 1, size,
+                          f->hfptr);
+                (*(struct string **) data)->len = size;
+            } else {
+                r = fread((char *) *data, 1, size, f->hfptr);
+            }
+            if (r == size) {
+                return;
+            }
+        }
+    }
+
+    if (ferror(f->hfptr)) {
+        run_error(READ_ERR, "INPUT/READ file error: %s", strerror(errno));
+    }
 }
 
 
-PRIVATE void input_con(struct expression *len, struct string *prompt, struct exp_list *lvalroot, int pr_sep)
+PUBLIC void
+do_readfile(struct two_exp *twoexp, struct exp_list *lvalroot)
 {
-	struct exp_list *work = lvalroot;
-	char line[MAX_LINELEN];
-	char field[MAX_LINELEN];
-	char *j;
-	char *i = NULL;
-	int nr;
-	int n;
-	int quote;
-	bool esc = false;
-	const char *p;
-	long l;
+    struct file_rec *f = pos_file(twoexp);
+    struct exp_list *work = lvalroot;
+    void           *result;
+    enum VAL_TYPE   ltype;
+    enum VAL_TYPE   rtype;
+    long            totsize = 0;
+    struct var_item *var;
+    long            strl;
+    long            nr;
 
-	if (prompt) {
-		p = prompt->s;
-	} else {
-		p = "? ";
-	}
+    while (work) {
+        int             size;
+        char HUGE_POINTER *lval;
 
-	if (len) {
-		l = calc_intexp(len) + 1;
-		I(2 <= l && l <= MAX_LINELEN);
-	} else {
-		l = MAX_LINELEN;
-	}
+        lval = (char *) exec_lval(work->exp, &ltype, &var, &strl);
 
-	esc = input_line(line, l, p);
-	i = line;
+        if (ltype == V_ARRAY) {
+            nr = var->array->nritems;
+            ltype = var->type;
+        } else
+            nr = 1;
 
-	while (work) {
-		void *data;
-		int must_free_mem;
-	        enum VAL_TYPE type;
+        size = type_size(ltype);
 
-		while (esc) {
-			if (curenv->running == RUNNING) {
-				if (curenv->escallowed)
-					exec_temphalt(catgets(catdesc, ExecSet, ExecInputEsc, "Escape from INPUT"));
+        for (; nr > 0; --nr) {
+            read1(f, work->exp->e.expid.id, &result, &rtype, &totsize);
 
-				my_printf(MSG_DIALOG, true,
-					  "Please re-INPUT from start");
-				work = lvalroot;
-				esc = input_line(line, l, p);
-				i = line;
-			} else
-				run_error(ESCAPE_ERR, "%s", catgets(catdesc, CommonSet, CommonEscape, "Escape"));
-		}
+            if (ltype == V_STRING)
+                do_str_assign((struct string **) lval,
+                              work->exp->e.expsid.twoexp, strl,
+                              (struct string *) result, 1);
+            else
+                do_num_assign((void *) lval, ltype, NULL, result,
+                              rtype, 1);
 
-		type = work->exp->e.expid.id->type;
+            lval += size;
+        }
 
-		while (true) {
-			while (*i && isspace_l(*i, latin_loc))
-				i++;
-
-			if (*i)
-				break;
-			else {
-				esc = input_line(line, l, "?? ");
-				i = line;
-			}
-		}
-
-		DBG_PRINTF(true,
-			  "Assessing \"%s\" for input type %d", i,
-			  type);
-
-		n = 0;
-		data = field;
-		must_free_mem = 0;
-
-		switch (type) {
-		case V_INT:
-			nr = sscanf(i, "%ld%n", (long *) field, &n);
-			i += n;
-			break;
-
-		case V_FLOAT:
-			nr = sscanf(i, "%f%n", (double *) field, &n);
-			i += n;
-			break;
-
-		case V_STRING:
-			j = i;
-			n = -1;
-
-			quote = (*j == '"');
-
-			if (quote)
-				j++;
-
-			while (*j && !((*j == ',' && !quote)
-				       || (*j == '"' && quote))) {
-				++n;
-				field[n] = *j;
-				j++;
-			}
-
-			while (isspace_l(field[n], latin_loc)
-			       && n >= 0)
-				--n;
-
-			field[n + 1] = '\0';
-			i += n + 1;
-
-			if (quote)
-				i += 2;	/* Past the quotes */
-
-			nr = 1;
-			data = str_make(RUN_POOL, field);
-			must_free_mem = 1;
-			break;
-
-		default:
-                  IP(false, "In input_con; default switch reached");
-			break;
-		}
-
-		if (nr != 1)
-			run_error(INPUT_ERR, "Input error @ %s", i);
-
-		while (*i && isspace_l(*i, latin_loc))
-			i++;
-
-		if (*i == ',')
-			i++;
-
-		do_assign2(work->exp, data, type, must_free_mem);
-		work = work->next;
-	}
-
-	if (*i)
-		my_printf(MSG_DIALOG, true, "Extra input ignored");
-	
-	if (pr_sep == 0) {
-		my_nl(MSG_PROGRAM);
-	} else {
-		process_pr_sep(pr_sep);
-	}
+        work = work->next;
+    }
 }
 
 
-PRIVATE void input_at(struct two_exp *twoexp, struct expression *len, struct string *prompt, struct exp_list *lvalroot, int pr_sep)
+PUBLIC void
+read_data(struct comal_line *line)
 {
-	sys_cursor(sel_outfile, calc_intexp(twoexp->exp1),
-			calc_intexp(twoexp->exp2));
-	input_con(len, prompt, lvalroot, pr_sep);
+    struct exp_list *walk = line->lc.readrec.lvalroot;
+
+    while (walk) {
+        if (!curenv->dataeptr)
+            run_error(EOD_ERR, "End of DATA");
+
+        do_assign1(walk->exp, becomesSYM, curenv->dataeptr->exp);
+
+        walk = walk->next;
+
+        curenv->dataeptr = curenv->dataeptr->next;
+
+        if (!curenv->dataeptr) {
+            do
+                curenv->datalptr = curenv->datalptr->ld->next;
+            while (curenv->datalptr && curenv->datalptr->cmd != dataSYM);
+
+            if (curenv->datalptr)
+                curenv->dataeptr = curenv->datalptr->lc.exproot;
+        }
+    }
 }
 
 
-PRIVATE void exec_input(struct comal_line *line)
+PUBLIC void
+exec_read(struct comal_line *line)
 {
-	struct input_rec *i = &line->lc.inputrec;
-
-	if (!i->modifier) {
-		input_con(NULL, NULL, i->lvalroot, i->pr_sep);
-	} else if (i->modifier->type == fileSYM) {
-		input_file(&i->modifier->twoexp, i->lvalroot);
-	} else if (i->modifier->type == atSYM) {
-		input_at(&i->modifier->twoexp, i->modifier->len, i->modifier->str, i->lvalroot, i->pr_sep);
-	} else {
-		input_con(NULL, i->modifier->str, i->lvalroot, i->pr_sep);
-	}
+    if (line->lc.readrec.modifier)
+        do_readfile(line->lc.readrec.modifier, line->lc.readrec.lvalroot);
+    else
+        read_data(line);
 }
 
 
-PRIVATE void exec_run(struct comal_line *line)
+PRIVATE void
+write1(struct file_rec *f, void *data, enum VAL_TYPE type, long *totsize)
 {
-	extern char *runfilename;
-	struct string *result;
-	enum VAL_TYPE type;
+    long            size;
+    long            w;
+    char            c;
 
-	if (curenv->changed) {
-		puts_line(MSG_DIALOG, curenv->curline);
+    switch (type) {
+    case V_FLOAT:
+        size = sizeof(double);
+        break;
+    case V_INT:
+        size = sizeof(long);
+        break;
+    case V_STRING:
+        if (data)
+            size = ((struct string *) data)->len;
+        else
+            size = 0;
+        break;
+    default:
+        IP(false, "write1 type switch default action");
+    }
 
-		if (!sys_yn
-		    (MSG_DIALOG,
-		     "Current environment contains unsaved changes! RUN anyway? "))
-			run_error(RUN_ERR, "RUN aborted");
-	}
+    if (f->mode == randomSYM) {
+        *totsize += size + 1;   /* 1 extra for type byte */
 
-	calc_exp(line->lc.exp, (void **) &result, &type);
-	runfilename = my_strdup(MISC_POOL, result->s);
-	mem_free(result);
+        if (type == V_STRING)
+            *totsize += sizeof(long);   /* str size */
 
-	DBG_PRINTF(true, "About to go RUNning: %s",
-		  runfilename);
+        if (*totsize > f->reclen)
+            run_error(WRITE_ERR, "Random file record overflow");
+    }
 
-	longjmp(RESTART, RUN);
+    c = (char) type;
+    w = fputc(c, f->hfptr);
+
+    if (w != EOF) {
+        DBG_PRINTF(true,
+                   "Writing %D bytes to file %D (host %p)",
+                   size, f->cfno, f->hfptr);
+
+        if (type == V_STRING) {
+            w = fwrite(&size, sizeof(long), 1, f->hfptr);
+
+            if (w > 0) {
+                w = fwrite(((struct string *) data)->s, 1, size, f->hfptr);
+            }
+        } else {
+            w = fwrite((char *) data, 1, size, f->hfptr);
+        }
+        if (w == size) {
+            return;
+        }
+    }
+
+    if (ferror(f->hfptr)) {
+        run_error(WRITE_ERR, "File write error: %s", strerror(errno));
+    }
 }
 
 
-PRIVATE int exec_return(struct comal_line *line)
+PUBLIC void
+exec_write(struct comal_line *line)
 {
-	void *result;
-	enum VAL_TYPE type;
+    struct file_rec *f = pos_file(&line->lc.writerec.twoexp);
+    struct exp_list *work = line->lc.writerec.exproot;
+    enum VAL_TYPE   type;
+    long            totsize = 0;
+    char HUGE_POINTER *result;
+    long            nr;
+    struct var_item *var;
 
-	if (curenv->running != RUNNING)
-		run_error(DIRECT_ERR, "Can't RETURN in command mode");
+    if (f->read_only)
+        run_error(WRITE_ERR, "File open for READ (only)");
 
-	if (line->lc.exp) {
-		calc_exp(line->lc.exp, &result, &type);
-		return_type = curenv->curenv->curproc->lc.pfrec.id->type;
+    while (work) {
+        int             size;
 
-		/* return <string> from numeric func checked in SCAN */
+        calc_exp(work->exp, (void **) &result, &type);
 
-		if (return_type == type)
-			return_result = result;
-		else {
-			if (return_type == V_INT) {
-				return_result = cell_alloc(INT_CPOOL);
-				*(long *) return_result =
-				    d2int(*(double *) result, 1);
-			} else {
-				return_result = cell_alloc(FLOAT_CPOOL);
-				*(double *) return_result =
-				    *(long *) result;
-			}
+        if (type == V_ARRAY) {
+            var = (struct var_item *) result;
+            result = (char *) &var->data.str[0];
+            nr = var->array->nritems;
+            type = var->type;
+        } else
+            nr = 1;
 
-			cell_free(result);
-		}
-	}
+        size = type_size(type);
 
-	return returnSYM;
+        for (; nr > 0; --nr) {
+            write1(f,
+                   (type ==
+                    V_STRING) ? (void *) *(struct string **) result : (void
+                                                                       *)
+                   result, type, &totsize);
+            result += size;
+        }
+
+        work = work->next;
+    }
+}
+
+PUBLIC void
+print_file(struct two_exp *twoexp,
+           struct print_list *printroot, int pr_sep,
+           struct expression *using_modifier)
+{
+    struct file_rec *f = pos_file(twoexp);
+
+    if (f->read_only)
+        run_error(WRITE_ERR, "File open for READ (only)");
+
+    prev_sel_file = sel_outfile;
+    sel_outfile = f->hfptr;
+    in_print_file = true;
+    if (using_modifier == NULL) {
+        print_con(printroot, pr_sep);
+    } else {
+        print_using(using_modifier, printroot, pr_sep);
+    }
+    sel_outfile = prev_sel_file;
+    prev_sel_file = NULL;
+    in_print_file = false;
+}
+
+
+static inline void
+process_pr_sep(int pr_sep)
+{
+    I(pr_sep == 0 || pr_sep == commaSYM || pr_sep == semicolonSYM);
+    if (pr_sep == semicolonSYM) {
+        my_ht(MSG_PROGRAM);
+    }
+}
+
+
+PRIVATE void
+print_con(struct print_list *printroot, int pr_sep)
+{
+    void           *result;
+    enum VAL_TYPE   type;
+    struct print_list *work = printroot;
+
+    while (work) {
+        process_pr_sep(work->pr_sep);
+        calc_exp(work->exp, &result, &type);
+        val_print(MSG_PROGRAM, result, type);
+        val_free(result, type);
+        work = work->next;
+    }
+
+    if (pr_sep == 0) {
+        my_nl(MSG_PROGRAM);
+    } else {
+        process_pr_sep(pr_sep);
+    }
+}
+
+
+PRIVATE char   *
+format_using(char *u, char *p)
+{
+    char           *s;
+    int             decpoint = 0;
+    int             width = 0,
+        prec = 0;
+
+    for (s = u; *s; s++) {
+        if (*s == '#') {
+            if (decpoint)
+                prec++;
+        } else if (*s == '.')
+            if (decpoint)
+                break;
+            else
+                decpoint = 1;
+        else
+            break;
+        width++;
+    }
+
+    Fmt_sfmt(p, FLOATUSING_MAX, "%%%d.%df", width, prec);
+    return s;
+}
+
+
+PRIVATE char   *
+put_using(char *s)
+{
+    char            str[MAX_LINELEN];
+    char           *from,
+                   *to;
+
+    from = s;
+    to = str;
+    while (*from != '\0' && *from != '#' && to < &str[MAX_LINELEN - 1]) {
+        *to = *from;
+        from++;
+        to++;
+    }
+    *to = '\0';
+    my_put(MSG_PROGRAM, str, -1L);
+    return from;
+}
+
+
+PRIVATE void
+print_using(struct expression *str,
+            struct print_list *printroot, int pr_sep)
+{
+    struct string  *usingstr;
+    char            floatusing[FLOATUSING_MAX];
+    void           *result;
+    double          d;
+    enum VAL_TYPE   type;
+    struct print_list *work = printroot;
+    char           *formatptr;
+
+    calc_exp(str, (void **) &usingstr, &type);
+    formatptr = put_using(usingstr->s);
+
+    while (work) {
+        calc_exp(work->exp, &result, &type);
+
+        if (type == V_INT)
+            d = *(long *) result;
+        else
+            d = *(double *) result;
+
+        val_free(result, type);
+        formatptr = format_using(formatptr, floatusing);
+        my_printf(MSG_PROGRAM, false, floatusing, d);
+        if (*formatptr != '\0') {
+            formatptr = put_using(formatptr);
+        }
+
+        work = work->next;
+    }
+    mem_free(usingstr);
+
+    if (!pr_sep)
+        my_nl(MSG_PROGRAM);
+}
+
+PRIVATE void
+print_maybe_using(struct print_rec *p)
+{
+    if (p->modifier == NULL || p->modifier->c_using == NULL) {
+        print_con(p->printroot, p->pr_sep);
+    } else {
+        print_using(p->modifier->c_using, p->printroot, p->pr_sep);
+    }
+}
+
+PRIVATE void
+print_at(struct print_rec *p)
+{
+    sys_cursor(sel_outfile, calc_intexp(p->modifier->twoexp->exp1),
+               calc_intexp(p->modifier->twoexp->exp2));
+    print_maybe_using(p);
+}
+
+PRIVATE void
+exec_print(struct comal_line *line)
+{
+    struct print_rec *p = &line->lc.printrec;
+
+    if (p->modifier != NULL) {
+        if (p->modifier->type == atSYM) {
+            if (p->modifier->twoexp != NULL) {
+                print_at(p);
+            } else {
+                print_maybe_using(p);
+            }
+        } else if (p->modifier->type == fileSYM) {
+            print_file(p->modifier->twoexp,
+                       p->printroot, p->pr_sep, p->modifier->c_using);
+        } else {
+            IP(false, "Bad print_rec.modifier.type");
+        }
+    } else {
+        print_maybe_using(p);
+    }
+}
+
+
+PRIVATE void
+exec_selfile(FILE ** f, struct expression *exp, const char *mode)
+{
+    struct string  *result;
+    enum VAL_TYPE   type;
+
+    if (*f)
+        if (fclose(*f))
+            run_error(SELECT_ERR,
+                      "Error when closing current SELECT file: %s",
+                      strerror(errno));
+
+    calc_exp(exp, (void **) &result, &type);
+
+    if (result->len == 0 || strncmp(result->s, "ds:", 3) == 0) {
+        *f = NULL;
+    } else {
+        if (strcmp(result->s, "lp:") == 0) {
+            run_error(NIMP_ERR, "SELECT \"lp:\" not implemented");
+        }
+
+        *f = fopen(result->s, mode);
+
+        if (!*f)
+            run_error(SELECT_ERR,
+                      "Error when opening new SELECT file: %s",
+                      strerror(errno));
+    }
+
+    mem_free(result);
+}
+
+
+PRIVATE void
+exec_import(struct comal_line *line)
+{
+    struct import_list *work = line->lc.importrec.importroot;
+    struct sym_item *importsym;
+    struct var_item *var;
+    struct sym_env *env;
+    static int      import_warning = 1;
+
+    if (line->lc.importrec.id)
+        env =
+            search_env(line->lc.importrec.id->name, curenv->curenv->prev);
+    else
+        env =
+            search_env_level(curenv->curenv->curproc->lc.pfrec.level - 1,
+                             curenv->curenv);
+
+    if (!env)
+        run_error(IMPORT_ERR, "Environment not found");
+
+    while (work) {
+        importsym = sym_search(env, work->id, S_VAR);
+
+        if (!importsym) {
+            /*
+             * UniComal compatibility; IMPORT of PROC/FUNC 
+             */
+            if (!routine_search_horse
+                (work->id, procSYM, curenv->curenv->curproc)
+                && !routine_search_horse(work->id, funcSYM,
+                                         curenv->curenv->curproc))
+                run_error(IMPORT_ERR, "IMPORTable item \"%s\" not found",
+                          work->id->name);
+            else if (import_warning) {
+                puts_line(MSG_DIALOG, line);
+                my_printf(MSG_DIALOG, true,
+                          "Warning: IMPORT of PROC/FUNC not necessary in OpenComal");
+                import_warning = 0;
+            }
+        } else {
+
+            var = importsym->data.var;
+
+            if (var->array && !work->array)
+                run_error(IMPORT_ERR,
+                          "IMPORTable symbol %s is an array",
+                          work->id->name);
+            else if (!var->array && work->array)
+                run_error(IMPORT_ERR,
+                          "IMPORTable symbol %s is not an array",
+                          work->id->name);
+
+            var =
+                var_refvar(var, var->array ? V_ARRAY : var->type,
+                           var->strlen, &var->data);
+
+            if (!sym_enter(curenv->curenv, work->id, S_VAR, var))
+                run_error(IMPORT_ERR,
+                          "IMPORTable symbol %s already present in this environment",
+                          work->id->name);
+        }
+
+        work = work->next;
+    }
+}
+
+PUBLIC void
+input_file(struct two_exp *twoexp, struct exp_list *lvalroot)
+{
+    struct file_rec *f = pos_file(twoexp);
+
+    prev_sel_file = sel_infile;
+    sel_infile = f->hfptr;
+    in_input_file = true;
+    input_con(NULL, NULL, lvalroot, commaSYM);
+    sel_infile = prev_sel_file;
+    prev_sel_file = NULL;
+    in_input_file = false;
+}
+
+
+PRIVATE bool
+input_line(char *s, long len, const char *p)
+{
+    bool            esc;
+
+    if (sel_infile) {
+        if (!fgets(s, len - 1, sel_infile)) {
+            if (feof(sel_infile)) {
+                fclose(sel_infile);
+                sel_infile = NULL;
+
+                DBG_PRINTF(true, "Closing SELINPUT file");
+            } else
+                run_error(SELECT_ERR,
+                          "Read error when reading SELECT INPUT file");
+        } else {
+            *(s + strlen(s) - 1) = '\0';        /* overwrite \n */
+            return false;
+        }
+    }
+
+    esc = sys_get(MSG_PROGRAM, s, len, p);
+
+    return esc;
+}
+
+
+PRIVATE void
+input_con(struct expression *len, struct string *prompt,
+          struct exp_list *lvalroot, int pr_sep)
+{
+    struct exp_list *work = lvalroot;
+    char            line[MAX_LINELEN];
+    char            field[MAX_LINELEN];
+    char           *j;
+    char           *i = NULL;
+    int             nr;
+    int             n;
+    int             quote;
+    bool            esc = false;
+    const char     *p;
+    long            l;
+
+    if (prompt) {
+        p = prompt->s;
+    } else {
+        p = "? ";
+    }
+
+    if (len) {
+        l = calc_intexp(len) + 1;
+        I(2 <= l && l <= MAX_LINELEN);
+    } else {
+        l = MAX_LINELEN;
+    }
+
+    esc = input_line(line, l, p);
+    i = line;
+
+    while (work) {
+        void           *data;
+        int             must_free_mem;
+        enum VAL_TYPE   type;
+
+        while (esc) {
+            if (curenv->running == RUNNING) {
+                if (curenv->escallowed)
+                    exec_temphalt(catgets
+                                  (catdesc, ExecSet, ExecInputEsc,
+                                   "Escape from INPUT"));
+
+                my_printf(MSG_DIALOG, true, "Please re-INPUT from start");
+                work = lvalroot;
+                esc = input_line(line, l, p);
+                i = line;
+            } else
+                run_error(ESCAPE_ERR, "%s",
+                          catgets(catdesc, CommonSet, CommonEscape,
+                                  "Escape"));
+        }
+
+        type = work->exp->e.expid.id->type;
+
+        while (true) {
+            while (*i && isspace_l(*i, latin_loc))
+                i++;
+
+            if (*i)
+                break;
+            else {
+                esc = input_line(line, l, "?? ");
+                i = line;
+            }
+        }
+
+        DBG_PRINTF(true, "Assessing \"%s\" for input type %d", i, type);
+
+        n = 0;
+        data = field;
+        must_free_mem = 0;
+
+        switch (type) {
+        case V_INT:
+            nr = sscanf(i, "%ld%n", (long *) field, &n);
+            i += n;
+            break;
+
+        case V_FLOAT:
+            nr = sscanf(i, "%f%n", (double *) field, &n);
+            i += n;
+            break;
+
+        case V_STRING:
+            j = i;
+            n = -1;
+
+            quote = (*j == '"');
+
+            if (quote)
+                j++;
+
+            while (*j && !((*j == ',' && !quote)
+                           || (*j == '"' && quote))) {
+                ++n;
+                field[n] = *j;
+                j++;
+            }
+
+            while (isspace_l(field[n], latin_loc)
+                   && n >= 0)
+                --n;
+
+            field[n + 1] = '\0';
+            i += n + 1;
+
+            if (quote)
+                i += 2;         /* Past the quotes */
+
+            nr = 1;
+            data = str_make(RUN_POOL, field);
+            must_free_mem = 1;
+            break;
+
+        default:
+            IP(false, "In input_con; default switch reached");
+            break;
+        }
+
+        if (nr != 1)
+            run_error(INPUT_ERR, "Input error @ %s", i);
+
+        while (*i && isspace_l(*i, latin_loc))
+            i++;
+
+        if (*i == ',')
+            i++;
+
+        do_assign2(work->exp, data, type, must_free_mem);
+        work = work->next;
+    }
+
+    if (*i)
+        my_printf(MSG_DIALOG, true, "Extra input ignored");
+
+    if (pr_sep == 0) {
+        my_nl(MSG_PROGRAM);
+    } else {
+        process_pr_sep(pr_sep);
+    }
+}
+
+
+PRIVATE void
+input_at(struct two_exp *twoexp, struct expression *len,
+         struct string *prompt, struct exp_list *lvalroot, int pr_sep)
+{
+    sys_cursor(sel_outfile, calc_intexp(twoexp->exp1),
+               calc_intexp(twoexp->exp2));
+    input_con(len, prompt, lvalroot, pr_sep);
+}
+
+
+PRIVATE void
+exec_input(struct comal_line *line)
+{
+    struct input_rec *i = &line->lc.inputrec;
+
+    if (!i->modifier) {
+        input_con(NULL, NULL, i->lvalroot, i->pr_sep);
+    } else if (i->modifier->type == fileSYM) {
+        input_file(&i->modifier->twoexp, i->lvalroot);
+    } else if (i->modifier->type == atSYM) {
+        input_at(&i->modifier->twoexp, i->modifier->len, i->modifier->str,
+                 i->lvalroot, i->pr_sep);
+    } else {
+        input_con(NULL, i->modifier->str, i->lvalroot, i->pr_sep);
+    }
+}
+
+
+PRIVATE void
+exec_run(struct comal_line *line)
+{
+    extern char    *runfilename;
+    struct string  *result;
+    enum VAL_TYPE   type;
+
+    if (curenv->changed) {
+        puts_line(MSG_DIALOG, curenv->curline);
+
+        if (!sys_yn
+            (MSG_DIALOG,
+             "Current environment contains unsaved changes! RUN anyway? "))
+            run_error(RUN_ERR, "RUN aborted");
+    }
+
+    calc_exp(line->lc.exp, (void **) &result, &type);
+    runfilename = my_strdup(MISC_POOL, result->s);
+    mem_free(result);
+
+    DBG_PRINTF(true, "About to go RUNning: %s", runfilename);
+
+    longjmp(RESTART, RUN);
+}
+
+
+PRIVATE int
+exec_return(struct comal_line *line)
+{
+    void           *result;
+    enum VAL_TYPE   type;
+
+    if (curenv->running != RUNNING)
+        run_error(DIRECT_ERR, "Can't RETURN in command mode");
+
+    if (line->lc.exp) {
+        calc_exp(line->lc.exp, &result, &type);
+        return_type = curenv->curenv->curproc->lc.pfrec.id->type;
+
+        /*
+         * return <string> from numeric func checked in SCAN 
+         */
+
+        if (return_type == type)
+            return_result = result;
+        else {
+            if (return_type == V_INT) {
+                return_result = cell_alloc(INT_CPOOL);
+                *(long *) return_result = d2int(*(double *) result, 1);
+            } else {
+                return_result = cell_alloc(FLOAT_CPOOL);
+                *(double *) return_result = *(long *) result;
+            }
+
+            cell_free(result);
+        }
+    }
+
+    return returnSYM;
 }
 
 
 
-PUBLIC int exec_line(struct comal_line *line)
+PUBLIC int
+exec_line(struct comal_line *line)
 {
-	enum VAL_TYPE type;
-	struct string *result;
+    enum VAL_TYPE   type;
+    struct string  *result;
 
-	if (sys_escape() && curenv->escallowed)
-		exec_temphalt(catgets(catdesc, CommonSet, CommonEscape, "Escape"));
+    if (sys_escape() && curenv->escallowed)
+        exec_temphalt(catgets(catdesc, CommonSet, CommonEscape, "Escape"));
 
-	if (!line)
-		exec_end();
+    if (!line)
+        exec_end();
 
-	if (curenv->trace && curenv->running == RUNNING) {
-		puts_line(MSG_TRACE, curenv->curline);
-	}
+    if (curenv->trace && curenv->running == RUNNING) {
+        puts_line(MSG_TRACE, curenv->curline);
+    }
 
-	switch (line->cmd) {
-	case 0:
-	case idSYM:
-	case dataSYM:
-	case endcaseSYM:
-	case endifSYM:
-	case nullSYM:
-	case useSYM:
-	case exportSYM:
-		break;
+    switch (line->cmd) {
+    case 0:
+    case idSYM:
+    case dataSYM:
+    case endcaseSYM:
+    case endifSYM:
+    case nullSYM:
+    case useSYM:
+    case exportSYM:
+        break;
 
-	case repeatSYM:
-		if (line->lc.ifwhilerec.exp)
-			exec_repeat(line);
-		
-		break;
+    case repeatSYM:
+        if (line->lc.ifwhilerec.exp)
+            exec_repeat(line);
 
-	case untilSYM:
-		if (!calc_logexp(line->lc.exp))
-			curenv->curline = line->lineptr;
+        break;
 
-		break;
+    case untilSYM:
+        if (!calc_logexp(line->lc.exp))
+            curenv->curline = line->lineptr;
 
-	case loopSYM:
-		return exec_loop(line);
+        break;
 
-	case osSYM:
-		calc_exp(line->lc.exp, (void **) &result, &type);
+    case loopSYM:
+        return exec_loop(line);
 
-		if (sys_system(result->s) == -1)
-			run_error(OS_ERR, "OS command failed");
+    case osSYM:
+        calc_exp(line->lc.exp, (void **) &result, &type);
 
-		mem_free(result);
-		break;
+        if (sys_system(result->s) == -1)
+            run_error(OS_ERR, "OS command failed");
 
-	case delSYM:
-		calc_exp(line->lc.exp, (void **) &result, &type);
+        mem_free(result);
+        break;
 
-		if (unlink(result->s) == -1 && errno != ENOENT) {
-			run_error(DEL_ERR,
-				  "DELete of %s failed (Read Only?)",
-				  result->s);
-		}
+    case delSYM:
+        calc_exp(line->lc.exp, (void **) &result, &type);
 
-		mem_free(result);
-		break;
+        if (unlink(result->s) == -1 && errno != ENOENT) {
+            run_error(DEL_ERR,
+                      "DELete of %s failed (Read Only?)", result->s);
+        }
 
-	case chdirSYM:
-		calc_exp(line->lc.exp, (void **) &result, &type);
-		sys_chdir(result->s);
-		mem_free(result);
-		break;
+        mem_free(result);
+        break;
 
-	case mkdirSYM:
-		calc_exp(line->lc.exp, (void **) &result, &type);
-		sys_mkdir(result->s);
-		mem_free(result);
-		break;
+    case chdirSYM:
+        calc_exp(line->lc.exp, (void **) &result, &type);
+        sys_chdir(result->s);
+        mem_free(result);
+        break;
 
-	case rmdirSYM:
-		calc_exp(line->lc.exp, (void **) &result, &type);
-		sys_rmdir(result->s);
-		mem_free(result);
-		break;
+    case mkdirSYM:
+        calc_exp(line->lc.exp, (void **) &result, &type);
+        sys_mkdir(result->s);
+        mem_free(result);
+        break;
 
-	case unitSYM:
-		// Ignored on UNIX
-		break;
+    case rmdirSYM:
+        calc_exp(line->lc.exp, (void **) &result, &type);
+        sys_rmdir(result->s);
+        mem_free(result);
+        break;
 
-	case dirSYM:
-		if (line->lc.exp) {
-			calc_exp(line->lc.exp, (void **) &result, &type);
-			sys_dir(result->s);
-			mem_free(result);
-		} else
-			sys_dir("");
+    case unitSYM:
+        // Ignored on UNIX
+        break;
 
-		break;
+    case dirSYM:
+        if (line->lc.exp) {
+            calc_exp(line->lc.exp, (void **) &result, &type);
+            sys_dir(result->s);
+            mem_free(result);
+        } else
+            sys_dir("");
 
-	case staticSYM:
-	case localSYM:
-	case dimSYM:
-		exec_dim(line);
-		break;
+        break;
 
-	case printSYM:
-		exec_print(line);
-		break;
+    case staticSYM:
+    case localSYM:
+    case dimSYM:
+        exec_dim(line);
+        break;
 
-	case pageSYM:
-		sys_page(sel_outfile);
-		break;
+    case printSYM:
+        exec_print(line);
+        break;
 
-	case cursorSYM:
-		sys_cursor(sel_outfile, calc_intexp(line->lc.twoexp.exp1),
-			   calc_intexp(line->lc.twoexp.exp2));
-		break;
+    case pageSYM:
+        sys_page(sel_outfile);
+        break;
 
-	case elseSYM:
-	case endwhileSYM:
-	case otherwiseSYM:
-		curenv->curline = line->lineptr;
-		break;
+    case cursorSYM:
+        sys_cursor(sel_outfile, calc_intexp(line->lc.twoexp.exp1),
+                   calc_intexp(line->lc.twoexp.exp2));
+        break;
 
-	case endloopSYM:
-		return endloopSYM;
+    case elseSYM:
+    case endwhileSYM:
+    case otherwiseSYM:
+        curenv->curline = line->lineptr;
+        break;
 
-	case ifSYM:
-		return exec_if(line);
+    case endloopSYM:
+        return endloopSYM;
 
-	case elifSYM:
-		run_chain(line, endifSYM);
-		break;
+    case ifSYM:
+        return exec_if(line);
 
-	case whenSYM:
-		run_chain(line, endcaseSYM);
-		break;
+    case elifSYM:
+        run_chain(line, endifSYM);
+        break;
 
-	case restoreSYM:
-		exec_restore(line);
-		break;
+    case whenSYM:
+        run_chain(line, endcaseSYM);
+        break;
 
-	case becomesSYM:
-		exec_assign(line);
-		break;
+    case restoreSYM:
+        exec_restore(line);
+        break;
 
-	case sysSYM:
-		return sys_sys_stat(line->lc.exproot);
+    case becomesSYM:
+        exec_assign(line);
+        break;
 
-	case runSYM:
-		exec_run(line);
-		break;
+    case sysSYM:
+        return sys_sys_stat(line->lc.exproot);
 
-	case trapSYM:
-		return exec_trap(line);
+    case runSYM:
+        exec_run(line);
+        break;
 
-	case forSYM:
-		return exec_for(line);
+    case trapSYM:
+        return exec_trap(line);
 
-	case execSYM:
-		do_call(line->lc.exp, procSYM);
-		break;
+    case forSYM:
+        return exec_for(line);
 
-	case returnSYM:
-		return exec_return(line);
+    case execSYM:
+        do_call(line->lc.exp, procSYM);
+        break;
 
-	case caseSYM:
-		exec_case(line);
-		break;
+    case returnSYM:
+        return exec_return(line);
 
-	case openSYM:
-		exec_open(line);
-		break;
-	
-	case createSYM:
-		exec_create(line);
-		break;
+    case caseSYM:
+        exec_case(line);
+        break;
 
-	case closeSYM:
-		exec_close(line);
-		break;
+    case openSYM:
+        exec_open(line);
+        break;
 
-	case importSYM:
-		exec_import(line);
-		break;
+    case createSYM:
+        exec_create(line);
+        break;
 
-	case select_outputSYM:
-		exec_selfile(&sel_outfile, line->lc.exp, "at");
-		break;
+    case closeSYM:
+        exec_close(line);
+        break;
 
-	case select_inputSYM:
-		exec_selfile(&sel_infile, line->lc.exp, "rt");
-		break;
+    case importSYM:
+        exec_import(line);
+        break;
 
-	case inputSYM:
-		exec_input(line);
-		break;
+    case select_outputSYM:
+        exec_selfile(&sel_outfile, line->lc.exp, "at");
+        break;
 
-	case writeSYM:
-		exec_write(line);
-		break;
+    case select_inputSYM:
+        exec_selfile(&sel_infile, line->lc.exp, "rt");
+        break;
 
-	case readSYM:
-		exec_read(line);
-		break;
+    case inputSYM:
+        exec_input(line);
+        break;
 
-	case whileSYM:
-		return exec_while(line);
+    case writeSYM:
+        exec_write(line);
+        break;
 
-	case endSYM:
-		exec_end();
-		break;
+    case readSYM:
+        exec_read(line);
+        break;
 
-	case stopSYM:
-		exec_stop(line);
-		break;
+    case whileSYM:
+        return exec_while(line);
 
-	case endforSYM:
-	case endtrapSYM:
-	case handlerSYM:
-		return line->cmd;
+    case endSYM:
+        exec_end();
+        break;
 
-	case endmoduleSYM:
-	case endprocSYM:
-		return returnSYM;
+    case stopSYM:
+        exec_stop(line);
+        break;
 
-	case endfuncSYM:
-		run_error(NORETURN_ERR, "Should have RETURNed by now");
+    case endforSYM:
+    case endtrapSYM:
+    case handlerSYM:
+        return line->cmd;
 
-	case moduleSYM:
-	case funcSYM:
-	case procSYM:
-		if (!line->lc.pfrec.external)
-			curenv->curline = line->lineptr->ld->next;
+    case endmoduleSYM:
+    case endprocSYM:
+        return returnSYM;
 
-		break;
+    case endfuncSYM:
+        run_error(NORETURN_ERR, "Should have RETURNed by now");
 
-	case traceSYM:
-		curenv->trace = (strcmp(exp_cmd(line->lc.exp), "on") == 0);
-		break;
+    case moduleSYM:
+    case funcSYM:
+    case procSYM:
+        if (!line->lc.pfrec.external)
+            curenv->curline = line->lineptr->ld->next;
 
-	case exitSYM:
-		return exec_exit(line);
+        break;
 
-	case retrySYM:
-		return retrySYM;
-	
-	case randomizeSYM:
-		if (line->lc.exp) {
-			sys_randomize(calc_intexp(line->lc.exp));
-		} else {
-			sys_randomize(time(NULL));
-		}
+    case traceSYM:
+        curenv->trace = (strcmp(exp_cmd(line->lc.exp), "on") == 0);
+        break;
 
-		break;
-	
-	case reportSYM:
-		run_error(calc_intexp(line->lc.exp), NULL);
-		break;
-	
-	case delaySYM:
-		sleep(calc_intexp(line->lc.exp));
-		break;
-	
-	case zoneSYM:
-		sys_zone(calc_intexp(line->lc.exp));
-		break;
-	
-	default:
-          IP(false, "exec_line default action");
-	}
+    case exitSYM:
+        return exec_exit(line);
 
-	return 0;
+    case retrySYM:
+        return retrySYM;
+
+    case randomizeSYM:
+        if (line->lc.exp) {
+            sys_randomize(calc_intexp(line->lc.exp));
+        } else {
+            sys_randomize(time(NULL));
+        }
+
+        break;
+
+    case reportSYM:
+        run_error(calc_intexp(line->lc.exp), NULL);
+        break;
+
+    case delaySYM:
+        sleep(calc_intexp(line->lc.exp));
+        break;
+
+    case zoneSYM:
+        sys_zone(calc_intexp(line->lc.exp));
+        break;
+
+    default:
+        IP(false, "exec_line default action");
+    }
+
+    return 0;
 }
 
 
-PRIVATE int exec_seq3(void)
+PRIVATE int
+exec_seq3(void)
 {
-	int retcode = 0;
+    int             retcode = 0;
 
-	while (!retcode) {
-		struct comal_line *eline;
-		
-		eline = curenv->curline;
-		retcode = exec_line(eline);
+    while (!retcode) {
+        struct comal_line *eline;
 
-		if (eline == curenv->curline && !retcode)
-			curenv->curline = curenv->curline->ld->next;
-	}
+        eline = curenv->curline;
+        retcode = exec_line(eline);
 
-	return retcode;
+        if (eline == curenv->curline && !retcode)
+            curenv->curline = curenv->curline->ld->next;
+    }
+
+    return retcode;
 }
 
 
-PRIVATE int exec_seq2(void)
+PRIVATE int
+exec_seq2(void)
 {
-	jmp_buf save_err;
-	static int ret;
+    jmp_buf         save_err;
+    static int      ret;
 
-	ret = 0;
+    ret = 0;
 
-	memcpy(save_err, ERRBUF, sizeof(jmp_buf));
+    memcpy(save_err, ERRBUF, sizeof(jmp_buf));
 
-	setjmp(ERRBUF);
+    setjmp(ERRBUF);
 
-	while (ret == 0) {
-		if (curenv->error) {
-			if (curenv->nrtraps)
-				longjmp(save_err, 666);
+    while (ret == 0) {
+        if (curenv->error) {
+            if (curenv->nrtraps)
+                longjmp(save_err, 666);
 
-			give_run_err(curenv->errline);
+            give_run_err(curenv->errline);
 
-			DBG_PRINTF(true,
-				  "Starting secondary COMAL loop");
+            DBG_PRINTF(true, "Starting secondary COMAL loop");
 
-			comal_loop(HALTED);
-		}
+            comal_loop(HALTED);
+        }
 
-		ret = exec_seq3();
-	}
+        ret = exec_seq3();
+    }
 
-	memcpy(ERRBUF, save_err, sizeof(jmp_buf));
+    memcpy(ERRBUF, save_err, sizeof(jmp_buf));
 
-	return ret;
+    return ret;
 }
 
 
-PUBLIC void exec_seq(struct comal_line *line)
+PUBLIC void
+exec_seq(struct comal_line *line)
 {
-	curenv->curline = line;
-	curenv->running = RUNNING;
+    curenv->curline = line;
+    curenv->running = RUNNING;
 
-	exec_seq2();
+    exec_seq2();
 }
 
-PUBLIC void exec_mod_init(struct comal_line *line)
+PUBLIC void
+exec_mod_init(struct comal_line *line)
 {
-	struct sym_env *env;
-	struct sym_env *oldenv=curenv->curenv;
+    struct sym_env *env;
+    struct sym_env *oldenv = curenv->curenv;
 
-	DBG_PRINTF(true,"Initialising module %s",
-		line->lc.pfrec.id->name);
-	env =
-	    sym_newenv(line->lc.pfrec.closed, NULL, NULL, line, line->lc.pfrec.id->name);
+    DBG_PRINTF(true, "Initialising module %s", line->lc.pfrec.id->name);
+    env =
+        sym_newenv(line->lc.pfrec.closed, NULL, NULL, line,
+                   line->lc.pfrec.id->name);
 
-	curenv->curenv = env;
-	exec_seq(line->ld->next);
-	line->lc.pfrec.staticenv=env;
-	curenv->curenv = oldenv;
+    curenv->curenv = env;
+    exec_seq(line->ld->next);
+    line->lc.pfrec.staticenv = env;
+    curenv->curenv = oldenv;
 }
