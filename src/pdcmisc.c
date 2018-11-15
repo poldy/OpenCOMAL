@@ -285,7 +285,7 @@ PUBLIC struct comal_line *search_line(long l, int exact)
 	        if (work) {
 		        puts_line(MSG_DEBUG, work);
                 } else {
-		        VL(("Returning NULL"));
+		        VL((true, "Returning NULL"));
                 }
         }
 	return work;
@@ -543,7 +543,7 @@ PUBLIC int proclevel(struct comal_line *proc)
 	int i;
 
 	if (comal_debug) {
-		DBG_PRINTF(false, "ProcLevel of ");
+		VL((false, "ProcLevel of "));
 		puts_line(MSG_DEBUG, proc);
 	}
 	if (proc)

@@ -18,7 +18,7 @@
 #include "compat_cdefs.h"
 
 /** Signal a run-time error  */
-extern void run_error(int error, const char *s, ...) __printflike(2, 3);
+extern void run_error(int error, const char *s, ...);
 
 /** Call a PROC/FUNC definition */
 extern void exec_call(struct expression *exp, int calltype, void **result,

@@ -27,7 +27,7 @@ extern void my_ht(int stream);
 extern void my_put(int stream, const char *buf, long len);
 
 /** Write a formatted string to the specified stream */
-extern void my_printf(int stream, bool newline, const char *s, ...) __printflike(3, 4);
+extern void my_printf(int stream, bool newline, const char *s, ...);
 
 /** Optionally print a debug message */
 #define DBG_PRINTF(...) VLG((comal_debug, __VA_ARGS__))

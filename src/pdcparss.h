@@ -103,7 +103,7 @@ extern struct expression *pars_exp_rnd(struct expression *exp1, struct expressio
  * The actual processing is deferred until a call to @pars_handle_error .
  * @see pars_handle_error
  */
-extern void pars_error(const char *s, ...) __printflike(1, 2);
+extern void pars_error(const char *s, ...);
 
 /**
  * Report any errors deferred from @c pars_error

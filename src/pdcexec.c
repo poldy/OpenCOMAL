@@ -1148,10 +1148,10 @@ PRIVATE int exec_for(struct comal_line *line)
 	while (true) {
                 if (comal_debug) {
 		        if (ltype == V_INT) {
-			        VL(("FOR loop, lval=%p, %D", lval,
+			        VL((true, "FOR loop, lval=%p, %D", lval,
 				    *(long *) lval));
                         } else {
-			        VL(("FOR loop, lval=%p, %f", lval,
+			        VL((true, "FOR loop, lval=%p, %f", lval,
 				    *(double *) lval));
 		        }
                 }

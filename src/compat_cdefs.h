@@ -10,6 +10,18 @@
 
 /** @file
  * Wrapper around BSD sys/cdefs.h annotations
+ *
+ * @todo
+ * - __pure
+ * - __used
+ * - __warn_unused_result
+ * - __bounded
+ * - __returns_twice
+ * - __only_inline
+ * - __packed
+ * - __aligned
+ * - __dso_public N/A
+ * - __dso_hidden N/A
  */
 
 #ifndef COMPAT_CDEFS_H
@@ -27,22 +39,12 @@
         __attribute__((__noreturn__))
 #endif
 
-#ifndef __printflike
-#define __printflike(x, y) \
-        __attribute__((format(printf, (x), (y))))
-#endif
-
 #ifndef __my_unused
 #define __my_unused \
         __attribute__((unused))
 #endif
 
 #endif  // __APPLE__
-
-#ifndef __my_nonnull
-#define __my_nonnull(...) \
-	__attribute__((__nonnull__(__VA_ARGS__)))
-#endif
 
 #ifndef __malloc
 #define __malloc \

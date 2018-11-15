@@ -50,7 +50,7 @@ extern bool ext_nl(void);
 extern bool ext_ht(void);
 
 /** Handle writing a np after "SYS SYSOUT" */
-extern void ext_page(FILE *f) __my_nonnull((1));
+extern void ext_page(FILE *f);
 
 /** Handle output after "SYS SYSOUT" */
 extern bool ext_put(const char *buf);

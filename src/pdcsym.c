@@ -35,9 +35,9 @@ PUBLIC struct sym_env *sym_newenv(bool closed, struct sym_env *prev,
 	struct sym_env *work = GETCORE(RUN_POOL, struct sym_env);
 
 	if (comal_debug) {
-		DBG_PRINTF(false,
+		VL((false,
 			  "Handing out new env %s at %p, prev=%p for: ",
-			  name, work, prev);
+			  name, work, prev));
 		puts_line(MSG_DEBUG, curproc);
 	}
 	work->prev = prev;
@@ -151,10 +151,10 @@ PRIVATE struct sym_item *search_horse(struct sym_env *env,
 	}
 	if (comal_debug) {
 		if (work) {
-			VL(("Found SYM at %p, %s, type %d", work,
+			VL((true, "Found SYM at %p, %s, type %d", work,
 			    work->id->name, work->symtype));
                 } else {
-			VL(("Returning NULL"));
+			VL((true, "Returning NULL"));
                 }
 	}
 	return work;

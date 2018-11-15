@@ -255,7 +255,7 @@ PRIVATE void free_horse(struct comal_line *line)
 	if (!line)
 		return;
         if (comal_debug) {
-	        DBG_PRINTF(false, "Freeing line: ");
+	        VL((false, "Freeing line: "));
 	        puts_line(MSG_DEBUG, line);
         }
 	switch (line->cmd) {
