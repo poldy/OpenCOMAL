@@ -14,10 +14,7 @@
 
 #define _XOPEN_SOURCE 700
 
-#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
-#define I_DEFAULT_PARAMS "assert"
-#include "nana.h"
-
+#include "pdcnana.h"
 #include "pdcglob.h"
 #include "pdcstr.h"
 #include "pdcmisc.h"

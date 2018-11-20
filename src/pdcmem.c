@@ -15,12 +15,7 @@
 #define _XOPEN_SOURCE 700
 
 #include "mem.h"
-
-#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
-#define L_DEFAULT_HANDLER my_printf
-#define L_DEFAULT_PARAMS MSG_DEBUG
-#include "nana.h"
-
+#include "pdcnana.h"
 #include "pdcglob.h"
 #include "pdcexec.h"
 #include "pdcmisc.h"

@@ -16,11 +16,7 @@
 
 #include <stdbool.h>
 #include <string.h>
-
-#define L_DEFAULT_HANDLER my_printf
-#define L_DEFAULT_PARAMS MSG_DEBUG
-#include "nana.h"
-
+#include "pdcnana.h"
 #include "pdcglob.h"
 #include "pdcsym.h"
 #include "pdcmisc.h"

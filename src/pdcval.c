@@ -23,9 +23,7 @@
 #include "pdcval.h"
 
 #include "fmt.h"
-
-#define I_DEFAULT_HANDLER(e,f,l,p) fatal(p)
-#include "nana.h"
+#include "pdcnana.h"
 
 PRIVATE void
 val_print_array(int stream, struct var_item *var)
