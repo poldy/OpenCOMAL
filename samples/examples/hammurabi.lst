@@ -99,7 +99,7 @@
      1110 PROC do'rats'attack
      1120   production:=RND(1,6); rat'food:=0
      1130   IF RND(1,100)>50 THEN
-     1140     rat'rood:=stored DIV RND(1,6)
+     1140     rat'food:=stored DIV RND(1,6)
      1150   ENDIF
      1160   harvest:=stored+plant*production
      1170   stored:=harvest-rat'food
