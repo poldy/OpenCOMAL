@@ -28,7 +28,7 @@ Lately I've also been trying to bring OpenComal closer to compliance
 with those standards:
 
 * [COMAL Kernel spec](http://datamuseum.dk/wiki/COMAL/standardization#TeleNova.2C_Nyn.C3.A4shamn.2C_Sweden._March_13_to_16.2C_1985)
-* [Common COMAL](https://computerarchive.org/files/computer/newsletters/comal-today/COMAL_Today_Issue_24.pdf), pages 21-46
+* [Common COMAL](https://archive.org/download/COMAL_Today_Issue_24), pages 21-46
 * [The "Type Detector" package](samples/examples/computer.md)
 * [The "STANDARD" package](samples/examples/standard.md)
 
