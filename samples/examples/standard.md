@@ -1,5 +1,5 @@
 These PROCs and FUNCs were originally specified in
-[COMAL Today issue 27](https://computerarchive.org/files/computer/newsletters/comal-today/COMAL_Today_Issue_27.pdf),
+[COMAL Today issue 27](https://archive.org/download/Comal_Today_Issue_27),
 pages 47-52.
 
 *VERSION'STANDARD$*: displays version and author information.
