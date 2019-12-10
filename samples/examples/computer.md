@@ -1,5 +1,5 @@
 These PROCs and FUNCS were originally specified in
-[COMAL Today issue 26](https://computerarchive.org/files/computer/newsletters/comal-today/COMAL_Today_Issue_26.pdf),
+[COMAL Today issue 26](https://archive.org/download/COMAL_Today_Issue_26),
 pages 33-34.
 
 *COMPUTER'COMAL*: returns a number that identifies what COMAL is running. 5 is OpenCOMAL.
